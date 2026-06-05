@@ -1,0 +1,114 @@
+name: Sync Provider Models
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      providers:
+        description: 'Providers to update (comma-separated, or "all")'
+        required: false
+        default: 'all'
+      source:
+        description: 'Data source: openrouter, modelsdev, or all'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - openrouter
+          - modelsdev
+      dry_run:
+        description: 'Dry run (no commit pushed)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: provider-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync-models:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout dev branch
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install toml
+
+      - name: Sync models (OpenRouter + models.dev)
+        id: sync
+        run: |
+          SOURCE="${{ github.event.inputs.source || 'all' }}"
+          ARGS="--source ${SOURCE} --entrypoint-mode"
+
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            if [ -n "${{ inputs.providers }}" ] && [ "${{ inputs.providers }}" != "all" ]; then
+              ARGS="$ARGS --providers ${{ inputs.providers }}"
+            fi
+          fi
+
+          echo "Running: python3 scripts/update_models.py $ARGS"
+          python3 scripts/update_models.py $ARGS
+
+          if git diff --exit-code --quiet entrypoint models; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No model changes detected"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Model changes detected:"
+            git diff --stat entrypoint models
+            {
+              echo "diff_summary<<EOF"
+              git diff --stat entrypoint models
+              echo "EOF"
+            } >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push to dev
+        if: steps.sync.outputs.has_changes == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run == true)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add entrypoint models
+          SOURCE="${{ github.event.inputs.source || 'all' }}"
+          git commit -m "chore(providers): sync model list from OpenRouter + models.dev [source=${SOURCE}]"
+          git push origin dev
+
+      - name: Summary
+        if: always()
+        run: |
+          SOURCE="${{ github.event.inputs.source || 'all' }}"
+          if [ "${{ steps.sync.outputs.has_changes }}" == "true" ]; then
+            if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" == "true" ]; then
+              echo "### Dry Run Complete (source: \`${SOURCE}\`)" >> $GITHUB_STEP_SUMMARY
+              echo "Changes were detected but not committed (dry run mode)." >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "${{ steps.sync.outputs.diff_summary }}" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            else
+              echo "### Committed to dev (source: \`${SOURCE}\`)" >> $GITHUB_STEP_SUMMARY
+              echo "Model list changes have been committed and pushed directly to \`dev\`." >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "${{ steps.sync.outputs.diff_summary }}" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "### No Changes (source: \`${SOURCE}\`)" >> $GITHUB_STEP_SUMMARY
+            echo "Model list is already up to date." >> $GITHUB_STEP_SUMMARY
+          fi
