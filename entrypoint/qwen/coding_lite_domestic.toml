@@ -1,0 +1,104 @@
+# Qwen - Coding Plan Lite (Domestic)
+# 通义千问国内版编程套餐 Lite - 周期计费
+
+[entrypoint]
+id = "qwen_coding_lite_domestic"
+provider_id = "qwen"
+type = "coding_plan"
+billing_type = "periodic"
+plan_tier = "lite"
+
+# Display names in all supported languages
+[entrypoint.name]
+en = "Qwen China Coding Plan Lite"
+zhs = "通义千问国内版编程套餐 Lite"
+zht = "通義千問國內版編程套餐 Lite"
+ja = "Qwen 中国コーディングプラン Lite"
+ko = "Qwen 중국 코딩 플랜 Lite"
+fr = "Qwen Chine Plan Coding Lite"
+es = "Qwen China Plan Coding Lite"
+ru = "Qwen Китай План Coding Lite"
+
+# API Configuration
+[entrypoint.api]
+protocol = "openai_chat_v1"
+base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+chat_endpoint = "/chat/completions"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "DASHSCOPE_API_KEY_CODING_LITE"
+
+# Default models for each tier
+[entrypoint.defaults]
+deep = "qwen3.5-397b-a17b"
+normal = "qwen3.5-122b-a10b"
+basic = "qwen3.5-flash-02-23"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+# Quota configuration for periodic billing
+# Official: 1,200 prompts per 5 hours, 9,000 prompts per week, 18,000 per month
+[[entrypoint.quota]]
+data_limit = 1200
+period_hours = 5
+billing_metric = "prompt_times"
+
+[[entrypoint.quota]]
+data_limit = 9000
+period_days = 7
+billing_metric = "prompt_times"
+
+[[entrypoint.quota]]
+data_limit = 18000
+period_days = 30
+billing_metric = "prompt_times"
+
+# Available models with pricing
+[[entrypoint.models]]
+id = "qwen3.5-397b-a17b"
+name = "Qwen3.5 397B A17B"
+context_window = 262144
+max_output_tokens = 16384
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[entrypoint.models.pricing]
+input_per_million = 0.39
+output_per_million = 2.34
+
+[[entrypoint.models]]
+id = "qwen3.5-122b-a10b"
+name = "Qwen3.5-122B-A10B"
+context_window = 262144
+max_output_tokens = 16384
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[entrypoint.models.pricing]
+input_per_million = 0.26
+output_per_million = 2.08
+
+[[entrypoint.models]]
+id = "qwen3.5-flash-02-23"
+name = "Qwen3.5 Flash 02-23"
+context_window = 131072
+max_output_tokens = 16384
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective"]
+
+[entrypoint.models.pricing]
+input_per_million = 0.08
+output_per_million = 0.32

@@ -1,0 +1,181 @@
+# xAI Grok (Official)
+
+[entrypoint]
+id = "xai_default"
+provider_id = "xai"
+type = "one_time"
+billing_type = "one_time"
+
+[entrypoint.api]
+protocol = "openai_chat_v1"
+base_url = "https://api.x.ai/v1"
+chat_endpoint = "/chat/completions"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "XAI_API_KEY"
+
+[entrypoint.name]
+en = "xAI Grok (Official)"
+zhs = "xAI Grok（官方）"
+zht = "xAI Grok（官方）"
+ja = "xAI Grok（公式）"
+ko = "xAI Grok（공식）"
+fr = "xAI Grok (Officiel)"
+es = "xAI Grok (Oficial)"
+ru = "xAI Grok (Официальный)"
+
+[entrypoint.defaults]
+deep = "grok-4.20-0309-reasoning"
+normal = "grok-3-mini-beta"
+basic = "grok-3-mini"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.models]]
+id = "grok-3"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.75
+
+[[entrypoint.models]]
+id = "grok-3-beta"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.75
+
+[[entrypoint.models]]
+id = "grok-4"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.75
+
+[[entrypoint.models]]
+id = "grok-4.20-beta"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 6.0
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "grok-4.20-multi-agent"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 6.0
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "grok-4.20-multi-agent-beta"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 6.0
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "grok-4.20"
+
+[entrypoint.models.pricing]
+input_per_million = 1.25
+output_per_million = 2.5
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "grok-4.20-0309-non-reasoning"
+
+[entrypoint.models.pricing]
+input_per_million = 1.25
+output_per_million = 2.5
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "grok-4.20-0309-reasoning"
+
+[entrypoint.models.pricing]
+input_per_million = 1.25
+output_per_million = 2.5
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "grok-4.20-multi-agent-0309"
+
+[entrypoint.models.pricing]
+input_per_million = 1.25
+output_per_million = 2.5
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "grok-4.3"
+
+[entrypoint.models.pricing]
+input_per_million = 1.25
+output_per_million = 2.5
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "grok-build-0.1"
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 2.0
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "grok-3-mini"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 0.5
+cached_per_million = 0.075
+
+[[entrypoint.models]]
+id = "grok-3-mini-beta"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 0.5
+cached_per_million = 0.075
+
+[[entrypoint.models]]
+id = "grok-4-fast"
+
+[entrypoint.models.pricing]
+input_per_million = 0.2
+output_per_million = 0.5
+cached_per_million = 0.05
+
+[[entrypoint.models]]
+id = "grok-4.1-fast"
+
+[entrypoint.models.pricing]
+input_per_million = 0.2
+output_per_million = 0.5
+cached_per_million = 0.05
+
+[[entrypoint.models]]
+id = "grok-code-fast-1"
+
+[entrypoint.models.pricing]
+input_per_million = 0.2
+output_per_million = 1.5
+cached_per_million = 0.02
+
+[[entrypoint.models]]
+id = "grok-imagine-image"
+
+[[entrypoint.models]]
+id = "grok-imagine-image-quality"
+
+[[entrypoint.models]]
+id = "grok-imagine-video"

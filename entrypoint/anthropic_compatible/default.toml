@@ -1,0 +1,85 @@
+# Anthropic Compatible - Default
+# Custom Anthropic-compatible API endpoint
+
+[entrypoint]
+id = "anthropic_compatible_default"
+provider_id = "anthropic_compatible"
+type = "custom"
+billing_type = "one_time"
+
+[entrypoint.name]
+en = "Anthropic Compatible (Custom)"
+zhs = "Anthropic 兼容 (自定义)"
+zht = "Anthropic 相容 (自訂)"
+ja = "Anthropic 互換 (カスタム)"
+ko = "Anthropic 호환 (사용자 지정)"
+fr = "Compatible Anthropic (Personnalisé)"
+es = "Anthropic Compatible (Personalizado)"
+ru = "Anthropic Совместимый (Пользовательский)"
+
+[entrypoint.api]
+protocol = "anthropic_messages_v1"
+base_url = ""
+chat_endpoint = "/messages"
+models_endpoint = "/models"
+auth_type = "x-api-key"
+auth_header = "x-api-key"
+env_var = "ANTHROPIC_COMPATIBLE_API_KEY"
+
+[entrypoint.defaults]
+deep = "claude-opus-4"
+normal = "claude-sonnet-4"
+basic = "claude-haiku-4"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.models]]
+id = "claude-opus-4"
+name = "Claude Opus 4"
+context_window = 200000
+max_output_tokens = 8192
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["flagship", "reasoning"]
+
+[entrypoint.models.pricing]
+input_per_million = 15.0
+output_per_million = 75.0
+cached_per_million = 1.50
+
+[[entrypoint.models]]
+id = "claude-sonnet-4"
+name = "Claude Sonnet 4"
+context_window = 200000
+max_output_tokens = 8192
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship"]
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.30
+
+[[entrypoint.models]]
+id = "claude-haiku-4"
+name = "Claude Haiku 4"
+context_window = 200000
+max_output_tokens = 8192
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective"]
+
+[entrypoint.models.pricing]
+input_per_million = 0.80
+output_per_million = 4.0
+cached_per_million = 0.08

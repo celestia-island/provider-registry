@@ -1,0 +1,173 @@
+# Together AI
+
+[entrypoint]
+id = "together_default"
+provider_id = "together"
+type = "one_time"
+billing_type = "one_time"
+
+[entrypoint.api]
+protocol = "openai_chat_v1"
+base_url = "https://api.together.xyz/v1"
+chat_endpoint = "/chat/completions"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "TOGETHER_API_KEY"
+
+[entrypoint.name]
+en = "Together AI"
+zhs = "Together AI"
+zht = "Together AI"
+ja = "Together AI"
+ko = "Together AI"
+fr = "Together AI"
+es = "Together AI"
+ru = "Together AI"
+
+[entrypoint.defaults]
+deep = "zai-org/GLM-5.1"
+normal = "MiniMaxAI/MiniMax-M2.5"
+basic = "MiniMaxAI/MiniMax-M2.7"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.models]]
+id = "zai-org/GLM-5.1"
+
+[entrypoint.models.pricing]
+input_per_million = 1.4
+output_per_million = 4.4
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-R1"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 7.0
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3.7-Max"
+
+[entrypoint.models.pricing]
+input_per_million = 2.5
+output_per_million = 7.5
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V4-Pro"
+
+[entrypoint.models.pricing]
+input_per_million = 2.1
+output_per_million = 4.4
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 2.0
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V3"
+
+[entrypoint.models.pricing]
+input_per_million = 1.25
+output_per_million = 1.25
+
+[[entrypoint.models]]
+id = "moonshotai/Kimi-K2.6"
+
+[entrypoint.models.pricing]
+input_per_million = 1.2
+output_per_million = 4.5
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+
+[entrypoint.models.pricing]
+input_per_million = 0.88
+output_per_million = 0.88
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V3-1"
+
+[entrypoint.models.pricing]
+input_per_million = 0.6
+output_per_million = 1.7
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3.5-397B-A17B"
+
+[entrypoint.models.pricing]
+input_per_million = 0.6
+output_per_million = 3.6
+
+[[entrypoint.models]]
+id = "moonshotai/Kimi-K2.5"
+
+[entrypoint.models.pricing]
+input_per_million = 0.5
+output_per_million = 2.8
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3-Coder-Next-FP8"
+
+[entrypoint.models.pricing]
+input_per_million = 0.5
+output_per_million = 1.2
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3.6-Plus"
+
+[entrypoint.models.pricing]
+input_per_million = 0.5
+output_per_million = 3.0
+
+[[entrypoint.models]]
+id = "MiniMaxAI/MiniMax-M2.5"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 1.2
+cached_per_million = 0.06
+
+[[entrypoint.models]]
+id = "MiniMaxAI/MiniMax-M2.7"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 1.2
+cached_per_million = 0.06
+
+[[entrypoint.models]]
+id = "google/gemma-4-31B-it"
+
+[entrypoint.models.pricing]
+input_per_million = 0.2
+output_per_million = 0.5
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3-235B-A22B-Instruct-2507-tput"
+
+[entrypoint.models.pricing]
+input_per_million = 0.2
+output_per_million = 0.6
+
+[[entrypoint.models]]
+id = "openai/gpt-oss-120b"
+
+[entrypoint.models.pricing]
+input_per_million = 0.15
+output_per_million = 0.6
+
+[[entrypoint.models]]
+id = "essentialai/Rnj-1-Instruct"
+
+[entrypoint.models.pricing]
+input_per_million = 0.15
+output_per_million = 0.15

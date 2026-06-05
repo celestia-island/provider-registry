@@ -1,0 +1,67 @@
+# Moonshot (China One-time) - Anthropic
+
+[entrypoint]
+id = "moonshot_default_anthropic"
+provider_id = "moonshot"
+type = "one_time"
+billing_type = "one_time"
+
+[entrypoint.api]
+protocol = "anthropic_messages_v1"
+base_url = "https://api.moonshot.cn"
+chat_endpoint = "/v1/messages"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "MOONSHOT_API_KEY"
+
+[entrypoint.name]
+en = "Moonshot (China One-time) (Anthropic)"
+zhs = "月之暗面（国内版一次性计费）（Anthropic）"
+zht = "月之暗面（國內版一次性計費）（Anthropic）"
+ja = "Moonshot（中国一回限り）（Anthropic）"
+ko = "Moonshot（중국 일시불）（Anthropic）"
+fr = "Moonshot (Chine Paiement unique) (Anthropic)"
+es = "Moonshot (China Pago único) (Anthropic)"
+ru = "Moonshot (Китай Разовая оплата) (Anthropic)"
+
+[entrypoint.defaults]
+deep = "kimi-k2-thinking"
+normal = "kimi-k2.5"
+basic = "kimi-k2-0905"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.models]]
+id = "kimi-k2"
+
+[entrypoint.models.pricing]
+input_per_million = 0.57
+output_per_million = 2.3
+
+[[entrypoint.models]]
+id = "kimi-k2-thinking"
+
+[entrypoint.models.pricing]
+input_per_million = 0.47
+output_per_million = 2.0
+cached_per_million = 0.141
+
+[[entrypoint.models]]
+id = "kimi-k2.5"
+
+[entrypoint.models.pricing]
+input_per_million = 0.45
+output_per_million = 2.2
+cached_per_million = 0.225
+
+[[entrypoint.models]]
+id = "kimi-k2-0905"
+
+[entrypoint.models.pricing]
+input_per_million = 0.4
+output_per_million = 2.0
+cached_per_million = 0.15

@@ -1,0 +1,87 @@
+# Moonshot - Coding Plan Basic (Domestic) - Anthropic
+
+[entrypoint]
+id = "moonshot_coding_basic_domestic_anthropic"
+provider_id = "moonshot"
+type = "coding_plan"
+billing_type = "periodic"
+plan_tier = "basic"
+
+[entrypoint.name]
+en = "Moonshot China Coding Plan Basic (Anthropic)"
+zhs = "月之暗面国内版编程套餐 Basic（Anthropic）"
+zht = "月之暗面國內版編程套餐 Basic（Anthropic）"
+ja = "Moonshot 中国コーディングプラン Basic（Anthropic）"
+ko = "Moonshot 중국 코딩 플랜 Basic（Anthropic）"
+fr = "Moonshot Chine Plan Coding Basic (Anthropic)"
+es = "Moonshot China Plan Coding Basic (Anthropic)"
+ru = "Moonshot Китай План Coding Basic (Anthropic)"
+
+[entrypoint.api]
+protocol = "anthropic_messages_v1"
+base_url = "https://api.moonshot.cn"
+chat_endpoint = "/v1/messages"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "MOONSHOT_API_KEY_CODING_BASIC"
+
+[entrypoint.defaults]
+deep = "moonshot-v1-128k"
+normal = "moonshot-v1-32k"
+basic = "moonshot-v1-8k"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.quota]]
+data_limit = 1024
+period_days = 7
+billing_metric = "prompt_times"
+
+[[entrypoint.models]]
+id = "moonshot-v1-128k"
+name = "Moonshot v1 128k"
+context_window = 128000
+max_output_tokens = 4096
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship"]
+
+[entrypoint.models.pricing]
+input_per_million = 12.0
+output_per_million = 12.0
+
+[[entrypoint.models]]
+id = "moonshot-v1-32k"
+name = "Moonshot v1 32k"
+context_window = 32000
+max_output_tokens = 4096
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[entrypoint.models.pricing]
+input_per_million = 12.0
+output_per_million = 12.0
+
+[[entrypoint.models]]
+id = "moonshot-v1-8k"
+name = "Moonshot v1 8k"
+context_window = 8000
+max_output_tokens = 4096
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective"]
+
+[entrypoint.models.pricing]
+input_per_million = 12.0
+output_per_million = 12.0

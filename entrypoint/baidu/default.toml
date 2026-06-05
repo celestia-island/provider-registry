@@ -1,0 +1,67 @@
+# Baidu Wenxin - Default
+# Baidu ERNIE (China)
+
+[entrypoint]
+id = "baidu_default"
+provider_id = "baidu"
+type = "one_time"
+billing_type = "one_time"
+
+[entrypoint.name]
+en = "Baidu ERNIE"
+zhs = "百度文心一言"
+zht = "百度文心一言"
+ja = "Baidu ERNIE"
+ko = "Baidu ERNIE"
+fr = "Baidu ERNIE"
+es = "Baidu ERNIE"
+ru = "Baidu ERNIE"
+
+[entrypoint.api]
+protocol = "openai_chat_v1"
+base_url = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop"
+chat_endpoint = "/chat/completions"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "BAIDU_API_KEY"
+
+[entrypoint.defaults]
+deep = "ernie-4.0-8k"
+normal = "ernie-3.5-8k"
+basic = "ernie-3.5-8k"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.models]]
+id = "ernie-4.0-8k"
+name = "ERNIE 4.0 8K"
+context_window = 8192
+max_output_tokens = 2048
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship"]
+
+[entrypoint.models.pricing]
+input_per_million = 12.0
+output_per_million = 12.0
+
+[[entrypoint.models]]
+id = "ernie-3.5-8k"
+name = "ERNIE 3.5 8K"
+context_window = 8192
+max_output_tokens = 2048
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective"]
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 3.0

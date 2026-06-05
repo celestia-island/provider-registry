@@ -1,0 +1,82 @@
+# Doubao - Coding Plan Lite (Domestic) - Anthropic
+
+[entrypoint]
+id = "doubao_coding_lite_domestic_anthropic"
+provider_id = "doubao"
+type = "coding_plan"
+billing_type = "periodic"
+plan_tier = "lite"
+
+[entrypoint.name]
+en = "Doubao China Coding Plan Lite (Anthropic)"
+zhs = "豆包国内版编程套餐 Lite（Anthropic）"
+zht = "豆包國內版編程套餐 Lite（Anthropic）"
+ja = "Doubao 中国コーディングプラン Lite（Anthropic）"
+ko = "Doubao 중국 코딩 플랜 Lite（Anthropic）"
+fr = "Doubao Chine Plan Coding Lite (Anthropic)"
+es = "Doubao China Plan Coding Lite (Anthropic)"
+ru = "Doubao Китай План Coding Lite (Anthropic)"
+
+[entrypoint.api]
+protocol = "anthropic_messages_v1"
+base_url = "https://ark.cn-beijing.volces.com/api/v3"
+chat_endpoint = "/v1/messages"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "DOUBAO_API_KEY_CODING_LITE"
+
+[entrypoint.defaults]
+deep = "doubao-pro-32k"
+normal = "doubao-pro-32k"
+basic = "doubao-lite-4k"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.quota]]
+data_limit = 1200
+period_hours = 5
+billing_metric = "prompt_times"
+
+[[entrypoint.quota]]
+data_limit = 9000
+period_days = 7
+billing_metric = "prompt_times"
+
+[[entrypoint.quota]]
+data_limit = 18000
+period_days = 30
+billing_metric = "prompt_times"
+
+[[entrypoint.models]]
+id = "doubao-pro-32k"
+name = "Doubao Pro 32K"
+context_window = 32768
+max_output_tokens = 4096
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship"]
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 1.0
+
+[[entrypoint.models]]
+id = "doubao-lite-4k"
+name = "Doubao Lite 4K"
+context_window = 4096
+max_output_tokens = 4096
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective"]
+
+[entrypoint.models.pricing]
+input_per_million = 0.1
+output_per_million = 0.1
