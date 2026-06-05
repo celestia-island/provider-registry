@@ -1,0 +1,104 @@
+# Cohere (Official)
+
+[entrypoint]
+id = "cohere_default"
+provider_id = "cohere"
+type = "one_time"
+billing_type = "one_time"
+
+[entrypoint.api]
+protocol = "openai_chat_v1"
+base_url = "https://api.cohere.ai/v2"
+chat_endpoint = "/chat/completions"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "COHERE_API_KEY"
+
+[entrypoint.name]
+en = "Cohere (Official)"
+zhs = "Cohere（官方）"
+zht = "Cohere（官方）"
+ja = "Cohere（公式）"
+ko = "Cohere（공식）"
+fr = "Cohere (Officiel)"
+es = "Cohere (Oficial)"
+ru = "Cohere (Официальный)"
+
+[entrypoint.defaults]
+deep = "command-a-reasoning-08-2025"
+normal = "command-a-translate-08-2025"
+basic = "command-a-03-2025"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.models]]
+id = "command-a-03-2025"
+
+[entrypoint.models.pricing]
+input_per_million = 2.5
+output_per_million = 10.0
+
+[[entrypoint.models]]
+id = "command-a-reasoning-08-2025"
+
+[entrypoint.models.pricing]
+input_per_million = 2.5
+output_per_million = 10.0
+
+[[entrypoint.models]]
+id = "command-a-translate-08-2025"
+
+[entrypoint.models.pricing]
+input_per_million = 2.5
+output_per_million = 10.0
+
+[[entrypoint.models]]
+id = "command-a-vision-07-2025"
+
+[entrypoint.models.pricing]
+input_per_million = 2.5
+output_per_million = 10.0
+
+[[entrypoint.models]]
+id = "command-r-plus-08-2024"
+
+[entrypoint.models.pricing]
+input_per_million = 2.5
+output_per_million = 10.0
+
+[[entrypoint.models]]
+id = "command-r-08-2024"
+
+[entrypoint.models.pricing]
+input_per_million = 0.15
+output_per_million = 0.6
+
+[[entrypoint.models]]
+id = "command-r7b-12-2024"
+
+[entrypoint.models.pricing]
+input_per_million = 0.0375
+output_per_million = 0.15
+
+[[entrypoint.models]]
+id = "command-r7b-arabic-02-2025"
+
+[entrypoint.models.pricing]
+input_per_million = 0.0375
+output_per_million = 0.15
+
+[[entrypoint.models]]
+id = "c4ai-aya-expanse-32b"
+
+[[entrypoint.models]]
+id = "c4ai-aya-expanse-8b"
+
+[[entrypoint.models]]
+id = "c4ai-aya-vision-32b"
+
+[[entrypoint.models]]
+id = "c4ai-aya-vision-8b"

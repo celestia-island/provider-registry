@@ -1,0 +1,390 @@
+# SiliconFlow (China)
+
+[entrypoint]
+id = "silicon_default"
+provider_id = "silicon"
+type = "one_time"
+billing_type = "one_time"
+
+[entrypoint.api]
+protocol = "openai_chat_v1"
+base_url = "https://api.siliconflow.cn/v1"
+chat_endpoint = "/chat/completions"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "SILICON_API_KEY"
+
+[entrypoint.name]
+en = "SiliconFlow (China)"
+zhs = "硅基流动（国内版）"
+zht = "硅基流動（國內版）"
+ja = "SiliconFlow（中国）"
+ko = "SiliconFlow（중국）"
+fr = "SiliconFlow (Chine)"
+es = "SiliconFlow (China)"
+ru = "SiliconFlow (Китай)"
+
+[entrypoint.defaults]
+deep = "Pro/zai-org/GLM-5.1"
+normal = "deepseek-ai/deepseek-v4-flash"
+basic = "zai-org/GLM-5V-Turbo"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.models]]
+id = "Pro/zai-org/GLM-5.1"
+
+[entrypoint.models.pricing]
+input_per_million = 1.4
+output_per_million = 4.4
+
+[[entrypoint.models]]
+id = "zai-org/GLM-5.1"
+
+[entrypoint.models.pricing]
+input_per_million = 1.4
+output_per_million = 4.4
+
+[[entrypoint.models]]
+id = "zai-org/GLM-5V-Turbo"
+
+[entrypoint.models.pricing]
+input_per_million = 1.2
+output_per_million = 4.0
+
+[[entrypoint.models]]
+id = "Pro/zai-org/GLM-5"
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 3.2
+
+[[entrypoint.models]]
+id = "zai-org/GLM-5"
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 3.2
+
+[[entrypoint.models]]
+id = "deepseek-ai/deepseek-v4-pro"
+
+[entrypoint.models.pricing]
+input_per_million = 1.74
+output_per_million = 3.48
+cached_per_million = 0.145
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V4-Pro"
+
+[entrypoint.models.pricing]
+input_per_million = 1.74
+output_per_million = 3.48
+cached_per_million = 0.145
+
+[[entrypoint.models]]
+id = "moonshotai/Kimi-K2.6"
+
+[entrypoint.models.pricing]
+input_per_million = 0.95
+output_per_million = 4.0
+cached_per_million = 0.16
+
+[[entrypoint.models]]
+id = "Pro/moonshotai/Kimi-K2.6"
+
+[entrypoint.models.pricing]
+input_per_million = 0.95
+output_per_million = 4.0
+cached_per_million = 0.16
+
+[[entrypoint.models]]
+id = "Pro/zai-org/GLM-4.7"
+
+[entrypoint.models.pricing]
+input_per_million = 0.6
+output_per_million = 2.2
+
+[[entrypoint.models]]
+id = "zai-org/GLM-4.7"
+
+[entrypoint.models.pricing]
+input_per_million = 0.6
+output_per_million = 2.2
+
+[[entrypoint.models]]
+id = "Qwen/Qwen2.5-72B-Instruct"
+
+[entrypoint.models.pricing]
+input_per_million = 0.59
+output_per_million = 0.59
+
+[[entrypoint.models]]
+id = "Qwen/Qwen2.5-72B-Instruct-128K"
+
+[entrypoint.models.pricing]
+input_per_million = 0.59
+output_per_million = 0.59
+
+[[entrypoint.models]]
+id = "Qwen/Qwen2.5-VL-72B-Instruct"
+
+[entrypoint.models.pricing]
+input_per_million = 0.59
+output_per_million = 0.59
+
+[[entrypoint.models]]
+id = "moonshotai/Kimi-K2-Instruct"
+
+[entrypoint.models.pricing]
+input_per_million = 0.58
+output_per_million = 2.29
+
+[[entrypoint.models]]
+id = "moonshotai/Kimi-K2-Thinking"
+
+[entrypoint.models.pricing]
+input_per_million = 0.55
+output_per_million = 2.5
+
+[[entrypoint.models]]
+id = "Pro/moonshotai/Kimi-K2-Thinking"
+
+[entrypoint.models.pricing]
+input_per_million = 0.55
+output_per_million = 2.5
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-R1"
+
+[entrypoint.models.pricing]
+input_per_million = 0.5
+output_per_million = 2.18
+
+[[entrypoint.models]]
+id = "nex-agi/DeepSeek-V3.1-Nex-N1"
+
+[entrypoint.models.pricing]
+input_per_million = 0.5
+output_per_million = 2.0
+
+[[entrypoint.models]]
+id = "Pro/deepseek-ai/DeepSeek-R1"
+
+[entrypoint.models.pricing]
+input_per_million = 0.5
+output_per_million = 2.18
+
+[[entrypoint.models]]
+id = "zai-org/GLM-4.6"
+
+[entrypoint.models.pricing]
+input_per_million = 0.5
+output_per_million = 1.9
+
+[[entrypoint.models]]
+id = "moonshotai/Kimi-K2.5"
+
+[entrypoint.models.pricing]
+input_per_million = 0.45
+output_per_million = 2.25
+
+[[entrypoint.models]]
+id = "Pro/moonshotai/Kimi-K2.5"
+
+[entrypoint.models.pricing]
+input_per_million = 0.45
+output_per_million = 2.25
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3-VL-235B-A22B-Thinking"
+
+[entrypoint.models.pricing]
+input_per_million = 0.45
+output_per_million = 3.5
+
+[[entrypoint.models]]
+id = "moonshotai/Kimi-K2-Instruct-0905"
+
+[entrypoint.models.pricing]
+input_per_million = 0.4
+output_per_million = 2.0
+
+[[entrypoint.models]]
+id = "Pro/moonshotai/Kimi-K2-Instruct-0905"
+
+[entrypoint.models.pricing]
+input_per_million = 0.4
+output_per_million = 2.0
+
+[[entrypoint.models]]
+id = "zai-org/GLM-4.5"
+
+[entrypoint.models.pricing]
+input_per_million = 0.4
+output_per_million = 2.0
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3-235B-A22B"
+
+[entrypoint.models.pricing]
+input_per_million = 0.35
+output_per_million = 1.42
+
+[[entrypoint.models]]
+id = "MiniMaxAI/MiniMax-M2.1"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 1.2
+
+[[entrypoint.models]]
+id = "MiniMaxAI/MiniMax-M2.5"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 1.2
+
+[[entrypoint.models]]
+id = "Pro/MiniMaxAI/MiniMax-M2.1"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 1.2
+
+[[entrypoint.models]]
+id = "Pro/MiniMaxAI/MiniMax-M2.5"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 1.22
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3-VL-235B-A22B-Instruct"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 1.5
+
+[[entrypoint.models]]
+id = "zai-org/GLM-4.6V"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 0.9
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3-VL-30B-A3B-Instruct"
+
+[entrypoint.models.pricing]
+input_per_million = 0.29
+output_per_million = 1.0
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3-VL-30B-A3B-Thinking"
+
+[entrypoint.models.pricing]
+input_per_million = 0.29
+output_per_million = 1.0
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3.5-122B-A10B"
+
+[entrypoint.models.pricing]
+input_per_million = 0.29
+output_per_million = 2.32
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3.5-397B-A17B"
+
+[entrypoint.models.pricing]
+input_per_million = 0.29
+output_per_million = 1.74
+
+[[entrypoint.models]]
+id = "baidu/ERNIE-4.5-300B-A47B"
+
+[entrypoint.models.pricing]
+input_per_million = 0.28
+output_per_million = 1.1
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V3.1"
+
+[entrypoint.models.pricing]
+input_per_million = 0.27
+output_per_million = 1.0
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V3.1-Terminus"
+
+[entrypoint.models.pricing]
+input_per_million = 0.27
+output_per_million = 1.0
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V3.2"
+
+[entrypoint.models.pricing]
+input_per_million = 0.27
+output_per_million = 0.42
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V3.2-Exp"
+
+[entrypoint.models.pricing]
+input_per_million = 0.27
+output_per_million = 0.41
+
+[[entrypoint.models]]
+id = "Pro/deepseek-ai/DeepSeek-V3.1-Terminus"
+
+[entrypoint.models.pricing]
+input_per_million = 0.27
+output_per_million = 1.0
+
+[[entrypoint.models]]
+id = "Pro/deepseek-ai/DeepSeek-V3.2"
+
+[entrypoint.models.pricing]
+input_per_million = 0.27
+output_per_million = 0.42
+
+[[entrypoint.models]]
+id = "Qwen/Qwen2.5-VL-32B-Instruct"
+
+[entrypoint.models.pricing]
+input_per_million = 0.27
+output_per_million = 0.27
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3.5-27B"
+
+[entrypoint.models.pricing]
+input_per_million = 0.26
+output_per_million = 2.09
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V3"
+
+[entrypoint.models.pricing]
+input_per_million = 0.25
+output_per_million = 1.0
+
+[[entrypoint.models]]
+id = "Pro/deepseek-ai/DeepSeek-V3"
+
+[entrypoint.models.pricing]
+input_per_million = 0.25
+output_per_million = 1.0
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3-Coder-480B-A35B-Instruct"
+
+[entrypoint.models.pricing]
+input_per_million = 0.25
+output_per_million = 1.0

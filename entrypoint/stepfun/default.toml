@@ -1,0 +1,68 @@
+# Stepfun (China)
+
+[entrypoint]
+id = "stepfun_default"
+provider_id = "stepfun"
+type = "one_time"
+billing_type = "one_time"
+
+[entrypoint.api]
+protocol = "openai_chat_v1"
+base_url = "https://api.stepfun.com/v1"
+chat_endpoint = "/chat/completions"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "STEPFUN_API_KEY"
+
+[entrypoint.name]
+en = "Stepfun (China)"
+zhs = "阶跃（Stepfun）"
+zht = "階躍（Stepfun）"
+ja = "Stepfun（中国）"
+ko = "Stepfun（중국）"
+fr = "Stepfun (Chine)"
+es = "Stepfun (China)"
+ru = "Stepfun (Китай)"
+
+[entrypoint.defaults]
+deep = "step-3.5-flash-2603"
+normal = "step-3.5-flash"
+basic = "step-3.5-flash-2603"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.models]]
+id = "step-2-16k"
+
+[entrypoint.models.pricing]
+input_per_million = 5.21
+output_per_million = 16.44
+cached_per_million = 1.04
+
+[[entrypoint.models]]
+id = "step-1-32k"
+
+[entrypoint.models.pricing]
+input_per_million = 2.05
+output_per_million = 9.59
+cached_per_million = 0.41
+
+[[entrypoint.models]]
+id = "step-3.5-flash-2603"
+
+[entrypoint.models.pricing]
+input_per_million = 0.1
+output_per_million = 0.3
+cached_per_million = 0.02
+
+[[entrypoint.models]]
+id = "step-3.5-flash"
+
+[entrypoint.models.pricing]
+input_per_million = 0.096
+output_per_million = 0.288
+cached_per_million = 0.019

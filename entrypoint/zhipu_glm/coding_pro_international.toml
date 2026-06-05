@@ -1,0 +1,56 @@
+# GLM International Coding Plan Pro
+
+[entrypoint]
+id = "zhipu_glm_coding_pro_international"
+provider_id = "zhipu_glm"
+type = "coding_plan"
+billing_type = "periodic"
+plan_tier = "pro"
+
+[entrypoint.api]
+protocol = "openai_chat_v1"
+base_url = "https://api.z.ai/api/coding/paas/v4"
+chat_endpoint = "/chat/completions"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "ZAI_API_KEY_CODING_PRO"
+
+[entrypoint.name]
+en = "GLM International Coding Plan Pro"
+zhs = "智谱 GLM 国际版编程套餐 Pro"
+zht = "智譜 GLM 國際版編程套餐 Pro"
+ja = "GLM 国際コーディングプラン Pro"
+ko = "GLM 국제 코딩 플랜 Pro"
+fr = "GLM International Plan Coding Pro"
+es = "GLM Internacional Plan Coding Pro"
+ru = "GLM Международный План Coding Pro"
+
+[entrypoint.defaults]
+deep = "glm-5.1"
+normal = "glm-5-turbo"
+basic = "glm-5v-turbo"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.models]]
+id = "glm-5.1"
+
+[entrypoint.models.pricing]
+input_per_million = 6.0
+output_per_million = 24.0
+cached_per_million = 1.3
+
+[[entrypoint.models]]
+id = "glm-5-turbo"
+
+[[entrypoint.models]]
+id = "glm-5v-turbo"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 22.0
+cached_per_million = 1.2

@@ -1,0 +1,23 @@
+# Stable Diffusion 3.5
+# Provider: stability
+
+[model]
+id = "stable-diffusion-3.5"
+name = "Stable Diffusion 3.5"
+provider_id = "stability"
+context_window = 0
+max_output_tokens = 0
+supports_vision = false
+supports_function_calling = false
+supports_streaming = false
+supports_reasoning = false
+category = { generation = "image" }
+tags = ["image_generation", "open_source"]
+
+[model.generation]
+modalities = ["image"]
+default_format = "png"
+max_resolution = "1024x1024"
+supported_formats = ["png", "jpg", "webp"]
+supports_streaming = false
+input_modalities = ["text"]

@@ -1,0 +1,19 @@
+# Qwen3 Next 80B A3B Thinking
+# Provider: qwen
+
+[model]
+id = "qwen3-next-80b-a3b-thinking"
+name = "Qwen3 Next 80B A3B Thinking"
+provider_id = "qwen"
+
+context_window = 131072
+max_output_tokens = 16384
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["reasoning"]
+
+[model.pricing]
+input_per_million = 0.1
+output_per_million = 0.78

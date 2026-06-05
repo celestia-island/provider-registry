@@ -1,0 +1,68 @@
+# GLM China Coding Plan Lite - Anthropic
+
+[entrypoint]
+id = "zhipu_glm_coding_lite_domestic_anthropic"
+provider_id = "zhipu_glm"
+type = "coding_plan"
+billing_type = "periodic"
+plan_tier = "lite"
+
+[entrypoint.api]
+protocol = "anthropic_messages_v1"
+base_url = "https://open.bigmodel.cn/api/coding/paas/v4"
+chat_endpoint = "/v1/messages"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "BIGMODEL_API_KEY_CODING_LITE"
+
+[entrypoint.name]
+en = "GLM China Coding Plan Lite (Anthropic)"
+zhs = "智谱 GLM 国内版编程套餐 Lite（Anthropic）"
+zht = "智譜 GLM 國內版編程套餐 Lite（Anthropic）"
+ja = "GLM 中国コーディングプラン Lite（Anthropic）"
+ko = "GLM 중국 코딩 플랜 Lite（Anthropic）"
+fr = "GLM Chine Plan Coding Lite (Anthropic)"
+es = "GLM China Plan Coding Lite (Anthropic)"
+ru = "GLM Китай План Coding Lite (Anthropic)"
+
+[entrypoint.defaults]
+deep = ["glm-5.1", "glm-5v-turbo"]
+normal = ["glm-5", "glm-5v-turbo"]
+basic = "glm-4.7-flash"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.quota]]
+data_limit = 80
+period_hours = 5
+billing_metric = "prompt_times"
+
+[[entrypoint.quota]]
+data_limit = 400
+period_days = 7
+billing_metric = "prompt_times"
+
+[[entrypoint.models]]
+id = "glm-5.1"
+
+[[entrypoint.models]]
+id = "glm-5-turbo"
+
+[entrypoint.models.pricing]
+input_per_million = 1.2
+output_per_million = 4.0
+cached_per_million = 0.24
+
+
+[[entrypoint.models]]
+id = "glm-5v-turbo"
+[[entrypoint.models]]
+id = "glm-5"
+
+[entrypoint.models.pricing]
+input_per_million = 0.72
+output_per_million = 2.3

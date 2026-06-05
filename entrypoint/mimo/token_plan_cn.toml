@@ -1,0 +1,49 @@
+# Xiaomi MiMo - Token Plan (China Cluster)
+# 小米 MiMo Token Plan 中国集群 - 周期计费
+
+[entrypoint]
+id = "mimo_token_plan_cn"
+provider_id = "mimo"
+type = "coding_plan"
+billing_type = "periodic"
+plan_tier = "token_plan"
+
+[entrypoint.name]
+en = "Xiaomi MiMo Token Plan (China)"
+zhs = "小米 MiMo Token Plan（国内版）"
+zht = "小米 MiMo Token Plan（國內版）"
+ja = "Xiaomi MiMo Token Plan（中国クラスタ）"
+ko = "Xiaomi MiMo Token Plan (중국 클러스터)"
+fr = "Xiaomi MiMo Token Plan (Chine)"
+es = "Xiaomi MiMo Token Plan (China)"
+ru = "Xiaomi MiMo Token Plan (Китай)"
+
+[entrypoint.api]
+protocol = "openai_chat_v1"
+base_url = "https://token-plan-cn.xiaomimimo.com/v1"
+chat_endpoint = "/chat/completions"
+models_endpoint = "/models"
+auth_type = "api-key"
+auth_header = "api-key"
+env_var = "XIAOMI_MIMO_TOKEN_PLAN_API_KEY"
+
+[entrypoint.defaults]
+deep = "mimo-v2.5-pro"
+normal = "mimo-v2.5-pro"
+basic = "mimo-v2.5-pro"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.models]]
+id = "mimo-v2.5-pro"
+name = "MiMo V2.5 Pro"
+context_window = 131072
+max_output_tokens = 16384
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship"]

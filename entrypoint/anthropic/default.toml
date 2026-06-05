@@ -1,0 +1,372 @@
+# Anthropic (Official)
+
+[entrypoint]
+id = "anthropic_default"
+provider_id = "anthropic"
+type = "one_time"
+billing_type = "one_time"
+
+[entrypoint.api]
+protocol = "anthropic_messages_v1"
+base_url = "https://api.anthropic.com/v1"
+chat_endpoint = "/messages"
+models_endpoint = "/models"
+auth_type = "bearer"
+auth_header = "x-api-key"
+env_var = "ANTHROPIC_API_KEY"
+
+[entrypoint.name]
+en = "Anthropic (Official)"
+zhs = "Anthropic（官方）"
+zht = "Anthropic（官方）"
+ja = "Anthropic（公式）"
+ko = "Anthropic（공식）"
+fr = "Anthropic (Officiel)"
+es = "Anthropic (Oficial)"
+ru = "Anthropic (Официальный)"
+
+[entrypoint.defaults]
+deep = "claude-opus-4-20250514"
+normal = "claude-opus-4-0"
+basic = "claude-3-haiku-20240307"
+
+[entrypoint.defaults.max_concurrent]
+deep = 1
+normal = 1
+basic = 2
+
+[[entrypoint.models]]
+id = "claude-opus-4.6-fast"
+
+[entrypoint.models.pricing]
+input_per_million = 30.0
+output_per_million = 150.0
+cached_per_million = 3.0
+
+[[entrypoint.models]]
+id = "claude-opus-4.7-fast"
+
+[entrypoint.models.pricing]
+input_per_million = 30.0
+output_per_million = 150.0
+cached_per_million = 3.0
+
+[[entrypoint.models]]
+id = "claude-opus-4"
+
+[entrypoint.models.pricing]
+input_per_million = 15.0
+output_per_million = 75.0
+cached_per_million = 1.5
+
+[[entrypoint.models]]
+id = "claude-opus-4-20250514"
+
+[entrypoint.models.pricing]
+input_per_million = 15.0
+output_per_million = 75.0
+cached_per_million = 1.5
+
+[[entrypoint.models]]
+id = "claude-opus-4-0"
+
+[entrypoint.models.pricing]
+input_per_million = 15.0
+output_per_million = 75.0
+cached_per_million = 1.5
+
+[[entrypoint.models]]
+id = "claude-opus-4-1-20250805"
+
+[entrypoint.models.pricing]
+input_per_million = 15.0
+output_per_million = 75.0
+cached_per_million = 1.5
+
+[[entrypoint.models]]
+id = "claude-opus-4.1"
+
+[entrypoint.models.pricing]
+input_per_million = 15.0
+output_per_million = 75.0
+cached_per_million = 1.5
+
+[[entrypoint.models]]
+id = "claude-opus-4-1"
+
+[entrypoint.models.pricing]
+input_per_million = 15.0
+output_per_million = 75.0
+cached_per_million = 1.5
+
+[[entrypoint.models]]
+id = "claude-opus-4.8-fast"
+
+[entrypoint.models.pricing]
+input_per_million = 10.0
+output_per_million = 50.0
+cached_per_million = 1.0
+
+[[entrypoint.models]]
+id = "claude-3.5-sonnet"
+
+[entrypoint.models.pricing]
+input_per_million = 6.0
+output_per_million = 30.0
+cached_per_million = 0.6
+
+[[entrypoint.models]]
+id = "claude-opus-4-5-20251101"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 25.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "claude-opus-4.5"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 25.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "claude-opus-4-5"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 25.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "claude-opus-4-6"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 25.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "claude-opus-4.6"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 25.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "claude-opus-4-7"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 25.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "claude-opus-4.7"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 25.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "claude-opus-4-8"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 25.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "claude-opus-4.8"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 25.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "claude-3.7-sonnet"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-3.7-sonnet:thinking"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-sonnet-4"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-sonnet-4-20250514"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-sonnet-4-0"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-sonnet-4-5-20250929"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-sonnet-4.5"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-sonnet-4-5"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-sonnet-4-6"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-sonnet-4.6"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-haiku-4-5-20251001"
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 5.0
+cached_per_million = 0.1
+
+[[entrypoint.models]]
+id = "claude-haiku-4.5"
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 5.0
+cached_per_million = 0.1
+
+[[entrypoint.models]]
+id = "claude-haiku-4-5"
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 5.0
+cached_per_million = 0.1
+
+[[entrypoint.models]]
+id = "claude-3.5-haiku"
+
+[entrypoint.models.pricing]
+input_per_million = 0.8
+output_per_million = 4.0
+cached_per_million = 0.08
+
+[[entrypoint.models]]
+id = "claude-3-opus-20240229"
+
+[entrypoint.models.pricing]
+input_per_million = 15.0
+output_per_million = 75.0
+cached_per_million = 1.5
+
+[[entrypoint.models]]
+id = "claude-3-sonnet-20240229"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-3-5-sonnet-20240620"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-3-5-sonnet-20241022"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-3-7-sonnet-20250219"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-3-5-haiku-20241022"
+
+[entrypoint.models.pricing]
+input_per_million = 0.8
+output_per_million = 4.0
+cached_per_million = 0.08
+
+[[entrypoint.models]]
+id = "claude-3-5-haiku-latest"
+
+[entrypoint.models.pricing]
+input_per_million = 0.8
+output_per_million = 4.0
+cached_per_million = 0.08
+
+[[entrypoint.models]]
+id = "claude-3-haiku"
+
+[entrypoint.models.pricing]
+input_per_million = 0.25
+output_per_million = 1.25
+cached_per_million = 0.03
+
+[[entrypoint.models]]
+id = "claude-3-haiku-20240307"
+
+[entrypoint.models.pricing]
+input_per_million = 0.25
+output_per_million = 1.25
+cached_per_million = 0.03
