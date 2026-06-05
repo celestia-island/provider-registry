@@ -1,0 +1,165 @@
+# Provider Registry
+# Catalog of all known LLM providers, grouped by category.
+# Each provider corresponds to a directory under entrypoint/ and optionally models/.
+
+[[compatible]]
+id = "openai_compatible"
+name = "OpenAI Compatible"
+description = "Custom OpenAI compatible API"
+is_operator = true
+
+[[compatible]]
+id = "anthropic_compatible"
+name = "Anthropic Compatible"
+description = "Custom Anthropic compatible API"
+is_operator = true
+
+[[compatible]]
+id = "gemini_compatible"
+name = "Gemini Compatible"
+description = "Custom Gemini compatible API"
+is_operator = true
+
+[[international.developers]]
+id = "anthropic"
+name = "Anthropic"
+description = "Claude models from Anthropic"
+is_official = true
+
+[[international.developers]]
+id = "openai"
+name = "OpenAI"
+description = "GPT models from OpenAI"
+is_official = true
+
+[[international.developers]]
+id = "google"
+name = "Google Gemini"
+description = "Gemini models from Google AI"
+is_official = true
+
+[[international.developers]]
+id = "xai"
+name = "xAI"
+description = "Grok models from xAI"
+is_official = true
+
+[[international.developers]]
+id = "mistral"
+name = "Mistral AI"
+description = "Mistral AI models"
+is_official = false
+
+[[international.developers]]
+id = "cohere"
+name = "Cohere"
+description = "Cohere AI models"
+is_official = false
+
+[[international.operators]]
+id = "openrouter"
+name = "OpenRouter"
+description = "Unified access to multiple models"
+is_official = false
+is_operator = true
+
+[[international.operators]]
+id = "together"
+name = "Together AI"
+description = "Open source models from Together AI"
+is_official = false
+is_operator = true
+
+[[international.operators]]
+id = "fireworks"
+name = "Fireworks AI"
+description = "Fast inference from Fireworks AI"
+is_official = false
+is_operator = true
+
+[[international.operators]]
+id = "cerebras"
+name = "Cerebras"
+description = "Fast inference from Cerebras"
+is_official = false
+is_operator = true
+
+[[international.operators]]
+id = "perplexity"
+name = "Perplexity"
+description = "AI search from Perplexity"
+is_official = false
+is_operator = true
+
+[[chinese.developers]]
+id = "deepseek"
+name = "DeepSeek"
+description = "DeepSeek AI models"
+is_official = true
+
+[[chinese.developers]]
+id = "zhipu_glm"
+name = "Zhipu GLM"
+description = "Zhipu AI models (supports domestic and international)"
+is_official = true
+
+[[chinese.developers]]
+id = "qwen"
+name = "Qwen"
+description = "Qwen models"
+is_official = true
+
+[[chinese.developers]]
+id = "moonshot"
+name = "Moonshot"
+description = "Kimi models"
+is_official = false
+
+[[chinese.developers]]
+id = "yi"
+name = "Yi"
+description = "Yi models"
+is_official = false
+
+[[chinese.developers]]
+id = "baichuan"
+name = "Baichuan"
+description = "Baichuan models"
+is_official = false
+
+[[chinese.developers]]
+id = "doubao"
+name = "Doubao"
+description = "ByteDance Doubao models"
+is_official = false
+
+[[chinese.developers]]
+id = "hunyuan"
+name = "Hunyuan"
+description = "Tencent Hunyuan models"
+is_official = false
+
+[[chinese.developers]]
+id = "baidu"
+name = "Wenxin"
+description = "Baidu Wenxin models"
+is_official = false
+
+[[chinese.developers]]
+id = "stepfun"
+name = "Stepfun"
+description = "Stepfun models"
+is_official = false
+
+[[chinese.developers]]
+id = "minimax"
+name = "MiniMax"
+description = "MiniMax models"
+is_official = false
+
+[[chinese.operators]]
+id = "silicon"
+name = "SiliconFlow"
+description = "SiliconFlow models"
+is_official = false
+is_operator = true
