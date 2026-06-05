@@ -1,0 +1,9 @@
+[model]
+id = "mimo-v2.5-pro"
+name = "MiMo V2.5 Pro"
+context_window = 131072
+max_output_tokens = 16384
+supports_vision = false
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship"]

@@ -1,0 +1,20 @@
+# Mistral: Pixtral Large 2411
+# Provider: mistral
+
+[model]
+id = "pixtral-large-2411"
+name = "Mistral: Pixtral Large 2411"
+provider_id = "mistral"
+
+context_window = 131072
+max_output_tokens = 16384
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 2.0
+output_per_million = 6.0
+cached_per_million = 0.2

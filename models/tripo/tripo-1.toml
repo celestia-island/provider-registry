@@ -1,0 +1,22 @@
+# Tripo
+# Provider: tripo
+
+[model]
+id = "tripo-1"
+name = "Tripo"
+provider_id = "tripo"
+context_window = 0
+max_output_tokens = 0
+supports_vision = false
+supports_function_calling = false
+supports_streaming = false
+supports_reasoning = false
+category = { generation = "model3d" }
+tags = ["3d_generation"]
+
+[model.generation]
+modalities = ["model3d"]
+default_format = "glb"
+supported_formats = ["glb", "gltf", "fbx", "obj"]
+supports_streaming = false
+input_modalities = ["text", "image"]

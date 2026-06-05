@@ -1,0 +1,20 @@
+# Grok 3 Mini Beta
+# Provider: xai
+
+[model]
+id = "grok-3-mini-beta"
+name = "Grok 3 Mini Beta"
+provider_id = "xai"
+
+context_window = 131072
+max_output_tokens = 16384
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 0.3
+output_per_million = 0.5
+cached_per_million = 0.075

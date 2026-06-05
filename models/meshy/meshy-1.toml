@@ -1,0 +1,22 @@
+# Meshy
+# Provider: meshy
+
+[model]
+id = "meshy-1"
+name = "Meshy"
+provider_id = "meshy"
+context_window = 0
+max_output_tokens = 0
+supports_vision = false
+supports_function_calling = false
+supports_streaming = false
+supports_reasoning = false
+category = { generation = "model3d" }
+tags = ["3d_generation"]
+
+[model.generation]
+modalities = ["model3d"]
+default_format = "glb"
+supported_formats = ["glb", "gltf", "fbx", "obj", "usdz"]
+supports_streaming = false
+input_modalities = ["text", "image"]
