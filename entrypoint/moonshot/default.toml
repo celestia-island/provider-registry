@@ -27,14 +27,22 @@ es = "Moonshot (China Pago único)"
 ru = "Moonshot (Китай Разовая оплата)"
 
 [entrypoint.defaults]
-deep = "kimi-k2.6"
-normal = "kimi-k2.5"
+deep = "kimi-k2.7-code-highspeed"
+normal = "kimi-k2.7-code"
 basic = "kimi-k2-thinking-turbo"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
 normal = 1
 basic = 2
+
+[[entrypoint.models]]
+id = "kimi-k2.7-code-highspeed"
+
+[entrypoint.models.pricing]
+input_per_million = 1.9
+output_per_million = 8.0
+cached_per_million = 0.38
 
 [[entrypoint.models]]
 id = "kimi-k2-thinking-turbo"
@@ -51,6 +59,14 @@ id = "kimi-k2.6"
 input_per_million = 0.95
 output_per_million = 4.0
 cached_per_million = 0.16
+
+[[entrypoint.models]]
+id = "kimi-k2.7-code"
+
+[entrypoint.models.pricing]
+input_per_million = 0.95
+output_per_million = 4.0
+cached_per_million = 0.19
 
 [[entrypoint.models]]
 id = "kimi-k2-0905"
