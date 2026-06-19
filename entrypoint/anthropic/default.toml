@@ -3,6 +3,7 @@
 [entrypoint]
 id = "anthropic_default"
 provider_id = "anthropic"
+website_domain = "anthropic.com"
 type = "one_time"
 billing_type = "one_time"
 

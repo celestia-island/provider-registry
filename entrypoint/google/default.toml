@@ -3,6 +3,7 @@
 [entrypoint]
 id = "google_default"
 provider_id = "google"
+website_domain = "google.com"
 type = "one_time"
 billing_type = "one_time"
 

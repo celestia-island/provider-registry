@@ -3,6 +3,7 @@
 [entrypoint]
 id = "zhipu_glm_coding_pro_domestic"
 provider_id = "zhipu_glm"
+website_domain = "zhipu.ai"
 type = "coding_plan"
 billing_type = "periodic"
 plan_tier = "pro"

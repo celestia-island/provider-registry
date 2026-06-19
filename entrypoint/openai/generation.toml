@@ -3,6 +3,7 @@
 [entrypoint]
 id = "openai_generation"
 provider_id = "openai"
+website_domain = "openai.com"
 type = "generation"
 billing_type = "per_use"
 

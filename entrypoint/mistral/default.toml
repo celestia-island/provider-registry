@@ -3,6 +3,7 @@
 [entrypoint]
 id = "mistral_default"
 provider_id = "mistral"
+website_domain = "mistral.ai"
 type = "one_time"
 billing_type = "one_time"
 

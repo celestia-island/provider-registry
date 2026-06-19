@@ -3,6 +3,7 @@
 [entrypoint]
 id = "fireworks_default"
 provider_id = "fireworks"
+website_domain = "fireworks.ai"
 type = "one_time"
 billing_type = "one_time"
 

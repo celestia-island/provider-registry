@@ -3,6 +3,7 @@
 [entrypoint]
 id = "openrouter_default"
 provider_id = "openrouter"
+website_domain = "openrouter.ai"
 type = "one_time"
 billing_type = "one_time"
 

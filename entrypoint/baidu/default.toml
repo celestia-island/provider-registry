@@ -4,6 +4,7 @@
 [entrypoint]
 id = "baidu_default"
 provider_id = "baidu"
+website_domain = "baidu.com"
 type = "one_time"
 billing_type = "one_time"
 

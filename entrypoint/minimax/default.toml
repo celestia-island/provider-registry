@@ -3,6 +3,7 @@
 [entrypoint]
 id = "minimax_default"
 provider_id = "minimax"
+website_domain = "minimax.chat"
 type = "one_time"
 billing_type = "one_time"
 

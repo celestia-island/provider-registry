@@ -3,6 +3,7 @@
 [entrypoint]
 id = "xai_default"
 provider_id = "xai"
+website_domain = "x.ai"
 type = "one_time"
 billing_type = "one_time"
 

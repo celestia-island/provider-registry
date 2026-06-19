@@ -3,6 +3,7 @@
 [entrypoint]
 id = "qwen_coding_lite_domestic_anthropic"
 provider_id = "qwen"
+website_domain = "alibaba.com"
 type = "coding_plan"
 billing_type = "periodic"
 plan_tier = "lite"

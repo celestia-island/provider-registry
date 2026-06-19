@@ -3,6 +3,7 @@
 [entrypoint]
 id = "moonshot_coding_basic_domestic_anthropic"
 provider_id = "moonshot"
+website_domain = "moonshot.cn"
 type = "coding_plan"
 billing_type = "periodic"
 plan_tier = "basic"

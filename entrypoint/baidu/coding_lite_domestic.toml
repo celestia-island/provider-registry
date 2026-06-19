@@ -4,6 +4,7 @@
 [entrypoint]
 id = "baidu_coding_lite_domestic"
 provider_id = "baidu"
+website_domain = "baidu.com"
 type = "coding_plan"
 billing_type = "periodic"
 plan_tier = "lite"
