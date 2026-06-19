@@ -3,6 +3,7 @@
 [entrypoint]
 id = "minimax_coding_starter_anthropic"
 provider_id = "minimax"
+website_domain = "minimax.chat"
 type = "coding_plan"
 billing_type = "periodic"
 plan_tier = "starter"

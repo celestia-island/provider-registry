@@ -2,7 +2,7 @@ name: Sync Provider Models
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 */6 * * *'
   workflow_dispatch:
     inputs:
       providers:
@@ -25,7 +25,7 @@ on:
         type: boolean
 
 concurrency:
-  group: provider-sync-${{ github.ref }}
+  group: provider-sync
   cancel-in-progress: false
 
 jobs:
@@ -35,10 +35,10 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout dev branch
+      - name: Checkout master branch (config-table source of truth)
         uses: actions/checkout@v4
         with:
-          ref: dev
+          ref: master
           fetch-depth: 0
 
       - name: Setup Python
@@ -78,15 +78,17 @@ jobs:
             } >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit and push to dev
+      - name: Commit and push to master
         if: steps.sync.outputs.has_changes == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run == true)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add entrypoint models
           SOURCE="${{ github.event.inputs.source || 'all' }}"
-          git commit -m "chore(providers): sync model list from OpenRouter + models.dev [source=${SOURCE}]"
-          git push origin dev
+          git commit -m "chore(providers): sync model list from OpenRouter + models.dev [source=${SOURCE}]
+
+Auto-merged into dev by the auto-merge-dev workflow (every 6h)."
+          git push origin master
 
       - name: Summary
         if: always()
@@ -96,18 +98,14 @@ jobs:
             if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" == "true" ]; then
               echo "### Dry Run Complete (source: \`${SOURCE}\`)" >> $GITHUB_STEP_SUMMARY
               echo "Changes were detected but not committed (dry run mode)." >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo '```' >> $GITHUB_STEP_SUMMARY
-              echo "${{ steps.sync.outputs.diff_summary }}" >> $GITHUB_STEP_SUMMARY
-              echo '```' >> $GITHUB_STEP_SUMMARY
             else
-              echo "### Committed to dev (source: \`${SOURCE}\`)" >> $GITHUB_STEP_SUMMARY
-              echo "Model list changes have been committed and pushed directly to \`dev\`." >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo '```' >> $GITHUB_STEP_SUMMARY
-              echo "${{ steps.sync.outputs.diff_summary }}" >> $GITHUB_STEP_SUMMARY
-              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "### Committed to master (source: \`${SOURCE}\`)" >> $GITHUB_STEP_SUMMARY
+              echo "Model list changes committed to \`master\`. \`dev\` auto-merges every 6h." >> $GITHUB_STEP_SUMMARY
             fi
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "${{ steps.sync.outputs.diff_summary }}" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
           else
             echo "### No Changes (source: \`${SOURCE}\`)" >> $GITHUB_STEP_SUMMARY
             echo "Model list is already up to date." >> $GITHUB_STEP_SUMMARY

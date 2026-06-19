@@ -3,6 +3,7 @@
 [entrypoint]
 id = "qwen_default"
 provider_id = "qwen"
+website_domain = "alibaba.com"
 type = "one_time"
 billing_type = "one_time"
 

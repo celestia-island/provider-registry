@@ -22,42 +22,49 @@ is_operator = true
 
 [[international.developers]]
 id = "anthropic"
+website_domain = "anthropic.com"
 name = "Anthropic"
 description = "Claude models from Anthropic"
 is_official = true
 
 [[international.developers]]
 id = "openai"
+website_domain = "openai.com"
 name = "OpenAI"
 description = "GPT models from OpenAI"
 is_official = true
 
 [[international.developers]]
 id = "google"
+website_domain = "google.com"
 name = "Google Gemini"
 description = "Gemini models from Google AI"
 is_official = true
 
 [[international.developers]]
 id = "xai"
+website_domain = "x.ai"
 name = "xAI"
 description = "Grok models from xAI"
 is_official = true
 
 [[international.developers]]
 id = "mistral"
+website_domain = "mistral.ai"
 name = "Mistral AI"
 description = "Mistral AI models"
 is_official = false
 
 [[international.developers]]
 id = "cohere"
+website_domain = "cohere.com"
 name = "Cohere"
 description = "Cohere AI models"
 is_official = false
 
 [[international.operators]]
 id = "openrouter"
+website_domain = "openrouter.ai"
 name = "OpenRouter"
 description = "Unified access to multiple models"
 is_official = false
@@ -65,6 +72,7 @@ is_operator = true
 
 [[international.operators]]
 id = "together"
+website_domain = "together.ai"
 name = "Together AI"
 description = "Open source models from Together AI"
 is_official = false
@@ -72,6 +80,7 @@ is_operator = true
 
 [[international.operators]]
 id = "fireworks"
+website_domain = "fireworks.ai"
 name = "Fireworks AI"
 description = "Fast inference from Fireworks AI"
 is_official = false
@@ -79,6 +88,7 @@ is_operator = true
 
 [[international.operators]]
 id = "cerebras"
+website_domain = "cerebras.ai"
 name = "Cerebras"
 description = "Fast inference from Cerebras"
 is_official = false
@@ -86,6 +96,7 @@ is_operator = true
 
 [[international.operators]]
 id = "perplexity"
+website_domain = "perplexity.ai"
 name = "Perplexity"
 description = "AI search from Perplexity"
 is_official = false
@@ -93,73 +104,92 @@ is_operator = true
 
 [[chinese.developers]]
 id = "deepseek"
+website_domain = "deepseek.com"
 name = "DeepSeek"
 description = "DeepSeek AI models"
 is_official = true
 
 [[chinese.developers]]
 id = "zhipu_glm"
+website_domain = "zhipu.ai"
 name = "Zhipu GLM"
 description = "Zhipu AI models (supports domestic and international)"
 is_official = true
 
 [[chinese.developers]]
 id = "qwen"
+website_domain = "alibaba.com"
 name = "Qwen"
 description = "Qwen models"
 is_official = true
 
 [[chinese.developers]]
 id = "moonshot"
+website_domain = "moonshot.cn"
 name = "Moonshot"
 description = "Kimi models"
 is_official = false
 
 [[chinese.developers]]
 id = "yi"
+website_domain = "01.ai"
 name = "Yi"
 description = "Yi models"
 is_official = false
 
 [[chinese.developers]]
 id = "baichuan"
+website_domain = "baichuan-ai.com"
 name = "Baichuan"
 description = "Baichuan models"
 is_official = false
 
 [[chinese.developers]]
 id = "doubao"
+website_domain = "volcengine.com"
 name = "Doubao"
 description = "ByteDance Doubao models"
 is_official = false
 
 [[chinese.developers]]
 id = "hunyuan"
+website_domain = "tencent.com"
 name = "Hunyuan"
 description = "Tencent Hunyuan models"
 is_official = false
 
 [[chinese.developers]]
 id = "baidu"
+website_domain = "baidu.com"
 name = "Wenxin"
 description = "Baidu Wenxin models"
 is_official = false
 
 [[chinese.developers]]
 id = "stepfun"
+website_domain = "stepfun.com"
 name = "Stepfun"
 description = "Stepfun models"
 is_official = false
 
 [[chinese.developers]]
 id = "minimax"
+website_domain = "minimax.chat"
 name = "MiniMax"
 description = "MiniMax models"
 is_official = false
 
 [[chinese.operators]]
 id = "silicon"
+website_domain = "siliconflow.cn"
 name = "SiliconFlow"
 description = "SiliconFlow models"
 is_official = false
 is_operator = true
+
+[[chinese.developers]]
+id = "mimo"
+name = "Xiaomi MiMo"
+website_domain = "xiaomi.com"
+description = "Xiaomi MiMo models"
+is_official = false

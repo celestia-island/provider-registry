@@ -3,6 +3,7 @@
 [entrypoint]
 id = "doubao_default_anthropic"
 provider_id = "doubao"
+website_domain = "volcengine.com"
 type = "one_time"
 billing_type = "one_time"
 

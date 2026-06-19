@@ -4,6 +4,7 @@
 [entrypoint]
 id = "mimo_token_plan_cn"
 provider_id = "mimo"
+website_domain = "xiaomi.com"
 type = "coding_plan"
 billing_type = "periodic"
 plan_tier = "token_plan"

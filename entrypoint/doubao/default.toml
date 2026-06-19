@@ -4,6 +4,7 @@
 [entrypoint]
 id = "doubao_default"
 provider_id = "doubao"
+website_domain = "volcengine.com"
 type = "one_time"
 billing_type = "one_time"
 

@@ -3,6 +3,7 @@
 [entrypoint]
 id = "doubao_coding_pro_domestic_anthropic"
 provider_id = "doubao"
+website_domain = "volcengine.com"
 type = "coding_plan"
 billing_type = "periodic"
 plan_tier = "pro"

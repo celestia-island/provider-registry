@@ -3,6 +3,7 @@
 [entrypoint]
 id = "openai_default"
 provider_id = "openai"
+website_domain = "openai.com"
 type = "one_time"
 billing_type = "one_time"
 

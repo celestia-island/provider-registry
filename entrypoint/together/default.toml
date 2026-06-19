@@ -3,6 +3,7 @@
 [entrypoint]
 id = "together_default"
 provider_id = "together"
+website_domain = "together.ai"
 type = "one_time"
 billing_type = "one_time"
 
