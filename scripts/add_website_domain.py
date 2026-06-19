@@ -64,6 +64,21 @@ def insert_after_line(lines, anchor_pattern, new_line):
     return lines, False
 
 
+def domain_for_entrypoint(pid: str, base_url: str) -> str | None:
+    """Resolve the canonical website_domain for an entrypoint.
+
+    zhipu_glm is special: it exposes two distinct serving entities — the domestic
+    Zhipu AI (open.bigmodel.cn -> zhipuai.cn) and the international Z.ai
+    (api.z.ai -> z.ai). The domain therefore depends on the entrypoint's base_url,
+    not just the provider_id.
+    """
+    if pid == "zhipu_glm":
+        if "z.ai" in base_url:
+            return "z.ai"
+        return "zhipuai.cn"
+    return WEBSITE_DOMAIN.get(pid)
+
+
 def process_entrypoints():
     changed = []
     ep_dir = REPO_ROOT / "entrypoint"
@@ -77,11 +92,27 @@ def process_entrypoints():
         if pid in COMPATIBLE_PROVIDERS:
             print(f"SKIP (compatible template): {toml_file.relative_to(REPO_ROOT)}")
             continue
-        domain = WEBSITE_DOMAIN.get(pid)
+        base_url = (
+            re.search(r'^base_url\s*=\s*"([^"]+)"', text, re.MULTILINE)
+        )
+        base_url = base_url.group(1) if base_url else ""
+        domain = domain_for_entrypoint(pid, base_url)
         if not domain:
             print(f"WARN (unknown provider_id {pid!r}): {toml_file.relative_to(REPO_ROOT)}")
             continue
-        if "website_domain" in text:
+        existing = re.search(r'^website_domain\s*=\s*"([^"]+)"', text, re.MULTILINE)
+        if existing:
+            if existing.group(1) == domain:
+                continue
+            text = re.sub(
+                r'(^website_domain\s*=\s*")[^"]+(")',
+                lambda mm: f'{mm.group(1)}{domain}{mm.group(2)}',
+                text,
+                count=1,
+                flags=re.MULTILINE,
+            )
+            toml_file.write_text(text, encoding="utf-8")
+            changed.append(toml_file.relative_to(REPO_ROOT))
             continue
         lines = text.splitlines(keepends=True)
         for i, line in enumerate(lines):
