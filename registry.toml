@@ -111,7 +111,7 @@ is_official = true
 
 [[chinese.developers]]
 id = "zhipu_glm"
-website_domain = "zhipu.ai"
+website_domain = "zhipuai.cn"
 name = "Zhipu GLM"
 description = "Zhipu AI models (supports domestic and international)"
 is_official = true

@@ -28,7 +28,7 @@ WEBSITE_DOMAIN = {
     "together": "together.ai",
     "cerebras": "cerebras.ai",
     "perplexity": "perplexity.ai",
-    "zhipu_glm": "zhipu.ai",
+    "zhipu_glm": "zhipuai.cn",
     "deepseek": "deepseek.com",
     "qwen": "alibaba.com",
     "moonshot": "moonshot.cn",

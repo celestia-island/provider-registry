@@ -3,7 +3,7 @@
 [entrypoint]
 id = "zhipu_glm_coding_max_domestic"
 provider_id = "zhipu_glm"
-website_domain = "zhipu.ai"
+website_domain = "zhipuai.cn"
 type = "coding_plan"
 billing_type = "periodic"
 plan_tier = "max"
