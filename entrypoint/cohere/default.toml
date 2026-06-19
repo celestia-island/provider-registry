@@ -28,8 +28,8 @@ ru = "Cohere (Официальный)"
 
 [entrypoint.defaults]
 deep = "command-a-reasoning-08-2025"
-normal = "command-a-translate-08-2025"
-basic = "command-a-03-2025"
+normal = "command-a-plus-05-2026"
+basic = "north-mini-code-1-0"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
@@ -38,6 +38,13 @@ basic = 2
 
 [[entrypoint.models]]
 id = "command-a-03-2025"
+
+[entrypoint.models.pricing]
+input_per_million = 2.5
+output_per_million = 10.0
+
+[[entrypoint.models]]
+id = "command-a-plus-05-2026"
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -103,3 +110,6 @@ id = "c4ai-aya-vision-32b"
 
 [[entrypoint.models]]
 id = "c4ai-aya-vision-8b"
+
+[[entrypoint.models]]
+id = "north-mini-code-1-0"

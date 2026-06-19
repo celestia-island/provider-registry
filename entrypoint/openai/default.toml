@@ -171,6 +171,14 @@ output_per_million = 30.0
 cached_per_million = 0.5
 
 [[entrypoint.models]]
+id = "gpt-image-2"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 30.0
+cached_per_million = 1.25
+
+[[entrypoint.models]]
 id = "gpt-audio"
 
 [entrypoint.models.pricing]
@@ -368,14 +376,6 @@ id = "gpt-5.1-codex-max"
 input_per_million = 1.25
 output_per_million = 10.0
 cached_per_million = 0.125
-
-[[entrypoint.models]]
-id = "o1-mini"
-
-[entrypoint.models.pricing]
-input_per_million = 1.1
-output_per_million = 4.4
-cached_per_million = 0.55
 
 [[entrypoint.models]]
 id = "o3-mini-high"
