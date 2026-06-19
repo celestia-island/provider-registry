@@ -3,7 +3,7 @@
 [entrypoint]
 id = "zhipu_glm_international"
 provider_id = "zhipu_glm"
-website_domain = "zhipu.ai"
+website_domain = "zhipuai.cn"
 type = "one_time"
 billing_type = "one_time"
 
