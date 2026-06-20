@@ -198,9 +198,3 @@ id = "gemma-4-26b-a4b-it"
 
 [[entrypoint.models]]
 id = "gemma-4-31b-it"
-
-[[entrypoint.models]]
-id = "gemma-4-E2B-it"
-
-[[entrypoint.models]]
-id = "gemma-4-E4B-it"

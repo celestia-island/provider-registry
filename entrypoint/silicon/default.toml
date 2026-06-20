@@ -27,7 +27,7 @@ es = "SiliconFlow (China)"
 ru = "SiliconFlow (Китай)"
 
 [entrypoint.defaults]
-deep = "Pro/zai-org/GLM-5.1"
+deep = "zai-org/GLM-5.2"
 normal = "deepseek-ai/deepseek-v4-flash"
 basic = "zai-org/GLM-5V-Turbo"
 
@@ -35,6 +35,13 @@ basic = "zai-org/GLM-5V-Turbo"
 deep = 1
 normal = 1
 basic = 2
+
+[[entrypoint.models]]
+id = "zai-org/GLM-5.2"
+
+[entrypoint.models.pricing]
+input_per_million = 1.4
+output_per_million = 4.4
 
 [[entrypoint.models]]
 id = "Pro/zai-org/GLM-5.1"
@@ -378,13 +385,6 @@ output_per_million = 1.0
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3.5-35B-A3B"
-
-[entrypoint.models.pricing]
-input_per_million = 0.23
-output_per_million = 1.86
-
-[[entrypoint.models]]
-id = "Qwen/Qwen3.6-35B-A3B"
 
 [entrypoint.models.pricing]
 input_per_million = 0.23
