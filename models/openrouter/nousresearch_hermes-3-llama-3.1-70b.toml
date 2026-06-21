@@ -1,0 +1,19 @@
+# Hermes 3 70B Instruct
+# Provider: openrouter
+
+[model]
+id = "nousresearch/hermes-3-llama-3.1-70b"
+name = "Hermes 3 70B Instruct"
+provider_id = "openrouter"
+
+context_window = 131072
+max_output_tokens = 16384
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.7
+output_per_million = 0.7

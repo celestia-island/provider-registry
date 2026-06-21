@@ -18,3 +18,7 @@ tags = ["cost_effective"]
 input_per_million = 0.1
 output_per_million = 0.1
 cached_per_million = 0.01
+
+[model.score]
+value = 28.77
+source = "design_arena"

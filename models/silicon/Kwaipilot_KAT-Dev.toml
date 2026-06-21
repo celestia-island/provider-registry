@@ -1,0 +1,19 @@
+# Kwaipilot/KAT-Dev
+# Provider: silicon
+
+[model]
+id = "Kwaipilot/KAT-Dev"
+name = "Kwaipilot/KAT-Dev"
+provider_id = "silicon"
+
+context_window = 128000
+max_output_tokens = 128000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.2
+output_per_million = 0.6

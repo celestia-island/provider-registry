@@ -1,0 +1,19 @@
+# Inflection 3 Productivity
+# Provider: openrouter
+
+[model]
+id = "inflection/inflection-3-productivity"
+name = "Inflection 3 Productivity"
+provider_id = "openrouter"
+
+context_window = 8000
+max_output_tokens = 1024
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 2.5
+output_per_million = 10.0

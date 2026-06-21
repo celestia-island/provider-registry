@@ -6,7 +6,7 @@ id = "qwen3-235b-a22b-thinking-2507"
 name = "Qwen3 235B A22B Thinking 2507"
 provider_id = "qwen"
 
-context_window = 131072
+context_window = 262144
 max_output_tokens = 16384
 supports_vision = false
 supports_function_calling = true
@@ -15,5 +15,10 @@ supports_reasoning = true
 tags = ["reasoning"]
 
 [model.pricing]
-input_per_million = 0.15
-output_per_million = 1.5
+input_per_million = 0.1
+output_per_million = 0.1
+cached_per_million = 0.1
+
+[model.score]
+value = 28.46
+source = "design_arena"

@@ -1,0 +1,19 @@
+# Devstral Small
+# Provider: mistral
+
+[model]
+id = "devstral-small-2507"
+name = "Devstral Small"
+provider_id = "mistral"
+
+context_window = 128000
+max_output_tokens = 128000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["deprecated"]
+
+[model.pricing]
+input_per_million = 0.1
+output_per_million = 0.3

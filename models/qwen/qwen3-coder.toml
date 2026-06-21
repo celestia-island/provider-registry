@@ -6,7 +6,7 @@ id = "qwen3-coder"
 name = "Qwen3 Coder 480B A35B"
 provider_id = "qwen"
 
-context_window = 262144
+context_window = 1048576
 max_output_tokens = 16384
 supports_vision = false
 supports_function_calling = true
@@ -16,5 +16,8 @@ tags = ["coding"]
 
 [model.pricing]
 input_per_million = 0.22
-output_per_million = 1.0
-cached_per_million = 0.022
+output_per_million = 1.8
+
+[model.score]
+value = 46.99
+source = "design_arena"

@@ -1,0 +1,20 @@
+# Nano Banana
+# Provider: openrouter
+
+[model]
+id = "google/gemini-2.5-flash-image"
+name = "Nano Banana"
+provider_id = "openrouter"
+
+context_window = 32768
+max_output_tokens = 8192
+supports_vision = true
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 0.3
+output_per_million = 2.5
+cached_per_million = 0.03

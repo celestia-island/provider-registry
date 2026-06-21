@@ -27,9 +27,9 @@ es = "MiniMax (China)"
 ru = "MiniMax (Китай)"
 
 [entrypoint.defaults]
-deep = "MiniMax-M3"
-normal = "MiniMax-M2.7-highspeed"
-basic = "MiniMax-M3"
+deep = "MiniMax-M2.7-highspeed"
+normal = "MiniMax-M2.7"
+basic = "MiniMax-M2.5-highspeed"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1

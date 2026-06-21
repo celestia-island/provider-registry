@@ -1,17 +1,17 @@
-# Mistral: Mistral Small 4
+# Mistral Small 4
 # Provider: mistral
 
 [model]
 id = "mistral-small-2603"
-name = "Mistral: Mistral Small 4"
+name = "Mistral Small 4"
 provider_id = "mistral"
 
-context_window = 262144
-max_output_tokens = 16384
+context_window = 256000
+max_output_tokens = 256000
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
-supports_reasoning = false
+supports_reasoning = true
 tags = []
 
 [model.pricing]

@@ -1,0 +1,19 @@
+# Granite 4.0 Micro
+# Provider: openrouter
+
+[model]
+id = "ibm-granite/granite-4.0-h-micro"
+name = "Granite 4.0 Micro"
+provider_id = "openrouter"
+
+context_window = 131000
+max_output_tokens = 131000
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.017
+output_per_million = 0.112

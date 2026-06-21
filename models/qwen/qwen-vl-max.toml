@@ -1,13 +1,13 @@
-# Qwen VL Max
+# Qwen-VL Max
 # Provider: qwen
 
 [model]
 id = "qwen-vl-max"
-name = "Qwen VL Max"
+name = "Qwen-VL Max"
 provider_id = "qwen"
 
 context_window = 131072
-max_output_tokens = 16384
+max_output_tokens = 8192
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
@@ -15,5 +15,5 @@ supports_reasoning = false
 tags = ["vision"]
 
 [model.pricing]
-input_per_million = 0.52
-output_per_million = 2.08
+input_per_million = 0.8
+output_per_million = 3.2

@@ -27,8 +27,8 @@ es = "OpenRouter (Multiproveedor)"
 ru = "OpenRouter (Мульти-провайдер)"
 
 [entrypoint.defaults]
-deep = "openai/gpt-5.4-pro"
-normal = "z-ai/glm-5-turbo"
+deep = "z-ai/glm-5.2"
+normal = "z-ai/glm-5.1"
 basic = "openai/gpt-5.4-mini"
 
 [entrypoint.defaults.max_concurrent]

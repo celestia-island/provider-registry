@@ -1,0 +1,19 @@
+# Weaver (alpha)
+# Provider: openrouter
+
+[model]
+id = "mancer/weaver"
+name = "Weaver (alpha)"
+provider_id = "openrouter"
+
+context_window = 8000
+max_output_tokens = 2000
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.75
+output_per_million = 1.0

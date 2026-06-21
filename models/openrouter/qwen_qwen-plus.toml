@@ -1,0 +1,20 @@
+# Qwen Plus
+# Provider: openrouter
+
+[model]
+id = "qwen/qwen-plus"
+name = "Qwen Plus"
+provider_id = "openrouter"
+
+context_window = 1000000
+max_output_tokens = 32768
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.26
+output_per_million = 0.78
+cached_per_million = 0.052

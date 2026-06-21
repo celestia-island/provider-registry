@@ -1,0 +1,19 @@
+# WizardLM-2 8x22B
+# Provider: openrouter
+
+[model]
+id = "microsoft/wizardlm-2-8x22b"
+name = "WizardLM-2 8x22B"
+provider_id = "openrouter"
+
+context_window = 65535
+max_output_tokens = 8000
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.62
+output_per_million = 0.62

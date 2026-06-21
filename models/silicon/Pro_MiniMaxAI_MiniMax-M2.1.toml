@@ -1,0 +1,19 @@
+# Pro/MiniMaxAI/MiniMax-M2.1
+# Provider: silicon
+
+[model]
+id = "Pro/MiniMaxAI/MiniMax-M2.1"
+name = "Pro/MiniMaxAI/MiniMax-M2.1"
+provider_id = "silicon"
+
+context_window = 197000
+max_output_tokens = 131000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 0.3
+output_per_million = 1.2

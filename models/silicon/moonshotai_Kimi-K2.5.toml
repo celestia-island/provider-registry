@@ -1,0 +1,19 @@
+# moonshotai/Kimi-K2.5
+# Provider: silicon
+
+[model]
+id = "moonshotai/Kimi-K2.5"
+name = "moonshotai/Kimi-K2.5"
+provider_id = "silicon"
+
+context_window = 262000
+max_output_tokens = 262000
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.45
+output_per_million = 2.25

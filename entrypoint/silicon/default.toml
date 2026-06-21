@@ -28,8 +28,8 @@ ru = "SiliconFlow (Китай)"
 
 [entrypoint.defaults]
 deep = "zai-org/GLM-5.2"
-normal = "deepseek-ai/deepseek-v4-flash"
-basic = "zai-org/GLM-5V-Turbo"
+normal = "Pro/zai-org/GLM-5.1"
+basic = "stepfun-ai/Step-3.5-Flash"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1

@@ -1,0 +1,19 @@
+# siliconflow/deepseek-r1-0528
+# Provider: qwen
+
+[model]
+id = "siliconflow/deepseek-r1-0528"
+name = "siliconflow/deepseek-r1-0528"
+provider_id = "qwen"
+
+context_window = 163840
+max_output_tokens = 32768
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.5
+output_per_million = 2.18

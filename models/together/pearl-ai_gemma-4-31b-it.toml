@@ -1,0 +1,19 @@
+# Pearl AI Gemma 4 31B Instruct
+# Provider: together
+
+[model]
+id = "pearl-ai/gemma-4-31b-it"
+name = "Pearl AI Gemma 4 31B Instruct"
+provider_id = "together"
+
+context_window = 32000
+max_output_tokens = 32000
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.28
+output_per_million = 0.86

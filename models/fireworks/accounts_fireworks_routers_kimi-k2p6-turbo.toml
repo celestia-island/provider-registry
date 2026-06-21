@@ -1,0 +1,20 @@
+# Kimi K2.6 Turbo
+# Provider: fireworks
+
+[model]
+id = "accounts/fireworks/routers/kimi-k2p6-turbo"
+name = "Kimi K2.6 Turbo"
+provider_id = "fireworks"
+
+context_window = 262000
+max_output_tokens = 262000
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 2.0
+output_per_million = 8.0
+cached_per_million = 0.3

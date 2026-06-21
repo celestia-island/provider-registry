@@ -1,0 +1,20 @@
+# Gemini Flash-Lite Latest
+# Provider: google
+
+[model]
+id = "gemini-flash-lite-latest"
+name = "Gemini Flash-Lite Latest"
+provider_id = "google"
+
+context_window = 1048576
+max_output_tokens = 65536
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 0.1
+output_per_million = 0.4
+cached_per_million = 0.025

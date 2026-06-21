@@ -1,0 +1,19 @@
+# MythoMax 13B
+# Provider: openrouter
+
+[model]
+id = "gryphe/mythomax-l2-13b"
+name = "MythoMax 13B"
+provider_id = "openrouter"
+
+context_window = 4096
+max_output_tokens = 4096
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.06
+output_per_million = 0.06

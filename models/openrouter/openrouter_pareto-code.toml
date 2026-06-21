@@ -1,0 +1,19 @@
+# Pareto Code Router
+# Provider: openrouter
+
+[model]
+id = "openrouter/pareto-code"
+name = "Pareto Code Router"
+provider_id = "openrouter"
+
+context_window = 2000000
+max_output_tokens = 200000
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.0
+output_per_million = 0.0

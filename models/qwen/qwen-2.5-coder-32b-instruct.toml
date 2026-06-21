@@ -6,8 +6,8 @@ id = "qwen-2.5-coder-32b-instruct"
 name = "Qwen2.5 Coder 32B Instruct"
 provider_id = "qwen"
 
-context_window = 32768
-max_output_tokens = 8192
+context_window = 128000
+max_output_tokens = 16384
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true

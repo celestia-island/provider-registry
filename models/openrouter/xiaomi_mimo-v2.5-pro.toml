@@ -1,0 +1,20 @@
+# MiMo-V2.5-Pro
+# Provider: openrouter
+
+[model]
+id = "xiaomi/mimo-v2.5-pro"
+name = "MiMo-V2.5-Pro"
+provider_id = "openrouter"
+
+context_window = 1048576
+max_output_tokens = 131072
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["vision"]
+
+[model.pricing]
+input_per_million = 0.435
+output_per_million = 0.87
+cached_per_million = 0.0036

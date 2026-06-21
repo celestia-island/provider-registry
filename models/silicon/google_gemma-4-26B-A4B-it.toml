@@ -1,0 +1,19 @@
+# Gemma 4 26B A4B IT
+# Provider: silicon
+
+[model]
+id = "google/gemma-4-26B-A4B-it"
+name = "Gemma 4 26B A4B IT"
+provider_id = "silicon"
+
+context_window = 262144
+max_output_tokens = 262144
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.12
+output_per_million = 0.4

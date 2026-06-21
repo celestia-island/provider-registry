@@ -1,9 +1,9 @@
-# Qwen-Max 
+# Qwen Max
 # Provider: qwen
 
 [model]
 id = "qwen-max"
-name = "Qwen-Max "
+name = "Qwen Max"
 provider_id = "qwen"
 
 context_window = 32768
@@ -15,6 +15,5 @@ supports_reasoning = false
 tags = []
 
 [model.pricing]
-input_per_million = 1.04
-output_per_million = 4.16
-cached_per_million = 0.208
+input_per_million = 1.6
+output_per_million = 6.4

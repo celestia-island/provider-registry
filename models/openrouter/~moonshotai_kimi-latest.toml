@@ -1,0 +1,20 @@
+# MoonshotAI Kimi Latest
+# Provider: openrouter
+
+[model]
+id = "~moonshotai/kimi-latest"
+name = "MoonshotAI Kimi Latest"
+provider_id = "openrouter"
+
+context_window = 262142
+max_output_tokens = 262142
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.66
+output_per_million = 3.5
+cached_per_million = 0.33

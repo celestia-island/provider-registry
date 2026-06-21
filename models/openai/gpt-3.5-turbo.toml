@@ -1,15 +1,15 @@
-# GPT-3.5 Turbo
+# GPT-3.5-turbo
 # Provider: openai
 
 [model]
 id = "gpt-3.5-turbo"
-name = "GPT-3.5 Turbo"
+name = "GPT-3.5-turbo"
 provider_id = "openai"
 
 context_window = 16385
 max_output_tokens = 4096
 supports_vision = false
-supports_function_calling = true
+supports_function_calling = false
 supports_streaming = true
 supports_reasoning = false
 tags = ["cost_effective", "legacy"]
@@ -17,3 +17,7 @@ tags = ["cost_effective", "legacy"]
 [model.pricing]
 input_per_million = 0.5
 output_per_million = 1.5
+
+[model.score]
+value = 10.7
+source = "artificial_analysis"

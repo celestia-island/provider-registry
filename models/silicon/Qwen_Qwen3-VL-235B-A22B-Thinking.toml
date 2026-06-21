@@ -1,0 +1,19 @@
+# Qwen/Qwen3-VL-235B-A22B-Thinking
+# Provider: silicon
+
+[model]
+id = "Qwen/Qwen3-VL-235B-A22B-Thinking"
+name = "Qwen/Qwen3-VL-235B-A22B-Thinking"
+provider_id = "silicon"
+
+context_window = 262000
+max_output_tokens = 262000
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["reasoning", "vision"]
+
+[model.pricing]
+input_per_million = 0.45
+output_per_million = 3.5

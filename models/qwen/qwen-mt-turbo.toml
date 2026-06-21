@@ -1,0 +1,19 @@
+# Qwen-MT Turbo
+# Provider: qwen
+
+[model]
+id = "qwen-mt-turbo"
+name = "Qwen-MT Turbo"
+provider_id = "qwen"
+
+context_window = 16384
+max_output_tokens = 8192
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 0.16
+output_per_million = 0.49

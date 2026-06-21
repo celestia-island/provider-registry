@@ -1,19 +1,23 @@
-# Qwen3.5-122B-A10B
+# Qwen3.5 122B-A10B
 # Provider: qwen
 
 [model]
 id = "qwen3.5-122b-a10b"
-name = "Qwen3.5-122B-A10B"
+name = "Qwen3.5 122B-A10B"
 provider_id = "qwen"
 
 context_window = 262144
-max_output_tokens = 16384
+max_output_tokens = 65536
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
-supports_reasoning = false
+supports_reasoning = true
 tags = []
 
 [model.pricing]
-input_per_million = 0.26
-output_per_million = 2.08
+input_per_million = 0.4
+output_per_million = 3.2
+
+[model.score]
+value = 45.7
+source = "artificial_analysis"

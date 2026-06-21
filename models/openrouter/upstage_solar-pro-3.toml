@@ -1,0 +1,20 @@
+# Solar Pro 3
+# Provider: openrouter
+
+[model]
+id = "upstage/solar-pro-3"
+name = "Solar Pro 3"
+provider_id = "openrouter"
+
+context_window = 128000
+max_output_tokens = 128000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.15
+output_per_million = 0.6
+cached_per_million = 0.015

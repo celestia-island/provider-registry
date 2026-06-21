@@ -27,9 +27,9 @@ es = "Google Gemini (Oficial)"
 ru = "Google Gemini (Официальный)"
 
 [entrypoint.defaults]
-deep = "gemma-4-26b-a4b-it"
+deep = "gemma-4-31b-it"
 normal = "gemini-3.1-flash-lite"
-basic = "gemini-3.5-flash"
+basic = "gemini-2.5-flash"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
@@ -113,6 +113,14 @@ id = "gemini-embedding-001"
 input_per_million = 0.15
 
 [[entrypoint.models]]
+id = "gemma-4-31b-it"
+
+[entrypoint.models.pricing]
+input_per_million = 0.12
+output_per_million = 0.35
+cached_per_million = 0.09
+
+[[entrypoint.models]]
 id = "gemini-2.0-flash"
 
 [entrypoint.models.pricing]
@@ -173,6 +181,13 @@ input_per_million = 0.06
 output_per_million = 0.12
 
 [[entrypoint.models]]
+id = "gemma-4-26b-a4b-it"
+
+[entrypoint.models.pricing]
+input_per_million = 0.06
+output_per_million = 0.33
+
+[[entrypoint.models]]
 id = "gemma-3-12b-it"
 
 [entrypoint.models.pricing]
@@ -192,9 +207,3 @@ id = "gemma-2-9b-it"
 [entrypoint.models.pricing]
 input_per_million = 0.03
 output_per_million = 0.09
-
-[[entrypoint.models]]
-id = "gemma-4-26b-a4b-it"
-
-[[entrypoint.models]]
-id = "gemma-4-31b-it"

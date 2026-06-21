@@ -1,0 +1,19 @@
+# Aion-RP 1.0 (8B)
+# Provider: openrouter
+
+[model]
+id = "aion-labs/aion-rp-llama-3.1-8b"
+name = "Aion-RP 1.0 (8B)"
+provider_id = "openrouter"
+
+context_window = 32768
+max_output_tokens = 32768
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.8
+output_per_million = 1.6

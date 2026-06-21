@@ -1,0 +1,19 @@
+# Pro/zai-org/GLM-4.7
+# Provider: silicon
+
+[model]
+id = "Pro/zai-org/GLM-4.7"
+name = "Pro/zai-org/GLM-4.7"
+provider_id = "silicon"
+
+context_window = 205000
+max_output_tokens = 205000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.6
+output_per_million = 2.2

@@ -1,0 +1,19 @@
+# GPT-4 Turbo
+# Provider: openrouter
+
+[model]
+id = "openai/gpt-4-turbo"
+name = "GPT-4 Turbo"
+provider_id = "openrouter"
+
+context_window = 128000
+max_output_tokens = 4096
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective", "legacy"]
+
+[model.pricing]
+input_per_million = 10.0
+output_per_million = 30.0

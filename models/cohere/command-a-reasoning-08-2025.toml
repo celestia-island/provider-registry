@@ -1,0 +1,19 @@
+# Command A Reasoning
+# Provider: cohere
+
+[model]
+id = "command-a-reasoning-08-2025"
+name = "Command A Reasoning"
+provider_id = "cohere"
+
+context_window = 256000
+max_output_tokens = 32000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 2.5
+output_per_million = 10.0

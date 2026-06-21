@@ -1,0 +1,20 @@
+# Kimi K2.7 Code
+# Provider: fireworks
+
+[model]
+id = "accounts/fireworks/models/kimi-k2p7-code"
+name = "Kimi K2.7 Code"
+provider_id = "fireworks"
+
+context_window = 262000
+max_output_tokens = 262000
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.95
+output_per_million = 4.0
+cached_per_million = 0.19

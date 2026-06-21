@@ -27,9 +27,9 @@ es = "Moonshot (China Pago único)"
 ru = "Moonshot (Китай Разовая оплата)"
 
 [entrypoint.defaults]
-deep = "kimi-k2.7-code-highspeed"
-normal = "kimi-k2.7-code"
-basic = "kimi-k2-thinking-turbo"
+deep = "kimi-k2-thinking-turbo"
+normal = "kimi-k2-thinking"
+basic = "kimi-k2"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1

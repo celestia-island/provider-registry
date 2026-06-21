@@ -28,8 +28,8 @@ ru = "Together AI"
 
 [entrypoint.defaults]
 deep = "zai-org/GLM-5.1"
-normal = "MiniMaxAI/MiniMax-M2.7"
-basic = "MiniMaxAI/MiniMax-M3"
+normal = "zai-org/GLM-5"
+basic = "MiniMaxAI/MiniMax-M2.7"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1

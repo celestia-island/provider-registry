@@ -1,0 +1,20 @@
+# Step 3.5 Flash 2603
+# Provider: stepfun
+
+[model]
+id = "step-3.5-flash-2603"
+name = "Step 3.5 Flash 2603"
+provider_id = "stepfun"
+
+context_window = 256000
+max_output_tokens = 256000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 0.1
+output_per_million = 0.3
+cached_per_million = 0.02

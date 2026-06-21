@@ -1,0 +1,19 @@
+# siliconflow/deepseek-v3-0324
+# Provider: qwen
+
+[model]
+id = "siliconflow/deepseek-v3-0324"
+name = "siliconflow/deepseek-v3-0324"
+provider_id = "qwen"
+
+context_window = 163840
+max_output_tokens = 163840
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["vision"]
+
+[model.pricing]
+input_per_million = 0.25
+output_per_million = 1.0

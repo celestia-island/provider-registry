@@ -1,0 +1,19 @@
+# DeepSeek R1 Distill Llama 70B
+# Provider: qwen
+
+[model]
+id = "deepseek-r1-distill-llama-70b"
+name = "DeepSeek R1 Distill Llama 70B"
+provider_id = "qwen"
+
+context_window = 32768
+max_output_tokens = 16384
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.287
+output_per_million = 0.861

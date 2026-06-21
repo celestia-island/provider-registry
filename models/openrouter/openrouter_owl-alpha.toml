@@ -1,0 +1,19 @@
+# Owl Alpha
+# Provider: openrouter
+
+[model]
+id = "openrouter/owl-alpha"
+name = "Owl Alpha"
+provider_id = "openrouter"
+
+context_window = 1048756
+max_output_tokens = 262144
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.0
+output_per_million = 0.0

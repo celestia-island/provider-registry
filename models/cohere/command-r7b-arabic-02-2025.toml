@@ -1,0 +1,19 @@
+# Command R7B Arabic
+# Provider: cohere
+
+[model]
+id = "command-r7b-arabic-02-2025"
+name = "Command R7B Arabic"
+provider_id = "cohere"
+
+context_window = 128000
+max_output_tokens = 4000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.0375
+output_per_million = 0.15

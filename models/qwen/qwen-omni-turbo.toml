@@ -1,0 +1,19 @@
+# Qwen-Omni Turbo
+# Provider: qwen
+
+[model]
+id = "qwen-omni-turbo"
+name = "Qwen-Omni Turbo"
+provider_id = "qwen"
+
+context_window = 32768
+max_output_tokens = 2048
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 0.07
+output_per_million = 0.27

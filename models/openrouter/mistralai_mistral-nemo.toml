@@ -1,0 +1,19 @@
+# Mistral Nemo
+# Provider: openrouter
+
+[model]
+id = "mistralai/mistral-nemo"
+name = "Mistral Nemo"
+provider_id = "openrouter"
+
+context_window = 131072
+max_output_tokens = 131072
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.02
+output_per_million = 0.03

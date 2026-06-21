@@ -29,7 +29,7 @@ ru = "Anthropic (Официальный)"
 [entrypoint.defaults]
 deep = "claude-fable-5"
 normal = "claude-opus-4-20250514"
-basic = "claude-3-haiku-20240307"
+basic = "claude-3.5-haiku"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1

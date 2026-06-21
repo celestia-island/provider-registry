@@ -1,0 +1,20 @@
+# Mixtral 8x22B Instruct
+# Provider: openrouter
+
+[model]
+id = "mistralai/mixtral-8x22b-instruct"
+name = "Mixtral 8x22B Instruct"
+provider_id = "openrouter"
+
+context_window = 65536
+max_output_tokens = 65536
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 2.0
+output_per_million = 6.0
+cached_per_million = 0.2

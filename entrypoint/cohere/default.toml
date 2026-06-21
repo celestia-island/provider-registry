@@ -28,8 +28,8 @@ ru = "Cohere (Официальный)"
 
 [entrypoint.defaults]
 deep = "command-a-reasoning-08-2025"
-normal = "command-a-plus-05-2026"
-basic = "north-mini-code-1-0"
+normal = "north-mini-code-1-0"
+basic = "c4ai-aya-vision-8b"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1

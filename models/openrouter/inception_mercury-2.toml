@@ -1,0 +1,20 @@
+# Mercury 2
+# Provider: openrouter
+
+[model]
+id = "inception/mercury-2"
+name = "Mercury 2"
+provider_id = "openrouter"
+
+context_window = 128000
+max_output_tokens = 50000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.25
+output_per_million = 0.75
+cached_per_million = 0.025

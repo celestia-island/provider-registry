@@ -1,0 +1,20 @@
+# GPT-5.4
+# Provider: openrouter
+
+[model]
+id = "openai/gpt-5.4"
+name = "GPT-5.4"
+provider_id = "openrouter"
+
+context_window = 1050000
+max_output_tokens = 128000
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["flagship"]
+
+[model.pricing]
+input_per_million = 2.5
+output_per_million = 15.0
+cached_per_million = 0.25

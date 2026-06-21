@@ -6,7 +6,7 @@ id = "claude-sonnet-4"
 name = "Claude Sonnet 4"
 provider_id = "anthropic"
 
-context_window = 200000
+context_window = 1000000
 max_output_tokens = 16384
 supports_vision = true
 supports_function_calling = true
@@ -18,3 +18,7 @@ tags = []
 input_per_million = 3.0
 output_per_million = 15.0
 cached_per_million = 0.3
+
+[model.score]
+value = 49.44
+source = "design_arena"

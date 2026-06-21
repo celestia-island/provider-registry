@@ -1,0 +1,19 @@
+# Llama 4 Scout
+# Provider: openrouter
+
+[model]
+id = "meta-llama/llama-4-scout"
+name = "Llama 4 Scout"
+provider_id = "openrouter"
+
+context_window = 327680
+max_output_tokens = 16384
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.1
+output_per_million = 0.3

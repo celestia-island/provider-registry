@@ -7,7 +7,7 @@ name = "o1"
 provider_id = "openai"
 
 context_window = 200000
-max_output_tokens = 16384
+max_output_tokens = 100000
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
@@ -18,3 +18,7 @@ tags = ["reasoning"]
 input_per_million = 15.0
 output_per_million = 60.0
 cached_per_million = 7.5
+
+[model.score]
+value = 39.7
+source = "artificial_analysis"

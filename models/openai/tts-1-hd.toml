@@ -5,21 +5,14 @@
 id = "tts-1-hd"
 name = "TTS 1 HD"
 provider_id = "openai"
+
 context_window = 4096
 max_output_tokens = 0
 supports_vision = false
 supports_function_calling = false
 supports_streaming = false
 supports_reasoning = false
-category = { generation = "audio" }
 tags = ["tts", "hd"]
-
-[model.generation]
-modalities = ["audio"]
-default_format = "mp3"
-supported_formats = ["mp3", "opus", "aac", "flac", "wav"]
-supports_streaming = true
-input_modalities = ["text"]
 
 [model.pricing]
 input_per_million = 0.0

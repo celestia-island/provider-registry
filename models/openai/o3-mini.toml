@@ -1,13 +1,13 @@
-# o3 Mini
+# o3-mini
 # Provider: openai
 
 [model]
 id = "o3-mini"
-name = "o3 Mini"
+name = "o3-mini"
 provider_id = "openai"
 
 context_window = 200000
-max_output_tokens = 16384
+max_output_tokens = 100000
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true

@@ -1,0 +1,19 @@
+# LFM2-24B-A2B
+# Provider: openrouter
+
+[model]
+id = "liquid/lfm-2-24b-a2b"
+name = "LFM2-24B-A2B"
+provider_id = "openrouter"
+
+context_window = 32768
+max_output_tokens = 32768
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.03
+output_per_million = 0.12

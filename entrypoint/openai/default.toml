@@ -28,7 +28,7 @@ ru = "OpenAI (Официальный)"
 
 [entrypoint.defaults]
 deep = "gpt-5.4-pro"
-normal = "dall-e-3"
+normal = "gpt-5.4-image-2"
 basic = "gpt-5.4-mini"
 
 [entrypoint.defaults.max_concurrent]

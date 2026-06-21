@@ -1,0 +1,19 @@
+# ByteDance-Seed/Seed-OSS-36B-Instruct
+# Provider: silicon
+
+[model]
+id = "ByteDance-Seed/Seed-OSS-36B-Instruct"
+name = "ByteDance-Seed/Seed-OSS-36B-Instruct"
+provider_id = "silicon"
+
+context_window = 262000
+max_output_tokens = 262000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.21
+output_per_million = 0.57

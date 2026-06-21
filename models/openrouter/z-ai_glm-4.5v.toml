@@ -1,0 +1,20 @@
+# GLM-4.5V
+# Provider: openrouter
+
+[model]
+id = "z-ai/glm-4.5v"
+name = "GLM-4.5V"
+provider_id = "openrouter"
+
+context_window = 65536
+max_output_tokens = 16384
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.6
+output_per_million = 1.8
+cached_per_million = 0.11

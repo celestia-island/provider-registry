@@ -1,0 +1,19 @@
+# Nova 2 Lite
+# Provider: openrouter
+
+[model]
+id = "amazon/nova-2-lite-v1"
+name = "Nova 2 Lite"
+provider_id = "openrouter"
+
+context_window = 1000000
+max_output_tokens = 65535
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["vision", "cost_effective"]
+
+[model.pricing]
+input_per_million = 0.3
+output_per_million = 2.5

@@ -1,0 +1,20 @@
+# GLM-4.7-Flash
+# Provider: openrouter
+
+[model]
+id = "z-ai/glm-4.7-flash"
+name = "GLM-4.7-Flash"
+provider_id = "openrouter"
+
+context_window = 202752
+max_output_tokens = 16384
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 0.06
+output_per_million = 0.4
+cached_per_million = 0.01

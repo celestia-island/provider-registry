@@ -7,7 +7,7 @@ name = "GPT-4.1"
 provider_id = "openai"
 
 context_window = 1047576
-max_output_tokens = 16384
+max_output_tokens = 32768
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
@@ -18,3 +18,7 @@ tags = []
 input_per_million = 2.0
 output_per_million = 8.0
 cached_per_million = 0.5
+
+[model.score]
+value = 32.51
+source = "design_arena"

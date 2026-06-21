@@ -1,27 +1,19 @@
-# GPT Image 1
+# gpt-image-1
 # Provider: openai
 
 [model]
 id = "gpt-image-1"
-name = "GPT Image 1"
+name = "gpt-image-1"
 provider_id = "openai"
+
 context_window = 0
 max_output_tokens = 0
 supports_vision = true
 supports_function_calling = false
-supports_streaming = false
+supports_streaming = true
 supports_reasoning = false
-category = { generation = "image" }
-tags = ["image_generation"]
-
-[model.generation]
-modalities = ["image"]
-default_format = "png"
-max_resolution = "4096x4096"
-supported_formats = ["png", "webp", "jpg"]
-supports_streaming = false
-input_modalities = ["text", "image"]
+tags = []
 
 [model.pricing]
 input_per_million = 0.0
-output_per_million = 167.0
+output_per_million = 0.0

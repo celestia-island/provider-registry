@@ -1,0 +1,19 @@
+# Qwen/Qwen3-235B-A22B-Instruct-2507
+# Provider: silicon
+
+[model]
+id = "Qwen/Qwen3-235B-A22B-Instruct-2507"
+name = "Qwen/Qwen3-235B-A22B-Instruct-2507"
+provider_id = "silicon"
+
+context_window = 262000
+max_output_tokens = 262000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.09
+output_per_million = 0.6

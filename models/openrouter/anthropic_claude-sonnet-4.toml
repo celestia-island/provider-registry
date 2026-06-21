@@ -1,0 +1,20 @@
+# Claude Sonnet 4
+# Provider: openrouter
+
+[model]
+id = "anthropic/claude-sonnet-4"
+name = "Claude Sonnet 4"
+provider_id = "openrouter"
+
+context_window = 1000000
+max_output_tokens = 64000
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3

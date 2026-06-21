@@ -1,0 +1,19 @@
+# GPT OSS 120B
+# Provider: together
+
+[model]
+id = "openai/gpt-oss-120b"
+name = "GPT OSS 120B"
+provider_id = "together"
+
+context_window = 131072
+max_output_tokens = 131072
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.15
+output_per_million = 0.6

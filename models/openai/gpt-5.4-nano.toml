@@ -1,20 +1,24 @@
-# GPT-5.4 Nano
+# GPT-5.4 nano
 # Provider: openai
 
 [model]
 id = "gpt-5.4-nano"
-name = "GPT-5.4 Nano"
+name = "GPT-5.4 nano"
 provider_id = "openai"
 
 context_window = 400000
-max_output_tokens = 16384
+max_output_tokens = 128000
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
-supports_reasoning = false
+supports_reasoning = true
 tags = ["flagship"]
 
 [model.pricing]
 input_per_million = 0.2
 output_per_million = 1.25
 cached_per_million = 0.02
+
+[model.score]
+value = 56.1
+source = "artificial_analysis"

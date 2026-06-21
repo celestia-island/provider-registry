@@ -6,7 +6,7 @@ id = "qwen3-vl-30b-a3b-instruct"
 name = "Qwen3 VL 30B A3B Instruct"
 provider_id = "qwen"
 
-context_window = 131072
+context_window = 262144
 max_output_tokens = 16384
 supports_vision = true
 supports_function_calling = true

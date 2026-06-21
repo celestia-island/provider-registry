@@ -1,0 +1,20 @@
+# DeepSeek V4 Pro
+# Provider: silicon
+
+[model]
+id = "deepseek-ai/deepseek-v4-pro"
+name = "DeepSeek V4 Pro"
+provider_id = "silicon"
+
+context_window = 1000000
+max_output_tokens = 384000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["vision"]
+
+[model.pricing]
+input_per_million = 1.74
+output_per_million = 3.48
+cached_per_million = 0.145

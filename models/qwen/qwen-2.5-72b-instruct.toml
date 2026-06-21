@@ -6,8 +6,8 @@ id = "qwen-2.5-72b-instruct"
 name = "Qwen2.5 72B Instruct"
 provider_id = "qwen"
 
-context_window = 32768
-max_output_tokens = 8192
+context_window = 131072
+max_output_tokens = 16384
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true
@@ -15,5 +15,5 @@ supports_reasoning = false
 tags = []
 
 [model.pricing]
-input_per_million = 0.12
-output_per_million = 0.39
+input_per_million = 0.36
+output_per_million = 0.4

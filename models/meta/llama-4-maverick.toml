@@ -17,3 +17,7 @@ tags = []
 [model.pricing]
 input_per_million = 0.15
 output_per_million = 0.6
+
+[model.score]
+value = 12.32
+source = "design_arena"

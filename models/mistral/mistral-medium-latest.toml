@@ -1,0 +1,19 @@
+# Mistral Medium (latest)
+# Provider: mistral
+
+[model]
+id = "mistral-medium-latest"
+name = "Mistral Medium (latest)"
+provider_id = "mistral"
+
+context_window = 262144
+max_output_tokens = 262144
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.4
+output_per_million = 2.0

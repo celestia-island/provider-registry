@@ -1,0 +1,19 @@
+# GLM-4.7
+# Provider: qwen
+
+[model]
+id = "glm-4.7"
+name = "GLM-4.7"
+provider_id = "qwen"
+
+context_window = 202752
+max_output_tokens = 16384
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.0
+output_per_million = 0.0

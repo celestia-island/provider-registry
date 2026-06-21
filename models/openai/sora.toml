@@ -5,22 +5,14 @@
 id = "sora"
 name = "Sora"
 provider_id = "openai"
+
 context_window = 0
 max_output_tokens = 0
 supports_vision = false
 supports_function_calling = false
 supports_streaming = false
 supports_reasoning = false
-category = { generation = "video" }
 tags = ["video_generation"]
-
-[model.generation]
-modalities = ["video"]
-default_format = "mp4"
-max_resolution = "1920x1080"
-supported_formats = ["mp4"]
-supports_streaming = false
-input_modalities = ["text", "image"]
 
 [model.pricing]
 input_per_million = 0.0

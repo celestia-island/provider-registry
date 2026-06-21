@@ -1,0 +1,19 @@
+# Reka Flash 3
+# Provider: openrouter
+
+[model]
+id = "rekaai/reka-flash-3"
+name = "Reka Flash 3"
+provider_id = "openrouter"
+
+context_window = 65536
+max_output_tokens = 65536
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = true
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 0.1
+output_per_million = 0.2

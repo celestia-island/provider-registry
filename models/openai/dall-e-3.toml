@@ -5,22 +5,14 @@
 id = "dall-e-3"
 name = "DALL-E 3"
 provider_id = "openai"
+
 context_window = 0
 max_output_tokens = 0
 supports_vision = false
 supports_function_calling = false
 supports_streaming = false
 supports_reasoning = false
-category = { generation = "image" }
 tags = ["image_generation", "flagship"]
-
-[model.generation]
-modalities = ["image"]
-default_format = "png"
-max_resolution = "1024x1792"
-supported_formats = ["png", "webp"]
-supports_streaming = false
-input_modalities = ["text"]
 
 [model.pricing]
 input_per_million = 0.0

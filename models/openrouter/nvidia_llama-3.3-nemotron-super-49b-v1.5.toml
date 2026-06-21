@@ -1,0 +1,19 @@
+# Llama 3.3 Nemotron Super 49B v1.5
+# Provider: openrouter
+
+[model]
+id = "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+name = "Llama 3.3 Nemotron Super 49B v1.5"
+provider_id = "openrouter"
+
+context_window = 131072
+max_output_tokens = 16384
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["vision"]
+
+[model.pricing]
+input_per_million = 0.4
+output_per_million = 0.4

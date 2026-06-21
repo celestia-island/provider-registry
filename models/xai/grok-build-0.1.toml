@@ -1,0 +1,20 @@
+# Grok Build 0.1
+# Provider: xai
+
+[model]
+id = "grok-build-0.1"
+name = "Grok Build 0.1"
+provider_id = "xai"
+
+context_window = 256000
+max_output_tokens = 256000
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 1.0
+output_per_million = 2.0
+cached_per_million = 0.2

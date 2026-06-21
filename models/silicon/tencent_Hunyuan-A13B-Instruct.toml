@@ -1,0 +1,19 @@
+# tencent/Hunyuan-A13B-Instruct
+# Provider: silicon
+
+[model]
+id = "tencent/Hunyuan-A13B-Instruct"
+name = "tencent/Hunyuan-A13B-Instruct"
+provider_id = "silicon"
+
+context_window = 131000
+max_output_tokens = 131000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.14
+output_per_million = 0.57

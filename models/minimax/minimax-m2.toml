@@ -6,7 +6,7 @@ id = "minimax-m2"
 name = "MiniMax M2"
 provider_id = "minimax"
 
-context_window = 196608
+context_window = 204800
 max_output_tokens = 16384
 supports_vision = false
 supports_function_calling = true
@@ -18,3 +18,7 @@ tags = ["cost_effective"]
 input_per_million = 0.26
 output_per_million = 1.0
 cached_per_million = 0.03
+
+[model.score]
+value = 48.27
+source = "design_arena"

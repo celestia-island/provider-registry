@@ -18,3 +18,7 @@ tags = []
 input_per_million = 10.0
 output_per_million = 10.0
 cached_per_million = 1.25
+
+[model.score]
+value = 53.7
+source = "design_arena"

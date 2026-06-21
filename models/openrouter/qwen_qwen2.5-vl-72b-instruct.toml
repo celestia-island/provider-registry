@@ -1,0 +1,20 @@
+# Qwen2.5 VL 72B Instruct
+# Provider: openrouter
+
+[model]
+id = "qwen/qwen2.5-vl-72b-instruct"
+name = "Qwen2.5 VL 72B Instruct"
+provider_id = "openrouter"
+
+context_window = 128000
+max_output_tokens = 128000
+supports_vision = true
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = ["vision"]
+
+[model.pricing]
+input_per_million = 0.8
+output_per_million = 1.0
+cached_per_million = 0.4

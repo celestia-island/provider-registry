@@ -1,13 +1,13 @@
-# GPT-4.1 Mini
+# GPT-4.1 mini
 # Provider: openai
 
 [model]
 id = "gpt-4.1-mini"
-name = "GPT-4.1 Mini"
+name = "GPT-4.1 mini"
 provider_id = "openai"
 
 context_window = 1047576
-max_output_tokens = 16384
+max_output_tokens = 32768
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
@@ -18,3 +18,7 @@ tags = ["cost_effective"]
 input_per_million = 0.4
 output_per_million = 1.6
 cached_per_million = 0.1
+
+[model.score]
+value = 27.51
+source = "design_arena"

@@ -1,0 +1,20 @@
+# OpenAI GPT Latest
+# Provider: openrouter
+
+[model]
+id = "~openai/gpt-latest"
+name = "OpenAI GPT Latest"
+provider_id = "openrouter"
+
+context_window = 1050000
+max_output_tokens = 128000
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 5.0
+output_per_million = 30.0
+cached_per_million = 0.5

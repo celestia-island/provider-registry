@@ -1,0 +1,19 @@
+# DeepSeek-R1
+# Provider: together
+
+[model]
+id = "deepseek-ai/DeepSeek-R1"
+name = "DeepSeek-R1"
+provider_id = "together"
+
+context_window = 163839
+max_output_tokens = 163839
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = true
+tags = ["deprecated"]
+
+[model.pricing]
+input_per_million = 3.0
+output_per_million = 7.0

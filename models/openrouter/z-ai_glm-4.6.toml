@@ -1,0 +1,20 @@
+# GLM-4.6
+# Provider: openrouter
+
+[model]
+id = "z-ai/glm-4.6"
+name = "GLM-4.6"
+provider_id = "openrouter"
+
+context_window = 202752
+max_output_tokens = 131072
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.43
+output_per_million = 1.74
+cached_per_million = 0.08

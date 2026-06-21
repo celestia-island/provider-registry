@@ -29,7 +29,6 @@ ru = "Stepfun (Китай)"
 [entrypoint.defaults]
 deep = "step-3.5-flash"
 normal = "step-3.5-flash-2603"
-basic = "step-3.5-flash"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1

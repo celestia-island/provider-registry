@@ -1,20 +1,24 @@
-# GPT-5.3-Codex
+# GPT-5.3 Codex
 # Provider: openai
 
 [model]
 id = "gpt-5.3-codex"
-name = "GPT-5.3-Codex"
+name = "GPT-5.3 Codex"
 provider_id = "openai"
 
 context_window = 400000
-max_output_tokens = 16384
+max_output_tokens = 128000
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
-supports_reasoning = false
+supports_reasoning = true
 tags = ["coding"]
 
 [model.pricing]
 input_per_million = 1.75
 output_per_million = 14.0
 cached_per_million = 0.175
+
+[model.score]
+value = 44.96
+source = "design_arena"
