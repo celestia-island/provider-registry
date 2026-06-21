@@ -1,18 +1,18 @@
-# GLM-5V-Turbo
+# GLM-4.5-Flash
 # Provider: zhipu_glm
 
 [model]
-id = "glm-5v-turbo"
-name = "GLM-5V-Turbo"
+id = "glm-4.5-flash"
+name = "GLM-4.5-Flash"
 provider_id = "zhipu_glm"
 
-context_window = 200000
-max_output_tokens = 131072
-supports_vision = true
+context_window = 131072
+max_output_tokens = 98304
+supports_vision = false
 supports_function_calling = true
 supports_streaming = true
 supports_reasoning = true
-tags = ["flagship", "vision", "cost_effective"]
+tags = ["cost_effective"]
 
 [model.pricing]
 input_per_million = 0.0
