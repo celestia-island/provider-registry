@@ -1,17 +1,17 @@
-# GLM 4.5V
+# GLM-4.5V
 # Provider: zhipu_glm
 
 [model]
 id = "glm-4.5v"
-name = "GLM 4.5V"
+name = "GLM-4.5V"
 provider_id = "zhipu_glm"
 
-context_window = 65536
+context_window = 64000
 max_output_tokens = 16384
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
-supports_reasoning = false
+supports_reasoning = true
 tags = []
 
 [model.pricing]

@@ -1,17 +1,17 @@
-# GLM 5 Turbo
+# GLM-5-Turbo
 # Provider: zhipu_glm
 
 [model]
 id = "glm-5-turbo"
-name = "GLM 5 Turbo"
+name = "GLM-5-Turbo"
 provider_id = "zhipu_glm"
 
-context_window = 202752
-max_output_tokens = 16384
+context_window = 200000
+max_output_tokens = 131072
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true
-supports_reasoning = false
+supports_reasoning = true
 tags = ["flagship", "cost_effective"]
 
 [model.pricing]

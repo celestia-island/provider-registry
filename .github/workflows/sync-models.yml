@@ -53,7 +53,7 @@ jobs:
         id: sync
         run: |
           SOURCE="${{ github.event.inputs.source || 'all' }}"
-          ARGS="--source ${SOURCE} --entrypoint-mode"
+          ARGS="--source ${SOURCE} --entrypoint-mode --individual-models"
 
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             if [ -n "${{ inputs.providers }}" ] && [ "${{ inputs.providers }}" != "all" ]; then

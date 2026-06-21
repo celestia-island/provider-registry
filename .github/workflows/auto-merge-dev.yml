@@ -27,5 +27,10 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Merge master into dev
         run: python3 scripts/merge_master_to_dev.py
