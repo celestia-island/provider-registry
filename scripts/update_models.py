@@ -908,8 +908,11 @@ def select_tier_models_from_list(models: List[ModelInfo], limit: int = 3) -> Dic
         has_flagship = 'flagship' in m.tags and 'legacy' not in m.tags
         version = extract_version(m.id)
         price = m.pricing_input
-        # Sort: reasoning first, then flagship, then by version DESC, then by price DESC
-        return (not has_reasoning, not has_flagship, -version, -price)
+        is_vision = 'vision' in m.tags or m.supports_vision
+        # Sort: reasoning first, then flagship, then by version DESC, then by price DESC.
+        # Prefer non-vision models (plain text) over vision variants at the same rank,
+        # so e.g. glm-5 wins the normal tier over glm-5v-turbo.
+        return (not has_reasoning, not has_flagship, is_vision, -version, -price)
 
     sorted_models = sorted(models, key=sort_key)
 
@@ -931,11 +934,39 @@ def select_tier_models_from_list(models: List[ModelInfo], limit: int = 3) -> Dic
         normal = flagship_models[1].id
     elif flagship_models:
         normal = flagship_models[0].id
-    elif cost_effective_models and len(cost_effective_models) > 1:
-        # Pick second best cost_effective for normal tier
-        normal = cost_effective_models[1].id
     else:
-        normal = sorted_models[1].id if len(sorted_models) > 1 else deep
+        # No non-reasoning flagships (e.g. all GLM-5.x flagships support
+        # reasoning, so flagship_models is empty). Pick a general-purpose
+        # model for the normal tier: prefer a plain-text flagship/reasoning
+        # model that is neither the deep pick nor a vision/cost-effective
+        # variant. Falls back to cost_effective[1] / sorted_models[1].
+        def is_normal_candidate(m: ModelInfo) -> bool:
+            if m.id == deep:
+                return False
+            if 'legacy' in m.tags:
+                return False
+            is_vision = 'vision' in m.tags or m.supports_vision
+            is_budget = 'cost_effective' in m.tags or 'free' in m.tags
+            # Prefer flagship text models; exclude vision variants and the
+            # cheapest budget models from the normal slot.
+            return 'flagship' in m.tags and not is_vision and not is_budget
+
+        normal_candidates = [m for m in sorted_models if is_normal_candidate(m)]
+        if normal_candidates:
+            # Prefer the plain major-version base model (e.g. "glm-5") over
+            # point releases (e.g. "glm-5.1") for the normal tier — the deep
+            # tier already takes the newest point release. This matches the
+            # intent of "newest for deep, stable base for the rest".
+            import re as _re
+            def is_plain_base(mid: str) -> bool:
+                return bool(_re.fullmatch(r'[a-z]+-\d+', mid.lower()))
+            plain_bases = [m for m in normal_candidates if is_plain_base(m.id)]
+            normal = (plain_bases[0] if plain_bases else normal_candidates[0]).id
+        elif cost_effective_models and len(cost_effective_models) > 1:
+            # Pick second best cost_effective for normal tier
+            normal = cost_effective_models[1].id
+        else:
+            normal = sorted_models[1].id if len(sorted_models) > 1 else deep
 
     # Basic tier: most cost-effective
     if cost_effective_models:

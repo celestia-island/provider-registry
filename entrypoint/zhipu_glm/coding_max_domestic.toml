@@ -29,7 +29,7 @@ ru = "GLM Китай План Coding Max"
 
 [entrypoint.defaults]
 deep = "glm-5.2"
-normal = "glm-5v-turbo"
+normal = "glm-5"
 basic = "glm-5-turbo"
 
 [entrypoint.defaults.max_concurrent]
@@ -46,7 +46,12 @@ output_per_million = 4.1
 cached_per_million = 0.2
 
 [[entrypoint.models]]
-id = "glm-5v-turbo"
+id = "glm-5"
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 3.2
+cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "glm-5-turbo"
