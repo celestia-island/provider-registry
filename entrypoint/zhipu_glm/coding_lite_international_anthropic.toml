@@ -28,7 +28,7 @@ es = "GLM Internacional Plan Coding Lite (Anthropic)"
 ru = "GLM Международный План Coding Lite (Anthropic)"
 
 [entrypoint.defaults]
-deep = ["glm-5.1", "glm-5v-turbo"]
+deep = ["glm-5.2", "glm-5v-turbo"]
 normal = ["glm-5", "glm-5v-turbo"]
 basic = "glm-4.7-flash"
 
@@ -46,6 +46,9 @@ billing_metric = "prompt_times"
 data_limit = 400
 period_days = 7
 billing_metric = "prompt_times"
+
+[[entrypoint.models]]
+id = "glm-5.2"
 
 [[entrypoint.models]]
 id = "glm-5.1"
