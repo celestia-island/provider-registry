@@ -961,8 +961,18 @@ def save_individual_model_files(
     return saved_count
 
 
-def select_tier_models_from_list(models: List[ModelInfo], limit: int = 3) -> Dict[str, str]:
-    """Select N curated models from the list for each request tier"""
+def select_tier_models_from_list(
+    models: List[ModelInfo], limit: int = 3, is_coding_plan: bool = False
+) -> Dict[str, Optional[str]]:
+    """Select N curated models from the list for each request tier.
+
+    For coding plans the per-model ``pricing`` field doubles as the plan's
+    charge multiplier (1x = baseline). Only premium (≥1x) models belong in a
+    plan; the basic tier requires a sub-1x model, which no premium plan model
+    satisfies — so ``basic`` is left ``None`` and the runtime falls back to
+    the normal-tier model for that provider. This also guarantees every model
+    in a coding plan shares the plan's single request-entry URL.
+    """
     import re
 
     # Sort models by capability and price
@@ -986,6 +996,13 @@ def select_tier_models_from_list(models: List[ModelInfo], limit: int = 3) -> Dic
         return (not has_reasoning, not has_flagship, is_vision, -version, -price)
 
     sorted_models = sorted(models, key=sort_key)
+
+    # For coding plans, only premium models (charge multiplier ≥1x) belong in
+    # the plan. Sub-1x models (e.g. glm-4.7-flash at 0.06x) are excluded so
+    # that every model in the plan shares the plan's single entry URL and the
+    # basic tier correctly ends up unset.
+    if is_coding_plan:
+        sorted_models = [m for m in sorted_models if m.pricing_input >= 1.0]
 
     # Select models for each tier
     reasoning_models = [m for m in sorted_models if m.supports_reasoning and 'legacy' not in m.tags]
@@ -1039,11 +1056,25 @@ def select_tier_models_from_list(models: List[ModelInfo], limit: int = 3) -> Dic
         else:
             normal = sorted_models[1].id if len(sorted_models) > 1 else deep
 
-    # Basic tier: most cost-effective
-    if cost_effective_models:
-        basic = cost_effective_models[0].id
+    # Basic tier: only models priced below the 1x baseline qualify.
+    # Models at or above 1x are premium and belong in normal/deep — never basic.
+    # If no sub-1x model remains (e.g. a coding plan whose models are all ≥1x),
+    # basic is left unset (None) and the runtime falls back to the normal model.
+    def is_basic_eligible(m: ModelInfo) -> bool:
+        if m.id in (deep, normal):
+            return False
+        if 'legacy' in m.tags:
+            return False
+        return m.pricing_input < 1.0
+
+    basic_pool = [m for m in sorted_models if is_basic_eligible(m)]
+    tagged = [m for m in basic_pool if 'cost_effective' in m.tags or 'free' in m.tags]
+    if tagged:
+        basic = tagged[0].id
+    elif basic_pool:
+        basic = basic_pool[-1].id
     else:
-        basic = sorted_models[-1].id if sorted_models else normal
+        basic = None
 
     return {
         'deep': deep,
@@ -1078,8 +1109,8 @@ def update_entrypoint_config(
 
     # For coding plans, limit models to a curated selection
     if is_coding_plan_entrypoint:
-        # Select top 3 models for each tier
-        selected = select_tier_models_from_list(models, limit=3)
+        # Select top models for each tier (coding plans restrict to ≥1x pool)
+        selected = select_tier_models_from_list(models, limit=3, is_coding_plan=True)
         # Get selected model objects
         selected_models = []
         for tier in ['deep', 'normal', 'basic']:
@@ -1108,7 +1139,10 @@ def update_entrypoint_config(
                 k: v for k, v in old_defaults.items()
                 if k not in ('deep', 'normal', 'basic')
             }
-            config['entrypoint']['defaults'] = {**selected, **preserved_keys}
+            # Drop None tiers (e.g. basic=None when no sub-1x model exists in
+            # a coding plan) so the entrypoint simply omits that tier.
+            clean_selected = {k: v for k, v in selected.items() if v is not None}
+            config['entrypoint']['defaults'] = {**clean_selected, **preserved_keys}
 
         print(f"   Selected {len(unique_models)} models:")
         for m in unique_models:
@@ -1144,7 +1178,8 @@ def update_entrypoint_config(
                     k: v for k, v in old_defaults.items()
                     if k not in ('deep', 'normal', 'basic')
                 }
-                config['entrypoint']['defaults'] = {**selected, **preserved_keys}
+                clean_selected = {k: v for k, v in selected.items() if v is not None}
+                config['entrypoint']['defaults'] = {**clean_selected, **preserved_keys}
 
             cf.ok("Default models selected:")
             print(f"      Deep:   {selected.get('deep', 'N/A')}")
