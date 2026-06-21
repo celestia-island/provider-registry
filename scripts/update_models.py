@@ -531,11 +531,30 @@ def merge_model_dicts(
         )
 
         if m:
-            merged[model_id].pricing_input = m.pricing_input
-            merged[model_id].pricing_output = m.pricing_output
-            merged[model_id].pricing_cached = m.pricing_cached
-            merged[model_id].context_window = m.context_window
-            merged[model_id].max_output_tokens = m.max_output_tokens
+            # models.dev has priority, but it sometimes omits pricing/context
+            # (returns 0) for newly-listed models. Don't let those placeholder
+            # zeros clobber the real OpenRouter values — fall back to OpenRouter
+            # for any field models.dev reports as 0.
+            if m.pricing_input > 0 or o is None or o.pricing_input <= 0:
+                merged[model_id].pricing_input = m.pricing_input
+            else:
+                merged[model_id].pricing_input = o.pricing_input
+            if m.pricing_output > 0 or o is None or o.pricing_output <= 0:
+                merged[model_id].pricing_output = m.pricing_output
+            else:
+                merged[model_id].pricing_output = o.pricing_output
+            if m.pricing_cached > 0:
+                merged[model_id].pricing_cached = m.pricing_cached
+            elif o is not None:
+                merged[model_id].pricing_cached = o.pricing_cached
+            if m.context_window > 0:
+                merged[model_id].context_window = m.context_window
+            elif o is not None and o.context_window > 0:
+                merged[model_id].context_window = o.context_window
+            if m.max_output_tokens > 0:
+                merged[model_id].max_output_tokens = m.max_output_tokens
+            elif o is not None and o.max_output_tokens > 0:
+                merged[model_id].max_output_tokens = o.max_output_tokens
             merged[model_id].supports_vision = m.supports_vision
             merged[model_id].supports_reasoning = m.supports_reasoning
             merged[model_id].supports_function_calling = m.supports_function_calling

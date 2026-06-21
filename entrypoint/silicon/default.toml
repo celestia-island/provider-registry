@@ -27,7 +27,7 @@ es = "SiliconFlow (China)"
 ru = "SiliconFlow (Китай)"
 
 [entrypoint.defaults]
-deep = "Pro/zai-org/GLM-5.1"
+deep = "zai-org/GLM-5.2"
 normal = "deepseek-ai/deepseek-v4-flash"
 basic = "zai-org/GLM-5V-Turbo"
 
@@ -35,6 +35,13 @@ basic = "zai-org/GLM-5V-Turbo"
 deep = 1
 normal = 1
 basic = 2
+
+[[entrypoint.models]]
+id = "zai-org/GLM-5.2"
+
+[entrypoint.models.pricing]
+input_per_million = 1.4
+output_per_million = 4.4
 
 [[entrypoint.models]]
 id = "Pro/zai-org/GLM-5.1"
@@ -68,8 +75,8 @@ output_per_million = 3.2
 id = "zai-org/GLM-5"
 
 [entrypoint.models.pricing]
-input_per_million = 1.0
-output_per_million = 3.2
+input_per_million = 0.95
+output_per_million = 2.55
 
 [[entrypoint.models]]
 id = "deepseek-ai/deepseek-v4-pro"
@@ -88,7 +95,7 @@ output_per_million = 3.48
 cached_per_million = 0.145
 
 [[entrypoint.models]]
-id = "moonshotai/Kimi-K2.6"
+id = "Pro/moonshotai/Kimi-K2.6"
 
 [entrypoint.models.pricing]
 input_per_million = 0.95
@@ -96,12 +103,12 @@ output_per_million = 4.0
 cached_per_million = 0.16
 
 [[entrypoint.models]]
-id = "Pro/moonshotai/Kimi-K2.6"
+id = "moonshotai/Kimi-K2.6"
 
 [entrypoint.models.pricing]
-input_per_million = 0.95
+input_per_million = 0.77
 output_per_million = 4.0
-cached_per_million = 0.16
+cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "Pro/zai-org/GLM-4.7"
@@ -167,13 +174,6 @@ input_per_million = 0.5
 output_per_million = 2.18
 
 [[entrypoint.models]]
-id = "nex-agi/DeepSeek-V3.1-Nex-N1"
-
-[entrypoint.models.pricing]
-input_per_million = 0.5
-output_per_million = 2.0
-
-[[entrypoint.models]]
 id = "Pro/deepseek-ai/DeepSeek-R1"
 
 [entrypoint.models.pricing]
@@ -235,13 +235,6 @@ id = "Qwen/Qwen3-235B-A22B"
 [entrypoint.models.pricing]
 input_per_million = 0.35
 output_per_million = 1.42
-
-[[entrypoint.models]]
-id = "MiniMaxAI/MiniMax-M2.1"
-
-[entrypoint.models.pricing]
-input_per_million = 0.3
-output_per_million = 1.2
 
 [[entrypoint.models]]
 id = "MiniMaxAI/MiniMax-M2.5"
@@ -389,3 +382,10 @@ id = "Qwen/Qwen3-Coder-480B-A35B-Instruct"
 [entrypoint.models.pricing]
 input_per_million = 0.25
 output_per_million = 1.0
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3.5-35B-A3B"
+
+[entrypoint.models.pricing]
+input_per_million = 0.23
+output_per_million = 1.86

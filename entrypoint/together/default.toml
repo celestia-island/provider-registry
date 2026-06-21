@@ -28,8 +28,8 @@ ru = "Together AI"
 
 [entrypoint.defaults]
 deep = "zai-org/GLM-5.1"
-normal = "MiniMaxAI/MiniMax-M2.5"
-basic = "MiniMaxAI/MiniMax-M2.7"
+normal = "MiniMaxAI/MiniMax-M2.7"
+basic = "MiniMaxAI/MiniMax-M3"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
@@ -44,26 +44,18 @@ input_per_million = 1.4
 output_per_million = 4.4
 
 [[entrypoint.models]]
+id = "zai-org/GLM-5"
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 3.2
+
+[[entrypoint.models]]
 id = "deepseek-ai/DeepSeek-R1"
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
 output_per_million = 7.0
-
-[[entrypoint.models]]
-id = "Qwen/Qwen3.7-Max"
-
-[entrypoint.models.pricing]
-input_per_million = 2.5
-output_per_million = 7.5
-
-[[entrypoint.models]]
-id = "deepseek-ai/DeepSeek-V4-Pro"
-
-[entrypoint.models.pricing]
-input_per_million = 2.1
-output_per_million = 4.4
-cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8"
@@ -73,11 +65,33 @@ input_per_million = 2.0
 output_per_million = 2.0
 
 [[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V4-Pro"
+
+[entrypoint.models.pricing]
+input_per_million = 1.74
+output_per_million = 3.48
+cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "deepcogito/cogito-v2-1-671b"
+
+[entrypoint.models.pricing]
+input_per_million = 1.25
+output_per_million = 1.25
+
+[[entrypoint.models]]
 id = "deepseek-ai/DeepSeek-V3"
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
 output_per_million = 1.25
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3.7-Max"
+
+[entrypoint.models.pricing]
+input_per_million = 1.25
+output_per_million = 3.75
 
 [[entrypoint.models]]
 id = "moonshotai/Kimi-K2.6"
@@ -86,6 +100,14 @@ id = "moonshotai/Kimi-K2.6"
 input_per_million = 1.2
 output_per_million = 4.5
 cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "moonshotai/Kimi-K2.7-Code"
+
+[entrypoint.models.pricing]
+input_per_million = 0.95
+output_per_million = 4.0
+cached_per_million = 0.19
 
 [[entrypoint.models]]
 id = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
@@ -100,6 +122,14 @@ id = "deepseek-ai/DeepSeek-V3-1"
 [entrypoint.models.pricing]
 input_per_million = 0.6
 output_per_million = 1.7
+
+[[entrypoint.models]]
+id = "nvidia/nemotron-3-ultra-550b-a55b"
+
+[entrypoint.models.pricing]
+input_per_million = 0.6
+output_per_million = 3.6
+cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3.5-397B-A17B"
@@ -130,6 +160,13 @@ input_per_million = 0.5
 output_per_million = 3.0
 
 [[entrypoint.models]]
+id = "google/gemma-4-31B-it"
+
+[entrypoint.models.pricing]
+input_per_million = 0.39
+output_per_million = 0.97
+
+[[entrypoint.models]]
 id = "MiniMaxAI/MiniMax-M2.5"
 
 [entrypoint.models.pricing]
@@ -146,11 +183,26 @@ output_per_million = 1.2
 cached_per_million = 0.06
 
 [[entrypoint.models]]
-id = "google/gemma-4-31B-it"
+id = "MiniMaxAI/MiniMax-M3"
 
 [entrypoint.models.pricing]
-input_per_million = 0.2
-output_per_million = 0.5
+input_per_million = 0.3
+output_per_million = 1.2
+cached_per_million = 0.06
+
+[[entrypoint.models]]
+id = "Qwen/Qwen2.5-7B-Instruct-Turbo"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 0.3
+
+[[entrypoint.models]]
+id = "pearl-ai/gemma-4-31b-it"
+
+[entrypoint.models.pricing]
+input_per_million = 0.28
+output_per_million = 0.86
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3-235B-A22B-Instruct-2507-tput"
@@ -158,6 +210,13 @@ id = "Qwen/Qwen3-235B-A22B-Instruct-2507-tput"
 [entrypoint.models.pricing]
 input_per_million = 0.2
 output_per_million = 0.6
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3.5-9B"
+
+[entrypoint.models.pricing]
+input_per_million = 0.17
+output_per_million = 0.25
 
 [[entrypoint.models]]
 id = "openai/gpt-oss-120b"
@@ -172,3 +231,31 @@ id = "essentialai/Rnj-1-Instruct"
 [entrypoint.models.pricing]
 input_per_million = 0.15
 output_per_million = 0.15
+
+[[entrypoint.models]]
+id = "meta-llama/Meta-Llama-3-8B-Instruct-Lite"
+
+[entrypoint.models.pricing]
+input_per_million = 0.14
+output_per_million = 0.14
+
+[[entrypoint.models]]
+id = "google/gemma-3n-E4B-it"
+
+[entrypoint.models.pricing]
+input_per_million = 0.06
+output_per_million = 0.12
+
+[[entrypoint.models]]
+id = "openai/gpt-oss-20b"
+
+[entrypoint.models.pricing]
+input_per_million = 0.05
+output_per_million = 0.2
+
+[[entrypoint.models]]
+id = "LiquidAI/LFM2-24B-A2B"
+
+[entrypoint.models.pricing]
+input_per_million = 0.03
+output_per_million = 0.12
