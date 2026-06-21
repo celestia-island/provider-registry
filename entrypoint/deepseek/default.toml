@@ -27,8 +27,8 @@ es = "DeepSeek (Oficial)"
 ru = "DeepSeek (Официальный)"
 
 [entrypoint.defaults]
-deep = "deepseek-v4-pro"
-normal = "deepseek-v4-flash"
+deep = "deepseek-reasoner"
+normal = "deepseek-v4-pro"
 basic = "deepseek-v4-flash"
 
 [entrypoint.defaults.max_concurrent]
