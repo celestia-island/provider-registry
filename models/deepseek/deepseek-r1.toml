@@ -6,8 +6,8 @@ id = "deepseek-r1"
 name = "R1"
 provider_id = "deepseek"
 
-context_window = 64000
-max_output_tokens = 16000
+context_window = 163840
+max_output_tokens = 16384
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true
