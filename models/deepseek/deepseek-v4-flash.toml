@@ -1,9 +1,9 @@
-# DeepSeek Chat
+# DeepSeek V4 Flash
 # Provider: deepseek
 
 [model]
-id = "deepseek-chat"
-name = "DeepSeek Chat"
+id = "deepseek-v4-flash"
+name = "DeepSeek V4 Flash"
 provider_id = "deepseek"
 
 context_window = 1000000
@@ -11,8 +11,8 @@ max_output_tokens = 384000
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true
-supports_reasoning = false
-tags = []
+supports_reasoning = true
+tags = ["vision", "cost_effective"]
 
 [model.pricing]
 input_per_million = 0.14
@@ -20,5 +20,5 @@ output_per_million = 0.28
 cached_per_million = 0.0028
 
 [model.score]
-value = 41.4
+value = 55.63
 source = "design_arena"
