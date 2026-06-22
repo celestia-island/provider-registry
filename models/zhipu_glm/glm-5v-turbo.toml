@@ -15,5 +15,10 @@ supports_reasoning = true
 tags = ["flagship", "vision", "cost_effective"]
 
 [model.pricing]
-input_per_million = 0.0
-output_per_million = 0.0
+input_per_million = 1.2
+output_per_million = 4.0
+cached_per_million = 0.24
+
+[model.score]
+value = 52.07
+source = "design_arena"
