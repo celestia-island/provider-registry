@@ -27,9 +27,9 @@ es = "Qwen (China Pago único)"
 ru = "Qwen (Китай Разовая оплата)"
 
 [entrypoint.defaults]
-deep = "glm-5.1"
-normal = "glm-5"
-basic = "MiniMax/MiniMax-M2.7"
+deep = "qwen3.7-max"
+normal = "qwen3-coder-plus"
+basic = "qwen3-32b"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
