@@ -6,7 +6,7 @@ id = "google/gemini-3-pro-image"
 name = "Nano Banana Pro (Gemini 3 Pro Image)"
 provider_id = "openrouter"
 
-context_window = 65536
+context_window = 131072
 max_output_tokens = 32768
 supports_vision = true
 supports_function_calling = true
