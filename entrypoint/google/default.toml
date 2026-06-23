@@ -27,9 +27,9 @@ es = "Google Gemini (Oficial)"
 ru = "Google Gemini (Официальный)"
 
 [entrypoint.defaults]
-deep = "gemma-4-31b-it"
-normal = "gemini-3.1-flash-lite"
-basic = "gemini-2.5-flash"
+deep = "gemini-3-pro-image"
+normal = "gemini-3.5-flash"
+basic = "gemini-3.1-flash-lite"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
