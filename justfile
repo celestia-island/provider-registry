@@ -3,6 +3,9 @@ set dotenv-load
 default:
     @just --list
 
+fmt:
+    ruff check --fix . 2>/dev/null || black . 2>/dev/null || true
+
 sync source='all' providers='all':
     python3 scripts/update_models.py --source {{ source }} --entrypoint-mode --providers {{ providers }}
 
