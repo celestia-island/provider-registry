@@ -6,7 +6,7 @@ id = "MiniMax-M3"
 name = "MiniMax-M3"
 provider_id = "minimax"
 
-context_window = 512000
+context_window = 1000000
 max_output_tokens = 128000
 supports_vision = true
 supports_function_calling = true
@@ -15,6 +15,6 @@ supports_reasoning = true
 tags = ["cost_effective"]
 
 [model.pricing]
-input_per_million = 0.6
-output_per_million = 2.4
-cached_per_million = 0.12
+input_per_million = 0.3
+output_per_million = 1.2
+cached_per_million = 0.06
