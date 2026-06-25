@@ -29,6 +29,7 @@ ru = "Stepfun (Китай)"
 [entrypoint.defaults]
 deep = "step-3.5-flash"
 normal = "step-3.5-flash-2603"
+basic = "step-3.7-flash"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
@@ -50,6 +51,14 @@ id = "step-1-32k"
 input_per_million = 2.05
 output_per_million = 9.59
 cached_per_million = 0.41
+
+[[entrypoint.models]]
+id = "step-3.7-flash"
+
+[entrypoint.models.pricing]
+input_per_million = 0.19
+output_per_million = 1.13
+cached_per_million = 0.04
 
 [[entrypoint.models]]
 id = "step-3.5-flash"
