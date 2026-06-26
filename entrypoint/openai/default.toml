@@ -27,7 +27,7 @@ es = "OpenAI (Oficial)"
 ru = "OpenAI (Официальный)"
 
 [entrypoint.defaults]
-deep = "gpt-5.4-pro"
+deep = "gpt-5.5"
 normal = "gpt-5.4-image-2"
 basic = "gpt-5.4-mini"
 
