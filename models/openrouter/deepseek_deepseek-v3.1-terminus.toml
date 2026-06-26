@@ -6,8 +6,8 @@ id = "deepseek/deepseek-v3.1-terminus"
 name = "DeepSeek V3.1 Terminus"
 provider_id = "openrouter"
 
-context_window = 128000
-max_output_tokens = 32000
+context_window = 163840
+max_output_tokens = 32768
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true
@@ -15,5 +15,6 @@ supports_reasoning = true
 tags = ["vision"]
 
 [model.pricing]
-input_per_million = 0.0
-output_per_million = 0.0
+input_per_million = 0.27
+output_per_million = 0.95
+cached_per_million = 0.13

@@ -6,7 +6,7 @@ id = "z-ai/glm-5.1"
 name = "GLM-5.1"
 provider_id = "openrouter"
 
-context_window = 200000
+context_window = 202752
 max_output_tokens = 128000
 supports_vision = false
 supports_function_calling = true
@@ -15,5 +15,6 @@ supports_reasoning = true
 tags = ["flagship"]
 
 [model.pricing]
-input_per_million = 0.0
-output_per_million = 0.0
+input_per_million = 0.98
+output_per_million = 3.08
+cached_per_million = 0.182
