@@ -18,3 +18,7 @@ tags = ["deprecated"]
 input_per_million = 0.4
 output_per_million = 2.0
 cached_per_million = 0.04
+
+[model.score]
+value = 31.3
+source = "artificial_analysis"
