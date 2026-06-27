@@ -2,7 +2,7 @@
 # Provider: silicon
 
 [model]
-id = "deepseek-ai/deepseek-v4-pro"
+id = "deepseek-ai/DeepSeek-V4-Pro"
 name = "DeepSeek V4 Pro"
 provider_id = "silicon"
 

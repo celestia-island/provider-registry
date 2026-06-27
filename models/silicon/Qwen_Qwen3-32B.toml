@@ -11,7 +11,7 @@ max_output_tokens = 131000
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true
-supports_reasoning = false
+supports_reasoning = true
 tags = []
 
 [model.pricing]
