@@ -1,13 +1,13 @@
-# deepseek-ai/DeepSeek-V4-Pro
+# DeepSeek V4 Pro
 # Provider: silicon
 
 [model]
 id = "deepseek-ai/DeepSeek-V4-Pro"
-name = "deepseek-ai/DeepSeek-V4-Pro"
+name = "DeepSeek V4 Pro"
 provider_id = "silicon"
 
-context_window = 1049000
-max_output_tokens = 393000
+context_window = 1000000
+max_output_tokens = 384000
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true
