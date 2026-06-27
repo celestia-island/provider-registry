@@ -17,3 +17,7 @@ tags = []
 [model.pricing]
 input_per_million = 0.08
 output_per_million = 0.16
+
+[model.score]
+value = 10.1
+source = "artificial_analysis"
