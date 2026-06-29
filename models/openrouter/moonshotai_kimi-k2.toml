@@ -7,7 +7,7 @@ name = "Kimi K2 0711"
 provider_id = "openrouter"
 
 context_window = 131072
-max_output_tokens = 32768
+max_output_tokens = 100352
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true
