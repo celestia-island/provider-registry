@@ -18,3 +18,7 @@ tags = ["vision", "cost_effective"]
 input_per_million = 0.15
 output_per_million = 0.6
 cached_per_million = 0.075
+
+[model.score]
+value = 11.4
+source = "artificial_analysis"
