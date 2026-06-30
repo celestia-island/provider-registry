@@ -107,6 +107,13 @@ output_per_million = 1.5
 cached_per_million = 0.025
 
 [[entrypoint.models]]
+id = "gemini-3.1-flash-lite-image"
+
+[entrypoint.models.pricing]
+input_per_million = 0.25
+output_per_million = 1.5
+
+[[entrypoint.models]]
 id = "gemini-embedding-001"
 
 [entrypoint.models.pricing]
