@@ -28,7 +28,7 @@ ru = "Anthropic (Официальный)"
 
 [entrypoint.defaults]
 deep = "claude-fable-5"
-normal = "claude-opus-4-20250514"
+normal = "claude-sonnet-5"
 basic = "claude-3.5-haiku"
 
 [entrypoint.defaults.max_concurrent]
@@ -275,6 +275,14 @@ id = "claude-sonnet-4.6"
 input_per_million = 3.0
 output_per_million = 15.0
 cached_per_million = 0.3
+
+[[entrypoint.models]]
+id = "claude-sonnet-5"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 10.0
+cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "claude-haiku-4-5-20251001"
