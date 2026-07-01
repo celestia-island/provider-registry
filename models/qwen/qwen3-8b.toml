@@ -18,3 +18,7 @@ tags = []
 input_per_million = 0.18
 output_per_million = 0.7
 cached_per_million = 0.05
+
+[model.score]
+value = 9.0
+source = "artificial_analysis"

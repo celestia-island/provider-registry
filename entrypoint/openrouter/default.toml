@@ -100,7 +100,7 @@ output_per_million = 4.3
 id = "z-ai/glm-5.2"
 
 [entrypoint.models.pricing]
-input_per_million = 0.94
+input_per_million = 0.93
 output_per_million = 3.0
 cached_per_million = 0.18
 
@@ -315,14 +315,6 @@ input_per_million = 4.0
 output_per_million = 8.0
 
 [[entrypoint.models]]
-id = "~anthropic/claude-sonnet-latest"
-
-[entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 15.0
-cached_per_million = 0.3
-
-[[entrypoint.models]]
 id = "anthropic/claude-sonnet-4"
 
 [entrypoint.models.pricing]
@@ -417,3 +409,11 @@ id = "openai/gpt-4o-2024-11-20"
 input_per_million = 2.5
 output_per_million = 10.0
 cached_per_million = 1.25
+
+[[entrypoint.models]]
+id = "openai/gpt-5-image-mini"
+
+[entrypoint.models.pricing]
+input_per_million = 2.5
+output_per_million = 2.0
+cached_per_million = 0.25
