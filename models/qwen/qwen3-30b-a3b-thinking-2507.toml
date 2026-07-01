@@ -15,9 +15,8 @@ supports_reasoning = true
 tags = ["reasoning"]
 
 [model.pricing]
-input_per_million = 0.08
-output_per_million = 0.4
-cached_per_million = 0.08
+input_per_million = 0.13
+output_per_million = 1.56
 
 [model.score]
 value = 17.68
