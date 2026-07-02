@@ -75,3 +75,12 @@ id = "step-3.5-flash-2603"
 input_per_million = 0.1
 output_per_million = 0.3
 cached_per_million = 0.02
+
+[[entrypoint.models]]
+id = "step-tts-2"
+
+[[entrypoint.models]]
+id = "stepaudio-2.5-asr"
+
+[[entrypoint.models]]
+id = "stepaudio-2.5-tts"
