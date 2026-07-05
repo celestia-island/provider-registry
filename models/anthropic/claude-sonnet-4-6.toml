@@ -7,7 +7,7 @@ name = "Claude Sonnet 4.6"
 provider_id = "anthropic"
 
 context_window = 1000000
-max_output_tokens = 64000
+max_output_tokens = 128000
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
