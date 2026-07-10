@@ -6,7 +6,7 @@ id = "deepseek/deepseek-r1"
 name = "DeepSeek-R1"
 provider_id = "openrouter"
 
-context_window = 64000
+context_window = 163840
 max_output_tokens = 16000
 supports_vision = false
 supports_function_calling = true

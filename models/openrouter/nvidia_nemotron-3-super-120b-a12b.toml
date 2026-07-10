@@ -6,7 +6,7 @@ id = "nvidia/nemotron-3-super-120b-a12b"
 name = "Nemotron 3 Super 120B A12B"
 provider_id = "openrouter"
 
-context_window = 262144
+context_window = 1000000
 max_output_tokens = 16384
 supports_vision = false
 supports_function_calling = true

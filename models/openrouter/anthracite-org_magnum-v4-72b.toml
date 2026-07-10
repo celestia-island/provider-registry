@@ -6,7 +6,7 @@ id = "anthracite-org/magnum-v4-72b"
 name = "Magnum v4 72B"
 provider_id = "openrouter"
 
-context_window = 16384
+context_window = 32768
 max_output_tokens = 2048
 supports_vision = false
 supports_function_calling = false

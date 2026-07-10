@@ -6,7 +6,7 @@ id = "baidu/ernie-4.5-vl-424b-a47b"
 name = "ERNIE 4.5 VL 424B A47B "
 provider_id = "openrouter"
 
-context_window = 123000
+context_window = 131072
 max_output_tokens = 16000
 supports_vision = true
 supports_function_calling = false

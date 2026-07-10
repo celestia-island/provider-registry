@@ -6,7 +6,7 @@ id = "microsoft/wizardlm-2-8x22b"
 name = "WizardLM-2 8x22B"
 provider_id = "openrouter"
 
-context_window = 65535
+context_window = 65536
 max_output_tokens = 8000
 supports_vision = false
 supports_function_calling = false

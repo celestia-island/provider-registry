@@ -6,7 +6,7 @@ id = "qwen/qwen3-14b"
 name = "Qwen3 14B"
 provider_id = "openrouter"
 
-context_window = 40960
+context_window = 131702
 max_output_tokens = 40960
 supports_vision = false
 supports_function_calling = true

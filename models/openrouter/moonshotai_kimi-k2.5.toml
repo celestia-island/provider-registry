@@ -6,7 +6,7 @@ id = "moonshotai/kimi-k2.5"
 name = "Kimi K2.5"
 provider_id = "openrouter"
 
-context_window = 256000
+context_window = 262144
 max_output_tokens = 256000
 supports_vision = true
 supports_function_calling = true

@@ -6,7 +6,7 @@ id = "qwen/qwen-2.5-7b-instruct"
 name = "Qwen2.5 7B Instruct"
 provider_id = "openrouter"
 
-context_window = 32768
+context_window = 131072
 max_output_tokens = 32768
 supports_vision = false
 supports_function_calling = true

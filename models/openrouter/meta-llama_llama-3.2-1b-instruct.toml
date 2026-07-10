@@ -6,7 +6,7 @@ id = "meta-llama/llama-3.2-1b-instruct"
 name = "Llama 3.2 1B Instruct"
 provider_id = "openrouter"
 
-context_window = 60000
+context_window = 131072
 max_output_tokens = 60000
 supports_vision = false
 supports_function_calling = false

@@ -6,7 +6,7 @@ id = "qwen/qwen3-coder"
 name = "Qwen3 Coder 480B A35B"
 provider_id = "openrouter"
 
-context_window = 262144
+context_window = 1048576
 max_output_tokens = 65536
 supports_vision = false
 supports_function_calling = true

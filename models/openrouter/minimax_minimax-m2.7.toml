@@ -6,7 +6,7 @@ id = "minimax/minimax-m2.7"
 name = "MiniMax-M2.7"
 provider_id = "openrouter"
 
-context_window = 196608
+context_window = 204800
 max_output_tokens = 196608
 supports_vision = false
 supports_function_calling = true

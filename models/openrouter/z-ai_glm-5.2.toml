@@ -6,7 +6,7 @@ id = "z-ai/glm-5.2"
 name = "GLM-5.2"
 provider_id = "openrouter"
 
-context_window = 101376
+context_window = 1048576
 max_output_tokens = 101376
 supports_vision = false
 supports_function_calling = true
