@@ -1,9 +1,9 @@
-# Nano Banana 2 (Gemini 3.1 Flash Image)
+# Nano Banana 2
 # Provider: openrouter
 
 [model]
 id = "google/gemini-3.1-flash-image"
-name = "Nano Banana 2 (Gemini 3.1 Flash Image)"
+name = "Nano Banana 2"
 provider_id = "openrouter"
 
 context_window = 131072
