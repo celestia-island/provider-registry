@@ -97,20 +97,20 @@ input_per_million = 0.27
 output_per_million = 0.41
 
 [[entrypoint.models]]
+id = "deepseek-chat-v3.1"
+
+[entrypoint.models.pricing]
+input_per_million = 0.25
+output_per_million = 0.95
+cached_per_million = 0.13
+
+[[entrypoint.models]]
 id = "deepseek-chat-v3-0324"
 
 [entrypoint.models.pricing]
 input_per_million = 0.24
 output_per_million = 0.9
 cached_per_million = 0.135
-
-[[entrypoint.models]]
-id = "deepseek-chat-v3.1"
-
-[entrypoint.models.pricing]
-input_per_million = 0.21
-output_per_million = 0.79
-cached_per_million = 0.13
 
 [[entrypoint.models]]
 id = "deepseek-v3.2"
