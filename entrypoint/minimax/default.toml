@@ -56,7 +56,7 @@ cached_per_million = 0.06
 id = "minimax-m1"
 
 [entrypoint.models.pricing]
-input_per_million = 0.4
+input_per_million = 0.55
 output_per_million = 2.2
 
 [[entrypoint.models]]
@@ -74,6 +74,14 @@ id = "minimax-m2.1"
 input_per_million = 0.3
 output_per_million = 1.2
 cached_per_million = 0.03
+
+[[entrypoint.models]]
+id = "minimax-m2.7"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 1.2
+cached_per_million = 0.06
 
 [[entrypoint.models]]
 id = "minimax-m3"
@@ -127,13 +135,6 @@ id = "minimax-m2"
 [entrypoint.models.pricing]
 input_per_million = 0.26
 output_per_million = 1.02
-
-[[entrypoint.models]]
-id = "minimax-m2.7"
-
-[entrypoint.models.pricing]
-input_per_million = 0.24
-output_per_million = 0.96
 
 [[entrypoint.models]]
 id = "minimax-01"

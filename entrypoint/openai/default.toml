@@ -399,7 +399,7 @@ id = "gpt-5.1-chat"
 [entrypoint.models.pricing]
 input_per_million = 1.25
 output_per_million = 10.0
-cached_per_million = 0.13
+cached_per_million = 0.125
 
 [[entrypoint.models]]
 id = "gpt-5.1-chat-latest"
