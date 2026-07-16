@@ -7,7 +7,7 @@ name = "Qwen3.7 Plus"
 provider_id = "qwen"
 
 context_window = 1000000
-max_output_tokens = 65536
+max_output_tokens = 64000
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
