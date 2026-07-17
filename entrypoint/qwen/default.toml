@@ -283,7 +283,6 @@ id = "qwen3.5-397b-a17b"
 [entrypoint.models.pricing]
 input_per_million = 0.43
 output_per_million = 2.58
-cached_per_million = 0.225
 
 [[entrypoint.models]]
 id = "qwen3.5-122b-a10b"
