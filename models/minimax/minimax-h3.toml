@@ -1,0 +1,28 @@
+# MiniMax H3
+# Provider: minimax
+# Omni-modal video generation model (video + synchronized stereo audio),
+# up to 2K / 15s via the Open Platform API. The open-weights H3-Base can be
+# self-hosted on a single 48GB GPU through ComfyUI (INT8 ConvRot repack);
+# the cloud provider additionally exposes the H3-Context-IR and
+# H3-Regenerate-2K pipeline.
+
+[model]
+id = "MiniMax-H3"
+name = "MiniMax H3"
+provider_id = "minimax"
+context_window = 0
+max_output_tokens = 0
+supports_vision = false
+supports_function_calling = false
+supports_streaming = false
+supports_reasoning = false
+category = { generation = "video" }
+tags = ["video_generation", "audio_video"]
+
+[model.generation]
+modalities = ["video"]
+default_format = "mp4"
+max_resolution = "2048x2048"
+supported_formats = ["mp4"]
+supports_streaming = false
+input_modalities = ["text", "image", "video", "audio"]
