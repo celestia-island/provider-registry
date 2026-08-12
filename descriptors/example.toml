@@ -1,0 +1,156 @@
+# Annotated MDD example. All values are fake and this file is never deployed.
+
+schema_version = 1
+
+[model]
+id = "example-mini-h3"
+name = "Example Mini H3"
+family = "example-family"
+architecture = "dit"
+description = "Fake three-component descriptor used to validate the MDD TOML format."
+
+[[components]]
+id = "encoder"
+kind = "encoder"
+arch = "example-vl-32b"
+dependencies = []
+inputs = [{ name = "text", dtype = "text" }, { name = "image", dtype = "u8" }]
+outputs = [{ name = "hidden_states", dtype = "bf16" }]
+
+[[components.runtimes]]
+engine = "llama_cpp"
+status = "ready"
+features = ["hidden-states-export"]
+quantizations = [{ id = "q4_k_m", bits = 4, size_multiplier = 0.25 }]
+
+[components.runtimes.entry]
+kind = "gguf"
+path = "models/example-encoder.Q4_K_M.gguf"
+sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+size_bytes = 10737418240
+
+[components.runtimes.hardware]
+min_vram_mb = 16384
+min_gpus = 1
+
+[[components]]
+id = "dit"
+kind = "dit"
+arch = "example-dit"
+dependencies = ["encoder"]
+inputs = [{ name = "hidden_states", dtype = "bf16" }, { name = "noise", dtype = "f32" }]
+outputs = [{ name = "latents", dtype = "bf16" }]
+
+[[components.runtimes]]
+engine = "cloud"
+status = "ready"
+features = ["context-ir"]
+quantizations = [{ id = "fp16", bits = 16, size_multiplier = 1.0 }]
+
+[components.runtimes.entry]
+kind = "url"
+path = "https://api.example.invalid/v1/video/generations"
+
+[[components.runtimes]]
+engine = "native"
+status = "unavailable"
+quantizations = [{ id = "int8", bits = 8, size_multiplier = 0.5 }]
+
+[components.runtimes.entry]
+kind = "file"
+path = "runtimes/example-dit-native"
+
+[[components]]
+id = "vae"
+kind = "vae"
+dependencies = ["dit"]
+outputs = [{ name = "frames", dtype = "u8" }]
+
+[[components.runtimes]]
+engine = "native"
+status = "unavailable"
+
+[components.runtimes.entry]
+kind = "file"
+path = "runtimes/example-vae-native"
+
+
+[[deploy.pipeline]]
+id = "encode"
+phase = "pre"
+cache_key = "text_encoder:prompt_hash"
+
+[[deploy.pipeline]]
+id = "denoise"
+phase = "iterative"
+
+[[deploy.pipeline]]
+id = "decode"
+phase = "post"
+
+[deploy.api]
+task = "video_generation"
+
+[deploy.api.submit]
+name = "video_generation"
+[[deploy.api.submit.params]]
+name = "prompt"
+dtype = "string"
+required = true
+[[deploy.api.submit.params]]
+name = "width"
+dtype = "number"
+required = false
+default = 768
+[[deploy.api.submit.params]]
+name = "duration"
+dtype = "number"
+required = false
+default = 8
+
+[deploy.api.result]
+name = "video_result"
+[[deploy.api.result.params]]
+name = "url"
+dtype = "string"
+required = true
+
+[scale]
+total_parameters_b = 30.0
+[scale.weights]
+size_gb = 62.0
+format = "safetensors"
+[[scale.quantization]]
+id = "fp16"
+bits = 16
+size_multiplier = 1.0
+[[scale.quantization]]
+id = "int8"
+bits = 8
+size_multiplier = 0.5
+[scale.activation]
+peak_gb = 12.0
+bytes_per_token = 0.5
+[scale.context]
+max_tokens = 8192
+kv_cache_bytes_per_token = 0.125
+[scale.throughput]
+tokens_per_second = 40.0
+requests_per_second = 2.0
+latency_ms = 120000
+
+[[scale.tiers]]
+id = "cloud-2k"
+engines = ["cloud"]
+quantizations = ["fp16"]
+placement = "cloud"
+notes = "Context-IR 2K generation via the hosted endpoint."
+
+[[scale.tiers]]
+id = "48gb-native"
+engines = ["native"]
+quantizations = ["int8"]
+placement = "single_card"
+min_vram_gb = 46.0
+min_gpus = 1
+notes = "Single-card native tier; engine status is unavailable until the native runtime lands."

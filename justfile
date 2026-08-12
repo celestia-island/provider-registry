@@ -15,3 +15,7 @@ sync-individual source='all' providers='all':
 # Merge master (config-table source of truth) into dev. Fast, no model fetches.
 merge-dev:
     python3 scripts/merge_master_to_dev.py
+
+# Structural validation of MDD descriptor TOML files.
+validate-descriptors:
+    python3 scripts/validate_descriptors.py

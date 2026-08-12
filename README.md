@@ -38,9 +38,13 @@ provider-registry/
 │   │   ├── claude-opus-4.toml
 │   │   └── ...
 │   └── ...
+├── descriptors/         # Model Deployment Descriptors (MDD, schema v1)
+│   ├── README.md        #   TOML format reference
+│   └── example.toml     #   annotated example (fake values)
 ├── registry.toml        # Provider catalog (grouped by category)
 ├── scripts/
 │   ├── update_models.py # Sync model lists from external APIs
+│   ├── validate_descriptors.py  # Structural validator for descriptors/
 │   └── utils/
 │       └── cli_format.py
 ├── justfile             # Task runner for common operations
@@ -114,6 +118,19 @@ just sync all openai,anthropic
 ```bash
 # In your project
 git submodule add https://github.com/celestia-island/provider-registry.git provider-registry
+```
+
+## Model Deployment Descriptors (MDD)
+
+Descriptors in `descriptors/` answer how a model is deployed and at what scale, for
+every model class (LLM / diffusion / audio / encoders). The schema v1 lives in the
+`plana-celestia-types` crate (`MddDescriptor`); the TOML data format mirrors it one-to-one.
+
+See [`descriptors/README.md`](descriptors/README.md) for the format reference and
+[`descriptors/example.toml`](descriptors/example.toml) for a complete annotated example.
+
+```bash
+just validate-descriptors   # structural validation of descriptors/
 ```
 
 ## CI
