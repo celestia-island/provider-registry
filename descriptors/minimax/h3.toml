@@ -1,0 +1,225 @@
+# MiniMax H3 — first full MDD descriptor (P12 M2.2).
+# Facts sourced from: provider-registry #2, arona backend_configs workflow,
+# staged weights on node-3 (/mnt/work/staging/h3-repack-weights), and the
+# verified GGUF encoder conversion. Entries reference artifact names, not
+# absolute host paths; deployment maps them per node.
+
+schema_version = 1
+
+[model]
+id = "MiniMax-H3"
+name = "MiniMax H3"
+family = "MiniMax-H"
+architecture = "dit"
+description = "Audio-video joint generation model. Cloud tier (Context-IR/2K) is ready; single-card native tier is planned."
+
+[[components]]
+id = "encoder"
+kind = "encoder"
+arch = "qwen3-vl-32b"
+dependencies = []
+inputs = [{ name = "prompt", dtype = "text" }]
+outputs = [{ name = "hidden_states", dtype = "bf16" }]
+
+[[components.runtimes]]
+engine = "llama_cpp"
+status = "ready"
+features = ["hidden-states-export", "vision", "mmproj-companion"]
+quantizations = [{ id = "q4_k_m", bits = 4, size_multiplier = 0.25 }]
+
+[components.runtimes.entry]
+kind = "gguf"
+path = "Qwen3-VL-32B-Instruct-MiniMax-H3-L0-49-Q4_K_M.gguf"
+sha256 = "af3f24155c2e3c700887876559442812f31b713acc928bcdd2500d8e1211facf"
+size_bytes = 14932211488
+
+[components.runtimes.hardware]
+min_vram_mb = 16384
+min_gpus = 1
+
+[[components]]
+id = "dit"
+kind = "dit"
+arch = "h3-fl2va"
+dependencies = ["encoder"]
+inputs = [{ name = "hidden_states", dtype = "bf16" }, { name = "noise", dtype = "f32" }]
+outputs = [{ name = "latents", dtype = "bf16" }]
+
+[[components.runtimes]]
+engine = "cloud"
+status = "ready"
+features = ["context-ir", "2k"]
+quantizations = [{ id = "fp16", bits = 16, size_multiplier = 1.0 }]
+
+[components.runtimes.entry]
+kind = "registry"
+path = "minimax"
+
+[[components.runtimes]]
+engine = "vllm"
+status = "planned"
+quantizations = [{ id = "bf16", bits = 16, size_multiplier = 1.0 }]
+
+[components.runtimes.entry]
+kind = "file"
+path = "minimax_h3_fl2va_bf16.safetensors"
+
+[components.runtimes.hardware]
+min_vram_mb = 163840
+min_gpus = 8
+
+[[components.runtimes]]
+engine = "sglang"
+status = "planned"
+quantizations = [{ id = "bf16", bits = 16, size_multiplier = 1.0 }]
+
+[components.runtimes.entry]
+kind = "file"
+path = "minimax_h3_fl2va_bf16.safetensors"
+
+[components.runtimes.hardware]
+min_vram_mb = 163840
+min_gpus = 8
+
+[[components.runtimes]]
+engine = "native"
+status = "unavailable"
+quantizations = [{ id = "int8", bits = 8, size_multiplier = 0.5 }]
+
+[components.runtimes.entry]
+kind = "file"
+path = "minimax_h3_fl2va_int8_convrot.safetensors"
+
+[components.runtimes.hardware]
+min_vram_mb = 47104
+min_gpus = 1
+
+[[components]]
+id = "vae"
+kind = "vae"
+dependencies = ["dit"]
+inputs = [{ name = "latents", dtype = "bf16" }]
+outputs = [{ name = "frames", dtype = "u8" }, { name = "audio", dtype = "f32" }]
+
+[[components.runtimes]]
+engine = "native"
+status = "unavailable"
+features = ["video-vae", "audio-vae"]
+
+[components.runtimes.entry]
+kind = "file"
+path = "minimax_h3_video_vae_fp16.safetensors"
+
+[[deploy.pipeline]]
+id = "encode"
+phase = "pre"
+cache_key = "text_encoder:prompt_hash"
+description = "Text conditioning via the llama.cpp encoder; hidden states cacheable per prompt hash."
+
+[[deploy.pipeline]]
+id = "denoise"
+phase = "iterative"
+description = "Flow denoising over the joint audio-video sequence."
+
+[[deploy.pipeline]]
+id = "decode"
+phase = "post"
+description = "Video and audio VAE decode plus muxing."
+
+[deploy.api]
+task = "video_generation"
+
+[deploy.api.submit]
+name = "video_generation"
+[[deploy.api.submit.params]]
+name = "prompt"
+dtype = "string"
+required = true
+[[deploy.api.submit.params]]
+name = "width"
+dtype = "number"
+required = false
+default = 768
+[[deploy.api.submit.params]]
+name = "height"
+dtype = "number"
+required = false
+default = 768
+[[deploy.api.submit.params]]
+name = "duration"
+dtype = "number"
+required = false
+default = 8
+[[deploy.api.submit.params]]
+name = "seed"
+dtype = "number"
+required = false
+[[deploy.api.submit.params]]
+name = "image_url"
+dtype = "string"
+required = false
+description = "Optional first-frame image conditioning."
+
+[deploy.api.result]
+name = "video_result"
+[[deploy.api.result.params]]
+name = "url"
+dtype = "string"
+required = true
+
+[scale]
+total_parameters_b = 30.0
+[scale.weights]
+size_gb = 67.0
+format = "safetensors"
+[[scale.quantization]]
+id = "fp16"
+bits = 16
+size_multiplier = 1.0
+[[scale.quantization]]
+id = "bf16"
+bits = 16
+size_multiplier = 1.0
+[[scale.quantization]]
+id = "int8"
+bits = 8
+size_multiplier = 0.5
+[[scale.quantization]]
+id = "q4_k_m"
+bits = 4
+size_multiplier = 0.25
+[scale.activation]
+peak_gb = 12.0
+bytes_per_token = 0.5
+[scale.context]
+max_tokens = 8192
+kv_cache_bytes_per_token = 0.125
+[scale.throughput]
+tokens_per_second = 40.0
+requests_per_second = 2.0
+latency_ms = 120000
+
+[[scale.tiers]]
+id = "cloud-2k"
+engines = ["cloud"]
+quantizations = ["fp16"]
+placement = "cloud"
+notes = "Context-IR 2K generation via the MiniMax cloud backend; ready today."
+
+[[scale.tiers]]
+id = "multi-card-bf16"
+engines = ["vllm", "sglang"]
+quantizations = ["bf16"]
+placement = "multi_card"
+min_vram_gb = 160.0
+min_gpus = 8
+notes = "Official BF16 weights on a multi-card cluster; runtime planned."
+
+[[scale.tiers]]
+id = "48gb-native"
+engines = ["native"]
+quantizations = ["int8"]
+placement = "single_card"
+min_vram_gb = 46.0
+min_gpus = 1
+notes = "Single-card (48GB) native tier; engine unavailable until the native DiT runtime lands."
