@@ -36,7 +36,7 @@ jobs:
 
     steps:
       - name: Checkout master branch (config-table source of truth)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: master
           fetch-depth: 0
