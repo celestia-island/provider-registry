@@ -38,6 +38,7 @@ basic = 2
 
 [[entrypoint.models]]
 id = "gemini-3-pro-image"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.0
@@ -46,6 +47,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "gemini-3.5-flash"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.5
@@ -54,6 +56,7 @@ cached_per_million = 0.15
 
 [[entrypoint.models]]
 id = "gemini-flash-latest"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.5
@@ -62,6 +65,7 @@ cached_per_million = 0.15
 
 [[entrypoint.models]]
 id = "gemini-2.5-pro"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -70,6 +74,7 @@ cached_per_million = 0.125
 
 [[entrypoint.models]]
 id = "gemma-2-27b-it"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.65
@@ -77,6 +82,7 @@ output_per_million = 0.65
 
 [[entrypoint.models]]
 id = "gemini-3.1-flash-image"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.5
@@ -84,6 +90,7 @@ output_per_million = 3.0
 
 [[entrypoint.models]]
 id = "gemini-2.5-flash"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.3
@@ -92,6 +99,7 @@ cached_per_million = 0.03
 
 [[entrypoint.models]]
 id = "gemini-2.5-flash-image"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.3
@@ -100,6 +108,7 @@ cached_per_million = 0.075
 
 [[entrypoint.models]]
 id = "gemini-3.1-flash-lite"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.25
@@ -108,6 +117,7 @@ cached_per_million = 0.025
 
 [[entrypoint.models]]
 id = "gemini-flash-lite-latest"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.25
@@ -116,6 +126,7 @@ cached_per_million = 0.025
 
 [[entrypoint.models]]
 id = "gemini-3.1-flash-lite-image"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.25
@@ -123,6 +134,7 @@ output_per_million = 1.5
 
 [[entrypoint.models]]
 id = "gemma-4-31b-it"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.22
@@ -131,12 +143,14 @@ cached_per_million = 0.12
 
 [[entrypoint.models]]
 id = "gemini-embedding-001"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.15
 
 [[entrypoint.models]]
 id = "gemini-2.0-flash"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.1
@@ -145,6 +159,7 @@ cached_per_million = 0.025
 
 [[entrypoint.models]]
 id = "gemini-2.0-flash-001"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.1
@@ -153,6 +168,7 @@ cached_per_million = 0.025
 
 [[entrypoint.models]]
 id = "gemini-2.5-flash-lite"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.1
@@ -161,6 +177,7 @@ cached_per_million = 0.01
 
 [[entrypoint.models]]
 id = "gemma-3-27b-it"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.1
@@ -168,6 +185,7 @@ output_per_million = 0.3
 
 [[entrypoint.models]]
 id = "gemma-4-26b-a4b-it"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.1
@@ -175,6 +193,7 @@ output_per_million = 0.3
 
 [[entrypoint.models]]
 id = "gemini-2.0-flash-lite"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.075
@@ -182,6 +201,7 @@ output_per_million = 0.3
 
 [[entrypoint.models]]
 id = "gemini-2.0-flash-lite-001"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.07
@@ -189,6 +209,7 @@ output_per_million = 0.3
 
 [[entrypoint.models]]
 id = "gemma-3n-e4b-it"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.06
@@ -196,6 +217,7 @@ output_per_million = 0.12
 
 [[entrypoint.models]]
 id = "gemma-3-12b-it"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.05
@@ -203,6 +225,7 @@ output_per_million = 0.15
 
 [[entrypoint.models]]
 id = "gemma-3-4b-it"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.05
@@ -210,6 +233,7 @@ output_per_million = 0.1
 
 [[entrypoint.models]]
 id = "gemma-2-9b-it"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.03

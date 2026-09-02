@@ -38,6 +38,7 @@ basic = 2
 
 [[entrypoint.models]]
 id = "step-2-16k"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 5.21
@@ -46,6 +47,7 @@ cached_per_million = 1.04
 
 [[entrypoint.models]]
 id = "step-1-32k"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 2.05
@@ -54,6 +56,7 @@ cached_per_million = 0.41
 
 [[entrypoint.models]]
 id = "step-3.7-flash"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.185
@@ -62,6 +65,7 @@ cached_per_million = 0.037
 
 [[entrypoint.models]]
 id = "step-3.5-flash"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.1
@@ -70,6 +74,7 @@ cached_per_million = 0.02
 
 [[entrypoint.models]]
 id = "step-3.5-flash-2603"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.1
@@ -78,9 +83,12 @@ cached_per_million = 0.02
 
 [[entrypoint.models]]
 id = "step-tts-2"
+supports_vision = false
 
 [[entrypoint.models]]
 id = "stepaudio-2.5-asr"
+supports_vision = false
 
 [[entrypoint.models]]
 id = "stepaudio-2.5-tts"
+supports_vision = false

@@ -38,6 +38,7 @@ basic = 2
 
 [[entrypoint.models]]
 id = "claude-opus-4.6-fast"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 30.0
@@ -46,6 +47,7 @@ cached_per_million = 3.0
 
 [[entrypoint.models]]
 id = "claude-opus-4.7-fast"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 30.0
@@ -54,6 +56,7 @@ cached_per_million = 3.0
 
 [[entrypoint.models]]
 id = "claude-opus-4"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -62,6 +65,7 @@ cached_per_million = 1.5
 
 [[entrypoint.models]]
 id = "claude-opus-4-20250514"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -70,6 +74,7 @@ cached_per_million = 1.5
 
 [[entrypoint.models]]
 id = "claude-opus-4-0"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -78,6 +83,7 @@ cached_per_million = 1.5
 
 [[entrypoint.models]]
 id = "claude-opus-4-1-20250805"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -86,6 +92,7 @@ cached_per_million = 1.5
 
 [[entrypoint.models]]
 id = "claude-opus-4.1"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -94,6 +101,7 @@ cached_per_million = 1.5
 
 [[entrypoint.models]]
 id = "claude-opus-4-1"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -102,6 +110,7 @@ cached_per_million = 1.5
 
 [[entrypoint.models]]
 id = "claude-fable-5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 10.0
@@ -110,6 +119,7 @@ cached_per_million = 1.0
 
 [[entrypoint.models]]
 id = "claude-opus-4.8-fast"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 10.0
@@ -118,6 +128,7 @@ cached_per_million = 1.0
 
 [[entrypoint.models]]
 id = "claude-3.5-sonnet"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 6.0
@@ -126,6 +137,7 @@ cached_per_million = 0.6
 
 [[entrypoint.models]]
 id = "claude-opus-4-5-20251101"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -134,6 +146,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "claude-opus-4.5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -142,6 +155,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "claude-opus-4-5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -150,6 +164,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "claude-opus-4-6"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -158,6 +173,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "claude-opus-4.6"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -166,6 +182,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "claude-opus-4-7"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -174,6 +191,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "claude-opus-4.7"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -182,6 +200,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "claude-opus-4-8"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -190,6 +209,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "claude-opus-4.8"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -198,6 +218,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "claude-3.7-sonnet"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -206,6 +227,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-3.7-sonnet:thinking"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -214,6 +236,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-sonnet-4"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -222,6 +245,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-sonnet-4-20250514"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -230,6 +254,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-sonnet-4-0"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -238,6 +263,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-sonnet-4-5-20250929"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -246,6 +272,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-sonnet-4.5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -254,6 +281,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-sonnet-4-5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -262,6 +290,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-sonnet-4-6"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -270,6 +299,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-sonnet-4.6"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -278,6 +308,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-sonnet-5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.0
@@ -286,6 +317,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "claude-haiku-4-5-20251001"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.0
@@ -294,6 +326,7 @@ cached_per_million = 0.1
 
 [[entrypoint.models]]
 id = "claude-haiku-4.5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.0
@@ -302,6 +335,7 @@ cached_per_million = 0.1
 
 [[entrypoint.models]]
 id = "claude-haiku-4-5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.0
@@ -310,6 +344,7 @@ cached_per_million = 0.1
 
 [[entrypoint.models]]
 id = "claude-3.5-haiku"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.8
@@ -318,6 +353,7 @@ cached_per_million = 0.08
 
 [[entrypoint.models]]
 id = "claude-3-opus-20240229"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -326,6 +362,7 @@ cached_per_million = 1.5
 
 [[entrypoint.models]]
 id = "claude-3-sonnet-20240229"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -334,6 +371,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-3-5-sonnet-20240620"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -342,6 +380,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-3-5-sonnet-20241022"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -350,6 +389,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-3-7-sonnet-20250219"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -358,6 +398,7 @@ cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "claude-3-5-haiku-20241022"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.8
@@ -366,6 +407,7 @@ cached_per_million = 0.08
 
 [[entrypoint.models]]
 id = "claude-3-5-haiku-latest"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.8
@@ -374,6 +416,7 @@ cached_per_million = 0.08
 
 [[entrypoint.models]]
 id = "claude-3-haiku"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.25
@@ -382,6 +425,7 @@ cached_per_million = 0.03
 
 [[entrypoint.models]]
 id = "claude-3-haiku-20240307"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.25

@@ -38,6 +38,7 @@ basic = 2
 
 [[entrypoint.models]]
 id = "zai-org/GLM-5.1"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.4
@@ -45,6 +46,7 @@ output_per_million = 4.4
 
 [[entrypoint.models]]
 id = "zai-org/GLM-5.2"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.4
@@ -53,6 +55,7 @@ cached_per_million = 0.26
 
 [[entrypoint.models]]
 id = "zai-org/GLM-5"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.0
@@ -60,6 +63,7 @@ output_per_million = 3.2
 
 [[entrypoint.models]]
 id = "deepseek-ai/DeepSeek-R1"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -67,6 +71,7 @@ output_per_million = 7.0
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 2.0
@@ -74,6 +79,7 @@ output_per_million = 2.0
 
 [[entrypoint.models]]
 id = "deepseek-ai/DeepSeek-V4-Pro"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.74
@@ -82,6 +88,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "deepcogito/cogito-v2-1-671b"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -89,6 +96,7 @@ output_per_million = 1.25
 
 [[entrypoint.models]]
 id = "deepseek-ai/DeepSeek-V3"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -96,6 +104,7 @@ output_per_million = 1.25
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3.7-Max"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -103,6 +112,7 @@ output_per_million = 3.75
 
 [[entrypoint.models]]
 id = "moonshotai/Kimi-K2.6"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.2
@@ -111,6 +121,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.04
@@ -118,6 +129,7 @@ output_per_million = 1.04
 
 [[entrypoint.models]]
 id = "moonshotai/Kimi-K2.7-Code"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.95
@@ -126,6 +138,7 @@ cached_per_million = 0.19
 
 [[entrypoint.models]]
 id = "deepseek-ai/DeepSeek-V3-1"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.6
@@ -133,6 +146,7 @@ output_per_million = 1.7
 
 [[entrypoint.models]]
 id = "nvidia/nemotron-3-ultra-550b-a55b"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.6
@@ -141,6 +155,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3.5-397B-A17B"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.6
@@ -148,6 +163,7 @@ output_per_million = 3.6
 
 [[entrypoint.models]]
 id = "moonshotai/Kimi-K2.5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.5
@@ -155,6 +171,7 @@ output_per_million = 2.8
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3-Coder-Next-FP8"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.5
@@ -162,6 +179,7 @@ output_per_million = 1.2
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3.6-Plus"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.5
@@ -169,6 +187,7 @@ output_per_million = 3.0
 
 [[entrypoint.models]]
 id = "google/gemma-4-31B-it"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.39
@@ -176,6 +195,7 @@ output_per_million = 0.97
 
 [[entrypoint.models]]
 id = "MiniMaxAI/MiniMax-M2.5"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.3
@@ -184,6 +204,7 @@ cached_per_million = 0.06
 
 [[entrypoint.models]]
 id = "MiniMaxAI/MiniMax-M2.7"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.3
@@ -192,6 +213,7 @@ cached_per_million = 0.06
 
 [[entrypoint.models]]
 id = "MiniMaxAI/MiniMax-M3"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.3
@@ -200,6 +222,7 @@ cached_per_million = 0.06
 
 [[entrypoint.models]]
 id = "Qwen/Qwen2.5-7B-Instruct-Turbo"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.3
@@ -207,6 +230,7 @@ output_per_million = 0.3
 
 [[entrypoint.models]]
 id = "pearl-ai/gemma-4-31b-it"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.28
@@ -214,6 +238,7 @@ output_per_million = 0.86
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3-235B-A22B-Instruct-2507-tput"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.2
@@ -221,6 +246,7 @@ output_per_million = 0.6
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3.5-9B"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.17
@@ -228,6 +254,7 @@ output_per_million = 0.25
 
 [[entrypoint.models]]
 id = "openai/gpt-oss-120b"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.15
@@ -235,6 +262,7 @@ output_per_million = 0.6
 
 [[entrypoint.models]]
 id = "essentialai/Rnj-1-Instruct"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.15
@@ -242,6 +270,7 @@ output_per_million = 0.15
 
 [[entrypoint.models]]
 id = "meta-llama/Meta-Llama-3-8B-Instruct-Lite"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.14
@@ -249,6 +278,7 @@ output_per_million = 0.14
 
 [[entrypoint.models]]
 id = "google/gemma-3n-E4B-it"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.06
@@ -256,6 +286,7 @@ output_per_million = 0.12
 
 [[entrypoint.models]]
 id = "openai/gpt-oss-20b"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.05
@@ -263,6 +294,7 @@ output_per_million = 0.2
 
 [[entrypoint.models]]
 id = "LiquidAI/LFM2-24B-A2B"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.03

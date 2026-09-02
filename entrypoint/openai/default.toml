@@ -38,6 +38,7 @@ basic = 2
 
 [[entrypoint.models]]
 id = "gpt-5.4-pro"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 30.0
@@ -45,6 +46,7 @@ output_per_million = 180.0
 
 [[entrypoint.models]]
 id = "o3-pro"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 20.0
@@ -52,6 +54,7 @@ output_per_million = 80.0
 
 [[entrypoint.models]]
 id = "gpt-5-pro"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -59,6 +62,7 @@ output_per_million = 120.0
 
 [[entrypoint.models]]
 id = "gpt-5.4-image-2"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 8.0
@@ -67,6 +71,7 @@ cached_per_million = 2.0
 
 [[entrypoint.models]]
 id = "gpt-5.4"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -75,6 +80,7 @@ cached_per_million = 0.25
 
 [[entrypoint.models]]
 id = "gpt-5.4-mini"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.75
@@ -83,6 +89,7 @@ cached_per_million = 0.075
 
 [[entrypoint.models]]
 id = "gpt-5.4-nano"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.2
@@ -91,12 +98,14 @@ cached_per_million = 0.02
 
 [[entrypoint.models]]
 id = "dall-e-3"
+supports_vision = false
 
 [entrypoint.models.pricing]
 output_per_million = 40.0
 
 [[entrypoint.models]]
 id = "o1-pro"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 150.0
@@ -104,6 +113,7 @@ output_per_million = 600.0
 
 [[entrypoint.models]]
 id = "gpt-4"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 30.0
@@ -111,6 +121,7 @@ output_per_million = 60.0
 
 [[entrypoint.models]]
 id = "gpt-5.5-pro"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 30.0
@@ -118,6 +129,7 @@ output_per_million = 180.0
 
 [[entrypoint.models]]
 id = "gpt-5.2-pro"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 21.0
@@ -125,6 +137,7 @@ output_per_million = 168.0
 
 [[entrypoint.models]]
 id = "o1"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -133,6 +146,7 @@ cached_per_million = 7.5
 
 [[entrypoint.models]]
 id = "gpt-5-image"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 10.0
@@ -141,6 +155,7 @@ cached_per_million = 1.25
 
 [[entrypoint.models]]
 id = "o3-deep-research"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 10.0
@@ -149,6 +164,7 @@ cached_per_million = 2.5
 
 [[entrypoint.models]]
 id = "gpt-chat-latest"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -157,6 +173,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "gpt-4o-2024-05-13"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -164,6 +181,7 @@ output_per_million = 15.0
 
 [[entrypoint.models]]
 id = "gpt-5.5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -172,6 +190,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "gpt-5.6"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -180,6 +199,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "gpt-5.6-sol"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -188,6 +208,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "gpt-5.6-sol-pro"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -196,6 +217,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "gpt-image-2"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -204,6 +226,7 @@ cached_per_million = 1.25
 
 [[entrypoint.models]]
 id = "gpt-realtime-2.1"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 4.0
@@ -212,6 +235,7 @@ cached_per_million = 0.4
 
 [[entrypoint.models]]
 id = "gpt-audio"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -219,6 +243,7 @@ output_per_million = 10.0
 
 [[entrypoint.models]]
 id = "gpt-4o"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -227,6 +252,7 @@ cached_per_million = 1.25
 
 [[entrypoint.models]]
 id = "gpt-4o-2024-08-06"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -235,6 +261,7 @@ cached_per_million = 1.25
 
 [[entrypoint.models]]
 id = "gpt-4o-2024-11-20"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -243,6 +270,7 @@ cached_per_million = 1.25
 
 [[entrypoint.models]]
 id = "gpt-5-image-mini"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -251,6 +279,7 @@ cached_per_million = 0.25
 
 [[entrypoint.models]]
 id = "gpt-5.6-terra"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -259,6 +288,7 @@ cached_per_million = 0.25
 
 [[entrypoint.models]]
 id = "gpt-5.6-terra-pro"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -267,6 +297,7 @@ cached_per_million = 0.25
 
 [[entrypoint.models]]
 id = "gpt-4.1"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.0
@@ -275,6 +306,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "o3"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.0
@@ -283,6 +315,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "o4-mini-deep-research"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.0
@@ -291,6 +324,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "gpt-5.2"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.75
@@ -299,6 +333,7 @@ cached_per_million = 0.175
 
 [[entrypoint.models]]
 id = "gpt-5.2-chat"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.75
@@ -307,6 +342,7 @@ cached_per_million = 0.175
 
 [[entrypoint.models]]
 id = "gpt-5.2-chat-latest"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.75
@@ -315,6 +351,7 @@ cached_per_million = 0.175
 
 [[entrypoint.models]]
 id = "gpt-5.2-codex"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.75
@@ -323,6 +360,7 @@ cached_per_million = 0.175
 
 [[entrypoint.models]]
 id = "gpt-5.3-chat"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.75
@@ -331,6 +369,7 @@ cached_per_million = 0.175
 
 [[entrypoint.models]]
 id = "gpt-5.3-chat-latest"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.75
@@ -339,6 +378,7 @@ cached_per_million = 0.175
 
 [[entrypoint.models]]
 id = "gpt-5.3-codex"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.75
@@ -347,6 +387,7 @@ cached_per_million = 0.175
 
 [[entrypoint.models]]
 id = "gpt-5.3-codex-spark"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.75
@@ -355,6 +396,7 @@ cached_per_million = 0.175
 
 [[entrypoint.models]]
 id = "gpt-5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -363,6 +405,7 @@ cached_per_million = 0.125
 
 [[entrypoint.models]]
 id = "gpt-5-chat"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -371,6 +414,7 @@ cached_per_million = 0.125
 
 [[entrypoint.models]]
 id = "gpt-5-chat-latest"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -379,6 +423,7 @@ cached_per_million = 0.125
 
 [[entrypoint.models]]
 id = "gpt-5-codex"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -387,6 +432,7 @@ cached_per_million = 0.125
 
 [[entrypoint.models]]
 id = "gpt-5.1"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -395,6 +441,7 @@ cached_per_million = 0.125
 
 [[entrypoint.models]]
 id = "gpt-5.1-chat"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -403,6 +450,7 @@ cached_per_million = 0.125
 
 [[entrypoint.models]]
 id = "gpt-5.1-chat-latest"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -411,6 +459,7 @@ cached_per_million = 0.125
 
 [[entrypoint.models]]
 id = "gpt-5.1-codex"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -419,6 +468,7 @@ cached_per_million = 0.125
 
 [[entrypoint.models]]
 id = "gpt-5.1-codex-max"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25

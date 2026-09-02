@@ -38,6 +38,7 @@ basic = 2
 
 [[entrypoint.models]]
 id = "grok-3"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -46,6 +47,7 @@ cached_per_million = 0.75
 
 [[entrypoint.models]]
 id = "grok-3-beta"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -54,6 +56,7 @@ cached_per_million = 0.75
 
 [[entrypoint.models]]
 id = "grok-4"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -62,6 +65,7 @@ cached_per_million = 0.75
 
 [[entrypoint.models]]
 id = "grok-4.20-beta"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.0
@@ -70,6 +74,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "grok-4.20-multi-agent-beta"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.0
@@ -78,6 +83,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "grok-4.5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.0
@@ -86,6 +92,7 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "grok-4.20"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -94,6 +101,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "grok-4.20-0309-non-reasoning"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -102,6 +110,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "grok-4.20-0309-reasoning"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -110,6 +119,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "grok-4.20-multi-agent"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -118,6 +128,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "grok-4.20-multi-agent-0309"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -126,6 +137,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "grok-4.3"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.25
@@ -134,6 +146,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "grok-build-0.1"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.0
@@ -142,6 +155,7 @@ cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "grok-3-mini"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.3
@@ -150,6 +164,7 @@ cached_per_million = 0.075
 
 [[entrypoint.models]]
 id = "grok-3-mini-beta"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.3
@@ -158,6 +173,7 @@ cached_per_million = 0.075
 
 [[entrypoint.models]]
 id = "grok-4-fast"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.2
@@ -166,6 +182,7 @@ cached_per_million = 0.05
 
 [[entrypoint.models]]
 id = "grok-4.1-fast"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.2
@@ -174,6 +191,7 @@ cached_per_million = 0.05
 
 [[entrypoint.models]]
 id = "grok-code-fast-1"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.2
@@ -182,9 +200,12 @@ cached_per_million = 0.02
 
 [[entrypoint.models]]
 id = "grok-imagine-image"
+supports_vision = true
 
 [[entrypoint.models]]
 id = "grok-imagine-image-quality"
+supports_vision = true
 
 [[entrypoint.models]]
 id = "grok-imagine-video"
+supports_vision = true

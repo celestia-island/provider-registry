@@ -38,6 +38,7 @@ basic = 2
 
 [[entrypoint.models]]
 id = "glm-5-turbo"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.2
@@ -47,8 +48,10 @@ cached_per_million = 0.24
 
 [[entrypoint.models]]
 id = "glm-5v-turbo"
+supports_vision = true
 [[entrypoint.models]]
 id = "glm-5"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.72
@@ -56,6 +59,7 @@ output_per_million = 2.3
 
 [[entrypoint.models]]
 id = "glm-4.5"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.6
@@ -64,6 +68,7 @@ cached_per_million = 0.11
 
 [[entrypoint.models]]
 id = "glm-4.5v"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.6
@@ -72,6 +77,7 @@ cached_per_million = 0.11
 
 [[entrypoint.models]]
 id = "glm-4.6"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.39
@@ -79,6 +85,7 @@ output_per_million = 1.9
 
 [[entrypoint.models]]
 id = "glm-4.7"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.39
@@ -87,6 +94,7 @@ cached_per_million = 0.195
 
 [[entrypoint.models]]
 id = "glm-4.6v"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.3
@@ -94,6 +102,7 @@ output_per_million = 0.9
 
 [[entrypoint.models]]
 id = "glm-4.5-air"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.13
@@ -102,6 +111,7 @@ cached_per_million = 0.025
 
 [[entrypoint.models]]
 id = "glm-4.7-flash"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.06
@@ -110,6 +120,7 @@ cached_per_million = 0.01
 
 [[entrypoint.models]]
 id = "glm-4-32b"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.1

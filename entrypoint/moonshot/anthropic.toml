@@ -38,6 +38,7 @@ basic = 2
 
 [[entrypoint.models]]
 id = "kimi-k2"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.57
@@ -45,6 +46,7 @@ output_per_million = 2.3
 
 [[entrypoint.models]]
 id = "kimi-k2-thinking"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.47
@@ -53,6 +55,7 @@ cached_per_million = 0.141
 
 [[entrypoint.models]]
 id = "kimi-k2.5"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.45
@@ -61,6 +64,7 @@ cached_per_million = 0.225
 
 [[entrypoint.models]]
 id = "kimi-k2-0905"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.4

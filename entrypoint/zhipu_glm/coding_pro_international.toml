@@ -38,6 +38,7 @@ basic = 2
 
 [[entrypoint.models]]
 id = "glm-5.2"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.4
@@ -46,6 +47,7 @@ cached_per_million = 0.26
 
 [[entrypoint.models]]
 id = "glm-5"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.0

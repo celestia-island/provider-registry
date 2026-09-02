@@ -19,12 +19,15 @@ billing_metric = "prompt_times"
 
 [[entrypoint.models]]
 id = "glm-5.2"
+supports_vision = false
 
 [[entrypoint.models]]
 id = "glm-5.1"
+supports_vision = false
 
 [[entrypoint.models]]
 id = "glm-5-turbo"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.2
@@ -32,6 +35,7 @@ output_per_million = 4.0
 cached_per_million = 0.24
 [[entrypoint.models]]
 id = "glm-5v-turbo"
+supports_vision = true
 
 [entrypoint.api]
 protocol = "anthropic_messages_v1"

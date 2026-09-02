@@ -30,15 +30,20 @@ modalities = ["image", "audio", "video"]
 
 [[entrypoint.models]]
 id = "dall-e-3"
+supports_vision = false
 
 [[entrypoint.models]]
 id = "gpt-image-1"
+supports_vision = true
 
 [[entrypoint.models]]
 id = "tts-1"
+supports_vision = false
 
 [[entrypoint.models]]
 id = "tts-1-hd"
+supports_vision = false
 
 [[entrypoint.models]]
 id = "sora"
+supports_vision = false

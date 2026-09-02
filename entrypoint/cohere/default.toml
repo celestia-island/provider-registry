@@ -38,6 +38,7 @@ basic = 2
 
 [[entrypoint.models]]
 id = "command-a-03-2025"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -45,6 +46,7 @@ output_per_million = 10.0
 
 [[entrypoint.models]]
 id = "command-a-plus-05-2026"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -52,6 +54,7 @@ output_per_million = 10.0
 
 [[entrypoint.models]]
 id = "command-a-reasoning-08-2025"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -59,6 +62,7 @@ output_per_million = 10.0
 
 [[entrypoint.models]]
 id = "command-a-translate-08-2025"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -66,6 +70,7 @@ output_per_million = 10.0
 
 [[entrypoint.models]]
 id = "command-a-vision-07-2025"
+supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -73,6 +78,7 @@ output_per_million = 10.0
 
 [[entrypoint.models]]
 id = "command-r-plus-08-2024"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -80,6 +86,7 @@ output_per_million = 10.0
 
 [[entrypoint.models]]
 id = "command-r-08-2024"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.15
@@ -87,6 +94,7 @@ output_per_million = 0.6
 
 [[entrypoint.models]]
 id = "command-r7b-12-2024"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.0375
@@ -94,6 +102,7 @@ output_per_million = 0.15
 
 [[entrypoint.models]]
 id = "command-r7b-arabic-02-2025"
+supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.0375
@@ -101,15 +110,20 @@ output_per_million = 0.15
 
 [[entrypoint.models]]
 id = "c4ai-aya-expanse-32b"
+supports_vision = false
 
 [[entrypoint.models]]
 id = "c4ai-aya-expanse-8b"
+supports_vision = false
 
 [[entrypoint.models]]
 id = "c4ai-aya-vision-32b"
+supports_vision = true
 
 [[entrypoint.models]]
 id = "c4ai-aya-vision-8b"
+supports_vision = true
 
 [[entrypoint.models]]
 id = "north-mini-code-1-0"
+supports_vision = false
