@@ -14,10 +14,10 @@ fmt:
     {{ if which("ruff") != "" { "ruff check --fix ." } else { "black ." } }}
 
 sync source='all' providers='all':
-    python3 scripts/update_models.py --source {{ source }} --entrypoint-mode --providers {{ providers }}
+    {{ if os_family() == "windows" { "python" } else { "python3" } }} scripts/update_models.py --source {{ source }} --entrypoint-mode --providers {{ providers }}
 
 sync-individual source='all' providers='all':
-    python3 scripts/update_models.py --source {{ source }} --entrypoint-mode --individual-models --providers {{ providers }}
+    {{ if os_family() == "windows" { "python" } else { "python3" } }} scripts/update_models.py --source {{ source }} --entrypoint-mode --individual-models --providers {{ providers }}
 
 # Propagate supports_vision flags from model cards into entrypoint entries.
 sync-vision:
