@@ -3,13 +3,15 @@
 # `cd X; cmd` instead of `cd X && cmd`. Bash-only recipes use
 # [script('bash')] and need Git Bash (or WSL) when actually run.
 set windows-shell := ["powershell.exe", "-NoLogo", "-NoProfile", "-Command", "[Console]::OutputEncoding=[System.Text.Encoding]::UTF8; $PSDefaultParameterValues['*:Encoding']='utf8';"]
+set unstable
+set lists
 set dotenv-load
 
 default:
     @just --list
 
 fmt:
-    ruff check --fix . 2>/dev/null || black . 2>/dev/null || true
+    {{ if which("ruff") != "" { "ruff check --fix ." } else { "black ." } }}
 
 sync source='all' providers='all':
     python3 scripts/update_models.py --source {{ source }} --entrypoint-mode --providers {{ providers }}
