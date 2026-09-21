@@ -2,3 +2,7 @@ __pycache__/
 *.py[cod]
 
 /target
+
+# celestia-devtools: staged-on-demand shared justfile recipes (celestia-devtools init / just fetch)
+/.just/
+/celestia-devtools.just
