@@ -1,0 +1,13 @@
+name: Exp Lint Probe
+
+# Throwaway probe: how does the required context behave when a second check run
+# with the same name succeeds while the hosted lane cannot start?
+on:
+  pull_request:
+
+jobs:
+  probe:
+    name: "lint-commits / Lint commit messages"
+    runs-on: [self-hosted, linux, x64, local]
+    steps:
+      - run: echo "probe reports success under the required context name"
