@@ -1,13 +1,15 @@
 name: Exp Lint Probe
 
-# Throwaway probe: how does the required context behave when a second check run
-# with the same name succeeds while the hosted lane cannot start?
+# Throwaway probe: does a FAILING duplicate of the required context block the
+# PR even when the real lint lane succeeded?
 on:
   pull_request:
 
 jobs:
   probe:
     name: "lint-commits / Lint commit messages"
-    runs-on: [self-hosted, linux, x64, local]
+    runs-on: ubuntu-latest
     steps:
-      - run: echo "probe reports success under the required context name"
+      - run: |
+          echo "probe deliberately fails under the required context name"
+          exit 1
