@@ -9,7 +9,12 @@ billing_type = "one_time"
 
 [entrypoint.api]
 protocol = "gemini_generate_v1"
-base_url = "https://generativelanguage.googleapis.com/v1beta"
+# The OpenAI-compatibility layer, not the native v1beta surface: chest (and
+# every openai_chat_v1 consumer) authenticates with `Authorization: Bearer
+# <API key>`, which the native surface ignores (it wants ?key= /
+# x-goog-api-key), so a valid key 403s/400s on validate and chat. The
+# compat layer speaks exactly the bearer form and serves GET /models.
+base_url = "https://generativelanguage.googleapis.com/v1beta/openai"
 chat_endpoint = "/chat/completions"
 models_endpoint = "/models"
 auth_type = "bearer"
