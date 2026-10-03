@@ -32,7 +32,13 @@ jobs:
   sync-models:
     runs-on: ubuntu-latest
     permissions:
+      # contents: commit the sync branch; pull-requests: open the sync PR and
+      # request auto-merge. Master is protected (squash via PR only) — the old
+      # direct push died with GH006 on every run since the org tightened
+      # branch protection (2026-10-02), which is how the catalog fell a
+      # generation behind in the first place.
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout master branch (config-table source of truth)
@@ -78,15 +84,26 @@ jobs:
             } >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit and push to master
+      - name: Push sync branch and open auto-merge PR
         if: steps.sync.outputs.has_changes == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run == true)
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          BRANCH="chore/auto-model-sync"
+          UPDATED_AT=$(date -u +"%Y-%m-%dT:%MZ")
           git add entrypoint models
-          UPDATED_AT=$(date -u +"%Y-%m-%dT%H:%MZ")
-          git commit -m "🔄 Sync provider model list (updated ${UPDATED_AT})"
-          git push origin master
+          git commit -m "🔄 Sync provider model list (updated ${UPDATED_AT})."
+          git push --force-with-lease origin "HEAD:refs/heads/${BRANCH}"
+          # The PR title repeats the commit subject so the commit lint passes
+          # and auto-merge can fire once required checks are green.
+          if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
+            gh pr create --head "$BRANCH" --title "🔄 Sync provider model list (updated ${UPDATED_AT})." --body "Automated catalog refresh from the aggregator sources (openrouter / models.dev). Opened by the scheduled Sync Provider Models workflow; auto-merges once the required lint passes."
+          fi
+          # Auto-merge needs the repository feature enabled; if it is not, the
+          # PR simply stays open for an operator.
+          gh pr merge "$BRANCH" --squash --auto --delete-branch 2>/dev/null || echo "::warning::auto-merge unavailable — sync PR left open for an operator"
 
       - name: Summary
         if: always()
@@ -97,8 +114,8 @@ jobs:
               echo "### Dry Run Complete (source: \`${SOURCE}\`)" >> $GITHUB_STEP_SUMMARY
               echo "Changes were detected but not committed (dry run mode)." >> $GITHUB_STEP_SUMMARY
             else
-              echo "### Committed to master (source: \`${SOURCE}\`)" >> $GITHUB_STEP_SUMMARY
-              echo "Model list changes committed to \`master\`. \`dev\` auto-merges every 6h." >> $GITHUB_STEP_SUMMARY
+              echo "### Sync PR opened (source: \`${SOURCE}\`)" >> $GITHUB_STEP_SUMMARY
+              echo "Model list changes pushed to \`chore/auto-model-sync\` and proposed via PR (master only advances by squash merge)." >> $GITHUB_STEP_SUMMARY
             fi
             echo "" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
