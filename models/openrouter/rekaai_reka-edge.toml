@@ -7,7 +7,7 @@ name = "Reka Edge"
 provider_id = "openrouter"
 
 context_window = 16384
-max_output_tokens = 16384
+max_output_tokens = 14745
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true

@@ -7,7 +7,7 @@ name = "GPT-3.5 Turbo Instruct"
 provider_id = "openrouter"
 
 context_window = 4095
-max_output_tokens = 4096
+max_output_tokens = 3685
 supports_vision = false
 supports_function_calling = false
 supports_streaming = true

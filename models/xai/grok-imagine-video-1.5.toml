@@ -1,0 +1,19 @@
+# Grok Imagine Video 1.5
+# Provider: xai
+
+[model]
+id = "grok-imagine-video-1.5"
+name = "Grok Imagine Video 1.5"
+provider_id = "xai"
+
+context_window = 1024
+max_output_tokens = 0
+supports_vision = true
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = false
+tags = ["vision"]
+
+[model.pricing]
+input_per_million = 0.0
+output_per_million = 0.0

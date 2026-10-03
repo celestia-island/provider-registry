@@ -1,9 +1,9 @@
-# Gemma 3 12B
+# Gemma 3 12B IT
 # Provider: openrouter
 
 [model]
 id = "google/gemma-3-12b-it"
-name = "Gemma 3 12B"
+name = "Gemma 3 12B IT"
 provider_id = "openrouter"
 
 context_window = 131072

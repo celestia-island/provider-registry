@@ -1,0 +1,24 @@
+# Gemini 3.5 Flash Lite (batch)
+# Provider: google
+
+[model]
+id = "gemini-3.5-flash-lite:batch"
+name = "Gemini 3.5 Flash Lite (batch)"
+provider_id = "google"
+
+context_window = 1048576
+max_output_tokens = 16384
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 0.15
+output_per_million = 1.25
+cached_per_million = 0.015
+
+[model.score]
+value = 49.3
+source = "artificial_analysis"

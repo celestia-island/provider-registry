@@ -12,9 +12,13 @@ supports_vision = true
 supports_function_calling = true
 supports_streaming = true
 supports_reasoning = true
-tags = ["flagship"]
+tags = []
 
 [model.pricing]
 input_per_million = 10.0
 output_per_million = 50.0
 cached_per_million = 1.0
+
+[model.score]
+value = 76.9
+source = "artificial_analysis"

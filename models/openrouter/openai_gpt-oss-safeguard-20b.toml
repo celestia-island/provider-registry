@@ -1,9 +1,9 @@
-# gpt-oss-safeguard-20b
+# GPT OSS Safeguard 20B
 # Provider: openrouter
 
 [model]
 id = "openai/gpt-oss-safeguard-20b"
-name = "gpt-oss-safeguard-20b"
+name = "GPT OSS Safeguard 20B"
 provider_id = "openrouter"
 
 context_window = 131072

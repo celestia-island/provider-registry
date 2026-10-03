@@ -7,7 +7,7 @@ name = "Kimi K3"
 provider_id = "moonshot"
 
 context_window = 1048576
-max_output_tokens = 131072
+max_output_tokens = 1048576
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true

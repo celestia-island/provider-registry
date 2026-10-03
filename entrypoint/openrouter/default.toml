@@ -27,8 +27,8 @@ es = "OpenRouter (Multiproveedor)"
 ru = "OpenRouter (Мульти-провайдер)"
 
 [entrypoint.defaults]
-deep = "z-ai/glm-5.2"
-normal = "z-ai/glm-5.1"
+deep = "z-ai/glm-5.3-prime"
+normal = "z-ai/glm-5.3"
 basic = "openai/gpt-5.4-mini"
 
 [entrypoint.defaults.max_concurrent]
@@ -38,7 +38,6 @@ basic = 2
 
 [[entrypoint.models]]
 id = "openai/gpt-5.4-pro"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 30.0
@@ -46,7 +45,6 @@ output_per_million = 180.0
 
 [[entrypoint.models]]
 id = "openai/o3-pro"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 20.0
@@ -54,7 +52,6 @@ output_per_million = 80.0
 
 [[entrypoint.models]]
 id = "openai/gpt-5-pro"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -62,7 +59,6 @@ output_per_million = 120.0
 
 [[entrypoint.models]]
 id = "openai/gpt-5.4-image-2"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 8.0
@@ -70,8 +66,15 @@ output_per_million = 15.0
 cached_per_million = 2.0
 
 [[entrypoint.models]]
+id = "z-ai/glm-5.3-prime"
+
+[entrypoint.models.pricing]
+input_per_million = 2.8
+output_per_million = 8.8
+cached_per_million = 0.56
+
+[[entrypoint.models]]
 id = "openai/gpt-5.4"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 2.5
@@ -79,8 +82,23 @@ output_per_million = 15.0
 cached_per_million = 0.25
 
 [[entrypoint.models]]
+id = "z-ai/glm-5.1"
+
+[entrypoint.models.pricing]
+input_per_million = 1.4
+output_per_million = 4.4
+cached_per_million = 0.26
+
+[[entrypoint.models]]
+id = "z-ai/glm-5.3"
+
+[entrypoint.models.pricing]
+input_per_million = 1.4
+output_per_million = 4.4
+cached_per_million = 0.14
+
+[[entrypoint.models]]
 id = "z-ai/glm-5-turbo"
-supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.2
@@ -89,7 +107,6 @@ cached_per_million = 0.24
 
 [[entrypoint.models]]
 id = "z-ai/glm-5v-turbo"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.2
@@ -97,35 +114,7 @@ output_per_million = 4.0
 cached_per_million = 0.24
 
 [[entrypoint.models]]
-id = "z-ai/glm-5.1"
-supports_vision = false
-
-[entrypoint.models.pricing]
-input_per_million = 0.966
-output_per_million = 3.036
-cached_per_million = 0.1794
-
-[[entrypoint.models]]
-id = "z-ai/glm-5"
-supports_vision = false
-
-[entrypoint.models.pricing]
-input_per_million = 0.95
-output_per_million = 3.15
-cached_per_million = 0.19
-
-[[entrypoint.models]]
-id = "z-ai/glm-5.2"
-supports_vision = false
-
-[entrypoint.models.pricing]
-input_per_million = 0.9338
-output_per_million = 2.9348
-cached_per_million = 0.17342
-
-[[entrypoint.models]]
 id = "openai/gpt-5.4-mini"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.75
@@ -133,8 +122,31 @@ output_per_million = 4.5
 cached_per_million = 0.075
 
 [[entrypoint.models]]
+id = "z-ai/glm-5"
+
+[entrypoint.models.pricing]
+input_per_million = 0.6
+output_per_million = 1.92
+cached_per_million = 0.12
+
+[[entrypoint.models]]
+id = "z-ai/glm-5.2"
+
+[entrypoint.models.pricing]
+input_per_million = 0.41
+output_per_million = 3.99
+cached_per_million = 0.26
+
+[[entrypoint.models]]
+id = "z-ai/glm-5.3-flashx"
+
+[entrypoint.models.pricing]
+input_per_million = 0.37
+output_per_million = 1.25
+cached_per_million = 0.09
+
+[[entrypoint.models]]
 id = "openai/gpt-5.4-nano"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.2
@@ -142,8 +154,15 @@ output_per_million = 1.25
 cached_per_million = 0.02
 
 [[entrypoint.models]]
+id = "z-ai/glm-5.3-flash"
+
+[entrypoint.models.pricing]
+input_per_million = 0.15
+output_per_million = 0.5
+cached_per_million = 0.03
+
+[[entrypoint.models]]
 id = "openai/o1-pro"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 150.0
@@ -151,7 +170,6 @@ output_per_million = 600.0
 
 [[entrypoint.models]]
 id = "anthropic/claude-opus-4.6-fast"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 30.0
@@ -160,7 +178,6 @@ cached_per_million = 3.0
 
 [[entrypoint.models]]
 id = "anthropic/claude-opus-4.7-fast"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 30.0
@@ -169,7 +186,6 @@ cached_per_million = 3.0
 
 [[entrypoint.models]]
 id = "openai/gpt-4"
-supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 30.0
@@ -177,7 +193,6 @@ output_per_million = 60.0
 
 [[entrypoint.models]]
 id = "openai/gpt-5.5-pro"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 30.0
@@ -185,7 +200,6 @@ output_per_million = 180.0
 
 [[entrypoint.models]]
 id = "openai/gpt-5.2-pro"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 21.0
@@ -193,7 +207,6 @@ output_per_million = 168.0
 
 [[entrypoint.models]]
 id = "anthropic/claude-opus-4"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -202,7 +215,6 @@ cached_per_million = 1.5
 
 [[entrypoint.models]]
 id = "anthropic/claude-opus-4.1"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -211,7 +223,6 @@ cached_per_million = 1.5
 
 [[entrypoint.models]]
 id = "openai/o1"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 15.0
@@ -220,16 +231,30 @@ cached_per_million = 7.5
 
 [[entrypoint.models]]
 id = "anthropic/claude-fable-5"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 10.0
 output_per_million = 50.0
 cached_per_million = 1.0
+
+[[entrypoint.models]]
+id = "anthropic/claude-fable-5.1"
+
+[entrypoint.models.pricing]
+input_per_million = 10.0
+output_per_million = 50.0
+cached_per_million = 0.25
 
 [[entrypoint.models]]
 id = "~anthropic/claude-fable-latest"
-supports_vision = true
+
+[entrypoint.models.pricing]
+input_per_million = 10.0
+output_per_million = 50.0
+cached_per_million = 0.25
+
+[[entrypoint.models]]
+id = "anthropic/claude-opus-4.8-fast"
 
 [entrypoint.models.pricing]
 input_per_million = 10.0
@@ -237,8 +262,7 @@ output_per_million = 50.0
 cached_per_million = 1.0
 
 [[entrypoint.models]]
-id = "anthropic/claude-opus-4.8-fast"
-supports_vision = true
+id = "~openai/gpt-astra-latest"
 
 [entrypoint.models.pricing]
 input_per_million = 10.0
@@ -247,7 +271,6 @@ cached_per_million = 1.0
 
 [[entrypoint.models]]
 id = "openai/gpt-5-image"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 10.0
@@ -255,8 +278,23 @@ output_per_million = 10.0
 cached_per_million = 1.25
 
 [[entrypoint.models]]
+id = "openai/gpt-6-astra"
+
+[entrypoint.models.pricing]
+input_per_million = 10.0
+output_per_million = 50.0
+cached_per_million = 1.0
+
+[[entrypoint.models]]
+id = "openai/gpt-6-astra-pro"
+
+[entrypoint.models.pricing]
+input_per_million = 10.0
+output_per_million = 50.0
+cached_per_million = 1.0
+
+[[entrypoint.models]]
 id = "openai/o3-deep-research"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 10.0
@@ -265,7 +303,6 @@ cached_per_million = 2.5
 
 [[entrypoint.models]]
 id = "anthropic/claude-opus-4.5"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -274,7 +311,6 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "anthropic/claude-opus-4.6"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -283,7 +319,6 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "anthropic/claude-opus-4.7"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -292,7 +327,6 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "anthropic/claude-opus-4.8"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -300,8 +334,7 @@ output_per_million = 25.0
 cached_per_million = 0.5
 
 [[entrypoint.models]]
-id = "~anthropic/claude-opus-latest"
-supports_vision = true
+id = "anthropic/claude-opus-5"
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -310,7 +343,14 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "sakana/fugu-ultra"
-supports_vision = true
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 30.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "sakana/fugu-ultra-v2"
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -319,7 +359,6 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "openai/gpt-chat-latest"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -328,7 +367,6 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "openai/gpt-4o-2024-05-13"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -336,25 +374,6 @@ output_per_million = 15.0
 
 [[entrypoint.models]]
 id = "openai/gpt-5.5"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 5.0
-output_per_million = 30.0
-cached_per_million = 0.5
-
-[[entrypoint.models]]
-id = "openai/gpt-5.6-sol"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 5.0
-output_per_million = 30.0
-cached_per_million = 0.5
-
-[[entrypoint.models]]
-id = "openai/gpt-5.6-sol-pro"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -363,7 +382,6 @@ cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "~openai/gpt-latest"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 5.0
@@ -371,103 +389,40 @@ output_per_million = 30.0
 cached_per_million = 0.5
 
 [[entrypoint.models]]
+id = "xiaomi/mimo-v2.6-pro-ultraspeed"
+
+[entrypoint.models.pricing]
+input_per_million = 4.35
+output_per_million = 8.7
+cached_per_million = 0.036
+
+[[entrypoint.models]]
 id = "aion-labs/aion-1.0"
-supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 4.0
 output_per_million = 8.0
 
 [[entrypoint.models]]
-id = "aion-labs/aion-3.0"
-supports_vision = false
+id = "anthropic/claude-opus-5.5"
 
 [entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 6.0
-cached_per_million = 0.75
+input_per_million = 4.0
+output_per_million = 20.0
+cached_per_million = 0.2
 
 [[entrypoint.models]]
-id = "anthropic/claude-sonnet-4"
-supports_vision = true
+id = "~anthropic/claude-opus-latest"
 
 [entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 15.0
-cached_per_million = 0.3
+input_per_million = 4.0
+output_per_million = 20.0
+cached_per_million = 0.2
 
 [[entrypoint.models]]
-id = "anthropic/claude-sonnet-4.5"
-supports_vision = true
+id = "openai/gpt-5.6-sol-pro"
 
 [entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 15.0
-cached_per_million = 0.3
-
-[[entrypoint.models]]
-id = "anthropic/claude-sonnet-4.6"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 15.0
-cached_per_million = 0.3
-
-[[entrypoint.models]]
-id = "moonshotai/kimi-k3"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 15.0
-cached_per_million = 0.3
-
-[[entrypoint.models]]
-id = "sao10k/l3.1-70b-hanami-x1"
-supports_vision = false
-
-[entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 3.0
-
-[[entrypoint.models]]
-id = "anthracite-org/magnum-v4-72b"
-supports_vision = false
-
-[entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 5.0
-
-[[entrypoint.models]]
-id = "~moonshotai/kimi-latest"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 15.0
-cached_per_million = 0.3
-
-[[entrypoint.models]]
-id = "perplexity/sonar-pro"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 15.0
-
-[[entrypoint.models]]
-id = "perplexity/sonar-pro-search"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 15.0
-
-[[entrypoint.models]]
-id = "cohere/command-a"
-supports_vision = false
-
-[entrypoint.models.pricing]
-input_per_million = 2.5
-output_per_million = 10.0
+input_per_million = 4.0
+output_per_million = 20.0
+cached_per_million = 0.4

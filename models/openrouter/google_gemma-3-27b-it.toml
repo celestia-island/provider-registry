@@ -1,13 +1,13 @@
-# Gemma 3 27B
+# Gemma 3 27B IT
 # Provider: openrouter
 
 [model]
 id = "google/gemma-3-27b-it"
-name = "Gemma 3 27B"
+name = "Gemma 3 27B IT"
 provider_id = "openrouter"
 
 context_window = 131072
-max_output_tokens = 131072
+max_output_tokens = 117964
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true

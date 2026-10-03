@@ -7,7 +7,7 @@ name = "Sonar Deep Research"
 provider_id = "openrouter"
 
 context_window = 128000
-max_output_tokens = 128000
+max_output_tokens = 115200
 supports_vision = false
 supports_function_calling = false
 supports_streaming = true

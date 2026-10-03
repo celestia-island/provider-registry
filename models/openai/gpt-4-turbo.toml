@@ -12,7 +12,7 @@ supports_vision = true
 supports_function_calling = true
 supports_streaming = true
 supports_reasoning = false
-tags = ["cost_effective", "legacy"]
+tags = ["cost_effective", "legacy", "deprecated"]
 
 [model.pricing]
 input_per_million = 10.0

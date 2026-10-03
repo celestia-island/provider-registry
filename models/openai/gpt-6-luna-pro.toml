@@ -7,11 +7,11 @@ name = "GPT-6 Luna Pro"
 provider_id = "openai"
 
 context_window = 1050000
-max_output_tokens = 128000
+max_output_tokens = 16384
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
-supports_reasoning = true
+supports_reasoning = false
 tags = []
 
 [model.pricing]

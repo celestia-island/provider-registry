@@ -6,7 +6,7 @@ id = "xiaomi/mimo-v2.5"
 name = "MiMo-V2.5"
 provider_id = "openrouter"
 
-context_window = 1048576
+context_window = 1050000
 max_output_tokens = 131072
 supports_vision = true
 supports_function_calling = true

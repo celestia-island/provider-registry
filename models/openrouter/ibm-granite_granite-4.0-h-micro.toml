@@ -7,7 +7,7 @@ name = "Granite 4.0 Micro"
 provider_id = "openrouter"
 
 context_window = 131000
-max_output_tokens = 131000
+max_output_tokens = 117900
 supports_vision = false
 supports_function_calling = false
 supports_streaming = true

@@ -6,7 +6,7 @@ id = "grok-imagine-image-quality"
 name = "Grok Imagine Image Quality"
 provider_id = "xai"
 
-context_window = 8000
+context_window = 16000
 max_output_tokens = 0
 supports_vision = true
 supports_function_calling = false

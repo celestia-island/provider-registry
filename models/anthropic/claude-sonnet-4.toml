@@ -6,7 +6,7 @@ id = "claude-sonnet-4"
 name = "Claude Sonnet 4"
 provider_id = "anthropic"
 
-context_window = 1000000
+context_window = 200000
 max_output_tokens = 16384
 supports_vision = true
 supports_function_calling = true

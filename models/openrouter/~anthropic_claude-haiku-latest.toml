@@ -1,9 +1,9 @@
-# Anthropic Claude Haiku Latest
+# Claude Haiku Latest
 # Provider: openrouter
 
 [model]
 id = "~anthropic/claude-haiku-latest"
-name = "Anthropic Claude Haiku Latest"
+name = "Claude Haiku Latest"
 provider_id = "openrouter"
 
 context_window = 200000

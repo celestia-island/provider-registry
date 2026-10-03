@@ -1,9 +1,9 @@
-# OpenAI GPT Mini Latest
+# GPT Mini Latest
 # Provider: openrouter
 
 [model]
 id = "~openai/gpt-mini-latest"
-name = "OpenAI GPT Mini Latest"
+name = "GPT Mini Latest"
 provider_id = "openrouter"
 
 context_window = 400000

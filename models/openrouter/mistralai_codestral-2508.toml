@@ -7,7 +7,7 @@ name = "Codestral 2508"
 provider_id = "openrouter"
 
 context_window = 256000
-max_output_tokens = 256000
+max_output_tokens = 204800
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true

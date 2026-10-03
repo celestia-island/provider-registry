@@ -6,8 +6,8 @@ id = "stepfun/step-3.7-flash"
 name = "Step 3.7 Flash"
 provider_id = "openrouter"
 
-context_window = 256000
-max_output_tokens = 256000
+context_window = 262144
+max_output_tokens = 230400
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true

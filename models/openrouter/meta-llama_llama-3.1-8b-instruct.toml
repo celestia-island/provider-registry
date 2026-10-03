@@ -1,13 +1,13 @@
-# Llama 3.1 8B Instruct
+# Llama-3.1-8B-Instruct
 # Provider: openrouter
 
 [model]
 id = "meta-llama/llama-3.1-8b-instruct"
-name = "Llama 3.1 8B Instruct"
+name = "Llama-3.1-8B-Instruct"
 provider_id = "openrouter"
 
 context_window = 131072
-max_output_tokens = 131072
+max_output_tokens = 117964
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true

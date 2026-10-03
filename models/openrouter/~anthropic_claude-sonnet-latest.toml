@@ -1,9 +1,9 @@
-# Anthropic Claude Sonnet Latest
+# Claude Sonnet Latest
 # Provider: openrouter
 
 [model]
 id = "~anthropic/claude-sonnet-latest"
-name = "Anthropic Claude Sonnet Latest"
+name = "Claude Sonnet Latest"
 provider_id = "openrouter"
 
 context_window = 1000000

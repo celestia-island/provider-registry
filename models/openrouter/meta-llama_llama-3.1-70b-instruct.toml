@@ -1,9 +1,9 @@
-# Llama 3.1 70B Instruct
+# Llama-3.1-70B-Instruct
 # Provider: openrouter
 
 [model]
 id = "meta-llama/llama-3.1-70b-instruct"
-name = "Llama 3.1 70B Instruct"
+name = "Llama-3.1-70B-Instruct"
 provider_id = "openrouter"
 
 context_window = 131072

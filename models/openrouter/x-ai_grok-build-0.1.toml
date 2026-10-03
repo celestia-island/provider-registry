@@ -7,7 +7,7 @@ name = "Grok Build 0.1"
 provider_id = "openrouter"
 
 context_window = 256000
-max_output_tokens = 256000
+max_output_tokens = 230400
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true

@@ -7,7 +7,7 @@ name = "Sonar Reasoning Pro"
 provider_id = "openrouter"
 
 context_window = 128000
-max_output_tokens = 128000
+max_output_tokens = 115200
 supports_vision = true
 supports_function_calling = false
 supports_streaming = true

@@ -7,7 +7,7 @@ name = "Aion-RP 1.0 (8B)"
 provider_id = "openrouter"
 
 context_window = 32768
-max_output_tokens = 32768
+max_output_tokens = 29491
 supports_vision = false
 supports_function_calling = false
 supports_streaming = true

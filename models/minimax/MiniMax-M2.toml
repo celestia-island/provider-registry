@@ -6,8 +6,8 @@ id = "MiniMax-M2"
 name = "MiniMax-M2"
 provider_id = "minimax"
 
-context_window = 196608
-max_output_tokens = 128000
+context_window = 204800
+max_output_tokens = 131072
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true

@@ -6,8 +6,8 @@ id = "voxtral-small-24b-2507"
 name = "Mistral: Voxtral Small 24B 2507"
 provider_id = "mistral"
 
-context_window = 32000
-max_output_tokens = 8000
+context_window = 32768
+max_output_tokens = 8192
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true

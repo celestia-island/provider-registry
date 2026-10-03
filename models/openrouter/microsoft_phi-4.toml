@@ -7,7 +7,7 @@ name = "Phi 4"
 provider_id = "openrouter"
 
 context_window = 16384
-max_output_tokens = 16384
+max_output_tokens = 14745
 supports_vision = false
 supports_function_calling = false
 supports_streaming = true

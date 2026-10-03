@@ -7,17 +7,17 @@ name = "DeepSeek V4 Flash"
 provider_id = "deepseek"
 
 context_window = 1000000
-max_output_tokens = 384000
-supports_vision = false
+max_output_tokens = 393216
+supports_vision = true
 supports_function_calling = true
 supports_streaming = true
 supports_reasoning = true
-tags = ["vision", "cost_effective"]
+tags = ["vision", "cost_effective", "deprecated"]
 
 [model.pricing]
-input_per_million = 0.14
-output_per_million = 0.28
-cached_per_million = 0.0028
+input_per_million = 0.15
+output_per_million = 0.6
+cached_per_million = 0.003
 
 [model.score]
 value = 55.63

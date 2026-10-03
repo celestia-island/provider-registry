@@ -6,7 +6,7 @@ id = "deepseek/deepseek-chat"
 name = "DeepSeek Chat"
 provider_id = "openrouter"
 
-context_window = 131072
+context_window = 163840
 max_output_tokens = 16000
 supports_vision = false
 supports_function_calling = true
@@ -15,5 +15,5 @@ supports_reasoning = false
 tags = []
 
 [model.pricing]
-input_per_million = 0.2002
-output_per_million = 0.8001
+input_per_million = 0.2574
+output_per_million = 1.0287

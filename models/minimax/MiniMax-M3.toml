@@ -7,7 +7,7 @@ name = "MiniMax-M3"
 provider_id = "minimax"
 
 context_window = 1000000
-max_output_tokens = 128000
+max_output_tokens = 512000
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true

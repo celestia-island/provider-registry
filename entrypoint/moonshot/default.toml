@@ -29,7 +29,7 @@ ru = "Moonshot (Китай Разовая оплата)"
 [entrypoint.defaults]
 deep = "kimi-k2-thinking-turbo"
 normal = "kimi-k2-thinking"
-basic = "kimi-k2"
+basic = "kimi-k2.5"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
@@ -38,7 +38,6 @@ basic = 2
 
 [[entrypoint.models]]
 id = "kimi-k3"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
@@ -46,8 +45,15 @@ output_per_million = 15.0
 cached_per_million = 0.3
 
 [[entrypoint.models]]
+id = "kimi-k3:batch"
+
+[entrypoint.models.pricing]
+input_per_million = 2.28
+output_per_million = 11.4
+cached_per_million = 0.228
+
+[[entrypoint.models]]
 id = "kimi-k2.7-code-highspeed"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 1.9
@@ -56,7 +62,6 @@ cached_per_million = 0.38
 
 [[entrypoint.models]]
 id = "kimi-k2-thinking-turbo"
-supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 1.15
@@ -65,7 +70,6 @@ cached_per_million = 0.15
 
 [[entrypoint.models]]
 id = "kimi-k2.6"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.95
@@ -74,7 +78,6 @@ cached_per_million = 0.16
 
 [[entrypoint.models]]
 id = "kimi-k2.7-code"
-supports_vision = true
 
 [entrypoint.models.pricing]
 input_per_million = 0.95
@@ -83,7 +86,6 @@ cached_per_million = 0.19
 
 [[entrypoint.models]]
 id = "kimi-k2-0905"
-supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.6
@@ -91,26 +93,22 @@ output_per_million = 2.5
 
 [[entrypoint.models]]
 id = "kimi-k2-thinking"
-supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.6
 output_per_million = 2.5
-cached_per_million = 0.15
-
-[[entrypoint.models]]
-id = "kimi-k2.5"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 0.6
-output_per_million = 3.0
-cached_per_million = 0.1
 
 [[entrypoint.models]]
 id = "kimi-k2"
-supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 0.57
 output_per_million = 2.3
+
+[[entrypoint.models]]
+id = "kimi-k2.5"
+
+[entrypoint.models.pricing]
+input_per_million = 0.45
+output_per_million = 2.25
+cached_per_million = 0.07

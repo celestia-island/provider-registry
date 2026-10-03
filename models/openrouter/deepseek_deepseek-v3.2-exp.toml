@@ -7,7 +7,7 @@ name = "DeepSeek V3.2 Exp"
 provider_id = "openrouter"
 
 context_window = 163840
-max_output_tokens = 65536
+max_output_tokens = 147456
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true

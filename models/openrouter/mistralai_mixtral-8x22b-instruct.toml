@@ -7,7 +7,7 @@ name = "Mixtral 8x22B Instruct"
 provider_id = "openrouter"
 
 context_window = 65536
-max_output_tokens = 65536
+max_output_tokens = 52428
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true

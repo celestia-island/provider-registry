@@ -7,9 +7,9 @@ name = "Mistral Small 3.1 24B"
 provider_id = "openrouter"
 
 context_window = 128000
-max_output_tokens = 128000
+max_output_tokens = 102400
 supports_vision = true
-supports_function_calling = false
+supports_function_calling = true
 supports_streaming = true
 supports_reasoning = false
 tags = []

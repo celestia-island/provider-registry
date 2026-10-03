@@ -6,7 +6,7 @@ id = "zai-org/GLM-5.2"
 name = "GLM-5.2"
 provider_id = "together"
 
-context_window = 262144
+context_window = 1048575
 max_output_tokens = 164000
 supports_vision = false
 supports_function_calling = true

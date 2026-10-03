@@ -1,9 +1,9 @@
-# MiniMax M2-her
+# MiniMax-M2 Her
 # Provider: openrouter
 
 [model]
 id = "minimax/minimax-m2-her"
-name = "MiniMax M2-her"
+name = "MiniMax-M2 Her"
 provider_id = "openrouter"
 
 context_window = 65536

@@ -7,7 +7,7 @@ name = "Mistral Large"
 provider_id = "openrouter"
 
 context_window = 128000
-max_output_tokens = 128000
+max_output_tokens = 102400
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true

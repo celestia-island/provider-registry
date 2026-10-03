@@ -1,9 +1,9 @@
-# Google Gemini Pro Latest
+# Gemini Pro Latest
 # Provider: openrouter
 
 [model]
 id = "~google/gemini-pro-latest"
-name = "Google Gemini Pro Latest"
+name = "Gemini Pro Latest"
 provider_id = "openrouter"
 
 context_window = 1048576

@@ -1,9 +1,9 @@
-# Seed-2.0-Lite
+# Seed 2.0 Lite
 # Provider: openrouter
 
 [model]
 id = "bytedance-seed/seed-2.0-lite"
-name = "Seed-2.0-Lite"
+name = "Seed 2.0 Lite"
 provider_id = "openrouter"
 
 context_window = 262144

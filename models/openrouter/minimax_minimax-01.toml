@@ -7,7 +7,7 @@ name = "MiniMax-01"
 provider_id = "openrouter"
 
 context_window = 1000192
-max_output_tokens = 1000192
+max_output_tokens = 40000
 supports_vision = true
 supports_function_calling = false
 supports_streaming = true

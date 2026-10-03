@@ -1,0 +1,24 @@
+# GPT-5.4 Nano (batch)
+# Provider: openai
+
+[model]
+id = "gpt-5.4-nano:batch"
+name = "GPT-5.4 Nano (batch)"
+provider_id = "openai"
+
+context_window = 400000
+max_output_tokens = 16384
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship"]
+
+[model.pricing]
+input_per_million = 0.1
+output_per_million = 0.62
+cached_per_million = 0.01
+
+[model.score]
+value = 56.1
+source = "artificial_analysis"

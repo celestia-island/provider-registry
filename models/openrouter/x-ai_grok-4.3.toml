@@ -7,7 +7,7 @@ name = "Grok 4.3"
 provider_id = "openrouter"
 
 context_window = 1000000
-max_output_tokens = 1000000
+max_output_tokens = 900000
 supports_vision = true
 supports_function_calling = true
 supports_streaming = true
