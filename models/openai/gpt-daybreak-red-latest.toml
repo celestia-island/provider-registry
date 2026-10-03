@@ -1,0 +1,20 @@
+# Daybreak Red
+# Provider: openai
+
+[model]
+id = "gpt-daybreak-red-latest"
+name = "Daybreak Red"
+provider_id = "openai"
+
+context_window = 400000
+max_output_tokens = 128000
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 12.5
+output_per_million = 75.0
+cached_per_million = 1.25

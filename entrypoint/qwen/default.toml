@@ -27,7 +27,7 @@ es = "Qwen (China Pago único)"
 ru = "Qwen (Китай Разовая оплата)"
 
 [entrypoint.defaults]
-deep = "glm-5.2"
+deep = "glm-5.3"
 normal = "glm-5"
 basic = "MiniMax/MiniMax-M2.7"
 
@@ -39,6 +39,14 @@ basic = 2
 [[entrypoint.models]]
 id = "glm-5.2"
 supports_vision = false
+
+[entrypoint.models.pricing]
+input_per_million = 1.1
+output_per_million = 3.851
+cached_per_million = 0.275
+
+[[entrypoint.models]]
+id = "glm-5.3"
 
 [entrypoint.models.pricing]
 input_per_million = 1.1
@@ -79,6 +87,22 @@ input_per_million = 7.742
 output_per_million = 23.367
 
 [[entrypoint.models]]
+id = "qwen3.8-max-prime"
+
+[entrypoint.models.pricing]
+input_per_million = 4.0
+output_per_million = 12.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "kimi-k3"
+
+[entrypoint.models.pricing]
+input_per_million = 2.827
+output_per_million = 14.133
+cached_per_million = 0.283
+
+[[entrypoint.models]]
 id = "qwen3.7-max"
 supports_vision = false
 
@@ -94,6 +118,30 @@ supports_vision = true
 [entrypoint.models.pricing]
 input_per_million = 2.294
 output_per_million = 6.881
+
+[[entrypoint.models]]
+id = "qwen3.8-2.4t-a95b"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 6.0
+cached_per_million = 0.25
+
+[[entrypoint.models]]
+id = "qwen3.8-max-0902"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 6.0
+cached_per_million = 0.25
+
+[[entrypoint.models]]
+id = "qwen3.8-max"
+
+[entrypoint.models.pricing]
+input_per_million = 1.7774
+output_per_million = 5.3323
+cached_per_million = 0.22218
 
 [[entrypoint.models]]
 id = "qvq-max"
@@ -319,6 +367,14 @@ input_per_million = 0.43
 output_per_million = 2.58
 
 [[entrypoint.models]]
+id = "qwen3.8-27b"
+
+[entrypoint.models.pricing]
+input_per_million = 0.42
+output_per_million = 3.0
+cached_per_million = 0.085
+
+[[entrypoint.models]]
 id = "qwen3.5-122b-a10b"
 supports_vision = true
 
@@ -383,6 +439,14 @@ supports_vision = true
 [entrypoint.models.pricing]
 input_per_million = 0.3
 output_per_million = 1.8
+
+[[entrypoint.models]]
+id = "deepseek-v4.1-flash"
+
+[entrypoint.models.pricing]
+input_per_million = 0.2975
+output_per_million = 1.1902
+cached_per_million = 0.01488
 
 [[entrypoint.models]]
 id = "deepseek-r1-distill-llama-70b"

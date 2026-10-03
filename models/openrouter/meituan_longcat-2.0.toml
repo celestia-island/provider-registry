@@ -1,0 +1,20 @@
+# LongCat 2.0
+# Provider: openrouter
+
+[model]
+id = "meituan/longcat-2.0"
+name = "LongCat 2.0"
+provider_id = "openrouter"
+
+context_window = 1048756
+max_output_tokens = 262144
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.3
+output_per_million = 1.2
+cached_per_million = 0.006

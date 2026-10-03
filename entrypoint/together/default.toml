@@ -27,9 +27,9 @@ es = "Together AI"
 ru = "Together AI"
 
 [entrypoint.defaults]
-deep = "zai-org/GLM-5.2"
-normal = "zai-org/GLM-5.1"
-basic = "MiniMaxAI/MiniMax-M2.7"
+deep = "zai-org/GLM-5.3"
+normal = "zai-org/GLM-5.2"
+basic = "zai-org/GLM-5.3-Flash"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
@@ -54,6 +54,14 @@ output_per_million = 4.4
 cached_per_million = 0.26
 
 [[entrypoint.models]]
+id = "zai-org/GLM-5.3"
+
+[entrypoint.models.pricing]
+input_per_million = 1.4
+output_per_million = 4.4
+cached_per_million = 0.26
+
+[[entrypoint.models]]
 id = "zai-org/GLM-5"
 supports_vision = false
 
@@ -62,12 +70,28 @@ input_per_million = 1.0
 output_per_million = 3.2
 
 [[entrypoint.models]]
+id = "zai-org/GLM-5.3-Flash"
+
+[entrypoint.models.pricing]
+input_per_million = 0.15
+output_per_million = 0.5
+cached_per_million = 0.03
+
+[[entrypoint.models]]
 id = "deepseek-ai/DeepSeek-R1"
 supports_vision = false
 
 [entrypoint.models.pricing]
 input_per_million = 3.0
 output_per_million = 7.0
+
+[[entrypoint.models]]
+id = "moonshotai/Kimi-K3"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8"
@@ -85,6 +109,14 @@ supports_vision = false
 input_per_million = 1.74
 output_per_million = 3.48
 cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V4-Pro-0813"
+
+[entrypoint.models.pricing]
+input_per_million = 1.32
+output_per_million = 3.96
+cached_per_million = 0.13
 
 [[entrypoint.models]]
 id = "deepcogito/cogito-v2-1-671b"
@@ -126,6 +158,14 @@ supports_vision = false
 [entrypoint.models.pricing]
 input_per_million = 1.04
 output_per_million = 1.04
+
+[[entrypoint.models]]
+id = "thinkingmachines/Inkling"
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 4.05
+cached_per_million = 0.17
 
 [[entrypoint.models]]
 id = "moonshotai/Kimi-K2.7-Code"
@@ -192,6 +232,14 @@ supports_vision = true
 [entrypoint.models.pricing]
 input_per_million = 0.39
 output_per_million = 0.97
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V4.1-Flash"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 1.2
+cached_per_million = 0.006
 
 [[entrypoint.models]]
 id = "MiniMaxAI/MiniMax-M2.5"
@@ -267,6 +315,14 @@ supports_vision = false
 [entrypoint.models.pricing]
 input_per_million = 0.15
 output_per_million = 0.15
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V4-Flash-0731"
+
+[entrypoint.models.pricing]
+input_per_million = 0.14
+output_per_million = 0.28
+cached_per_million = 0.03
 
 [[entrypoint.models]]
 id = "meta-llama/Meta-Llama-3-8B-Instruct-Lite"

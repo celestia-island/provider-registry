@@ -1,0 +1,20 @@
+# Qwen3.8 Flash
+# Provider: qwen
+
+[model]
+id = "qwen3.8-flash"
+name = "Qwen3.8 Flash"
+provider_id = "qwen"
+
+context_window = 1000000
+max_output_tokens = 131072
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["cost_effective"]
+
+[model.pricing]
+input_per_million = 0.1187
+output_per_million = 0.4007
+cached_per_million = 0.01187

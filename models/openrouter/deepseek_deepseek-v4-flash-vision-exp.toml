@@ -1,0 +1,20 @@
+# DeepSeek V4 Flash Vision Exp
+# Provider: openrouter
+
+[model]
+id = "deepseek/deepseek-v4-flash-vision-exp"
+name = "DeepSeek V4 Flash Vision Exp"
+provider_id = "openrouter"
+
+context_window = 1048576
+max_output_tokens = 262144
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["vision", "cost_effective"]
+
+[model.pricing]
+input_per_million = 0.2156
+output_per_million = 0.6468
+cached_per_million = 0.00686

@@ -1,0 +1,20 @@
+# Kimi K3
+# Provider: qwen
+
+[model]
+id = "kimi-k3"
+name = "Kimi K3"
+provider_id = "qwen"
+
+context_window = 1048576
+max_output_tokens = 1048576
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 2.827
+output_per_million = 14.133
+cached_per_million = 0.283
