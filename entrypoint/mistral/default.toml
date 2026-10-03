@@ -27,14 +27,30 @@ es = "Mistral AI (Oficial)"
 ru = "Mistral AI (Официальный)"
 
 [entrypoint.defaults]
-deep = "magistral-medium-latest"
-normal = "ministral-3b-latest"
+deep = "zai-glm-5-2"
+normal = "zai-glm-5-3"
 basic = "ministral-8b-latest"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
 normal = 1
 basic = 2
+
+[[entrypoint.models]]
+id = "zai-glm-5-2"
+
+[entrypoint.models.pricing]
+input_per_million = 1.4
+output_per_million = 4.4
+cached_per_million = 0.14
+
+[[entrypoint.models]]
+id = "zai-glm-5-3"
+
+[entrypoint.models.pricing]
+input_per_million = 1.4
+output_per_million = 4.4
+cached_per_million = 0.14
 
 [[entrypoint.models]]
 id = "magistral-medium-latest"

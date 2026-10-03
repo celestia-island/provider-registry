@@ -27,7 +27,7 @@ es = "OpenAI (Oficial)"
 ru = "OpenAI (Официальный)"
 
 [entrypoint.defaults]
-deep = "gpt-5.4-pro"
+deep = "gpt-6-astra"
 normal = "gpt-5.4-image-2"
 basic = "gpt-5.4-mini"
 
@@ -59,6 +59,24 @@ supports_vision = true
 [entrypoint.models.pricing]
 input_per_million = 15.0
 output_per_million = 120.0
+
+[[entrypoint.models]]
+id = "gpt-6-astra"
+supports_vision = true
+
+[entrypoint.models.pricing]
+input_per_million = 10.0
+output_per_million = 50.0
+cached_per_million = 1.0
+
+[[entrypoint.models]]
+id = "gpt-6-astra-pro"
+supports_vision = true
+
+[entrypoint.models.pricing]
+input_per_million = 10.0
+output_per_million = 50.0
+cached_per_million = 1.0
 
 [[entrypoint.models]]
 id = "gpt-5.4-image-2"
@@ -145,6 +163,14 @@ output_per_million = 60.0
 cached_per_million = 7.5
 
 [[entrypoint.models]]
+id = "gpt-daybreak-red-latest"
+
+[entrypoint.models.pricing]
+input_per_million = 12.5
+output_per_million = 75.0
+cached_per_million = 1.25
+
+[[entrypoint.models]]
 id = "gpt-5-image"
 supports_vision = true
 
@@ -189,6 +215,23 @@ output_per_million = 30.0
 cached_per_million = 0.5
 
 [[entrypoint.models]]
+id = "gpt-image-2"
+supports_vision = true
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 30.0
+cached_per_million = 1.25
+
+[[entrypoint.models]]
+id = "gpt-daybreak-blue-latest"
+
+[entrypoint.models.pricing]
+input_per_million = 4.0
+output_per_million = 20.0
+cached_per_million = 0.4
+
+[[entrypoint.models]]
 id = "gpt-5.6"
 supports_vision = true
 
@@ -214,15 +257,6 @@ supports_vision = true
 input_per_million = 4.0
 output_per_million = 20.0
 cached_per_million = 0.4
-
-[[entrypoint.models]]
-id = "gpt-image-2"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 5.0
-output_per_million = 30.0
-cached_per_million = 1.25
 
 [[entrypoint.models]]
 id = "gpt-realtime-2.1"
@@ -278,6 +312,15 @@ output_per_million = 2.0
 cached_per_million = 0.25
 
 [[entrypoint.models]]
+id = "gpt-4.1"
+supports_vision = true
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 8.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
 id = "gpt-5.6-terra"
 supports_vision = true
 
@@ -294,24 +337,6 @@ supports_vision = true
 input_per_million = 2.0
 output_per_million = 12.0
 cached_per_million = 0.2
-
-[[entrypoint.models]]
-id = "gpt-6-astra"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 10.0
-output_per_million = 50.0
-cached_per_million = 1.0
-
-[[entrypoint.models]]
-id = "gpt-6-astra-pro"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 10.0
-output_per_million = 50.0
-cached_per_million = 1.0
 
 [[entrypoint.models]]
 id = "gpt-6-sol"
@@ -332,24 +357,6 @@ output_per_million = 10.0
 cached_per_million = 0.2
 
 [[entrypoint.models]]
-id = "gpt-6-luna"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 0.1
-output_per_million = 0.5
-cached_per_million = 0.01
-
-[[entrypoint.models]]
-id = "gpt-6-luna-pro"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 0.1
-output_per_million = 0.5
-cached_per_million = 0.01
-
-[[entrypoint.models]]
 id = "gpt-6.1-sol"
 supports_vision = true
 
@@ -366,15 +373,6 @@ supports_vision = true
 input_per_million = 2.0
 output_per_million = 10.0
 cached_per_million = 0.1
-
-[[entrypoint.models]]
-id = "gpt-4.1"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 2.0
-output_per_million = 8.0
-cached_per_million = 0.5
 
 [[entrypoint.models]]
 id = "o3"
@@ -474,6 +472,24 @@ supports_vision = true
 input_per_million = 1.25
 output_per_million = 10.0
 cached_per_million = 0.125
+
+[[entrypoint.models]]
+id = "gpt-6-luna"
+supports_vision = true
+
+[entrypoint.models.pricing]
+input_per_million = 0.1
+output_per_million = 0.5
+cached_per_million = 0.01
+
+[[entrypoint.models]]
+id = "gpt-6-luna-pro"
+supports_vision = true
+
+[entrypoint.models.pricing]
+input_per_million = 0.1
+output_per_million = 0.5
+cached_per_million = 0.01
 
 [[entrypoint.models]]
 id = "gpt-5-chat"

@@ -27,9 +27,9 @@ es = "SiliconFlow (China)"
 ru = "SiliconFlow (Китай)"
 
 [entrypoint.defaults]
-deep = "zai-org/GLM-5.2"
-normal = "Pro/zai-org/GLM-5.1"
-basic = "stepfun-ai/Step-3.5-Flash"
+deep = "zai-org/GLM-5.3"
+normal = "zai-org/GLM-5.2"
+basic = "zai-org/GLM-5.3-Flash"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
@@ -43,6 +43,14 @@ supports_vision = false
 [entrypoint.models.pricing]
 input_per_million = 1.4
 output_per_million = 4.4
+
+[[entrypoint.models]]
+id = "zai-org/GLM-5.3"
+
+[entrypoint.models.pricing]
+input_per_million = 1.4
+output_per_million = 4.4
+cached_per_million = 0.26
 
 [[entrypoint.models]]
 id = "Pro/zai-org/GLM-5.1"
@@ -85,6 +93,30 @@ input_per_million = 0.95
 output_per_million = 2.55
 
 [[entrypoint.models]]
+id = "zai-org/GLM-5.3-Flash"
+
+[entrypoint.models.pricing]
+input_per_million = 0.15
+output_per_million = 0.5
+cached_per_million = 0.03
+
+[[entrypoint.models]]
+id = "moonshotai/Kimi-K3"
+
+[entrypoint.models.pricing]
+input_per_million = 2.7
+output_per_million = 13.5
+cached_per_million = 0.27
+
+[[entrypoint.models]]
+id = "Qwen/Qwen3.8-2.4T-A95B"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 6.0
+cached_per_million = 0.25
+
+[[entrypoint.models]]
 id = "deepseek-ai/DeepSeek-V4-Pro"
 supports_vision = false
 
@@ -92,6 +124,14 @@ supports_vision = false
 input_per_million = 1.74
 output_per_million = 3.48
 cached_per_million = 0.145
+
+[[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V4-Pro-0813"
+
+[entrypoint.models.pricing]
+input_per_million = 1.32
+output_per_million = 3.96
+cached_per_million = 0.044
 
 [[entrypoint.models]]
 id = "Pro/moonshotai/Kimi-K2.6"
@@ -103,6 +143,14 @@ output_per_million = 4.0
 cached_per_million = 0.16
 
 [[entrypoint.models]]
+id = "moonshotai/Kimi-K2.7-Code"
+
+[entrypoint.models.pricing]
+input_per_million = 0.8592
+output_per_million = 3.8
+cached_per_million = 0.17993
+
+[[entrypoint.models]]
 id = "moonshotai/Kimi-K2.6"
 supports_vision = true
 
@@ -110,6 +158,14 @@ supports_vision = true
 input_per_million = 0.77
 output_per_million = 4.0
 cached_per_million = 0.2
+
+[[entrypoint.models]]
+id = "meituan-longcat/LongCat-2.0"
+
+[entrypoint.models.pricing]
+input_per_million = 0.75
+output_per_million = 2.95
+cached_per_million = 0.015
 
 [[entrypoint.models]]
 id = "Pro/zai-org/GLM-4.7"
@@ -184,6 +240,14 @@ input_per_million = 0.5
 output_per_million = 2.18
 
 [[entrypoint.models]]
+id = "nex-agi/Nex-N2-Pro"
+
+[entrypoint.models.pricing]
+input_per_million = 0.5
+output_per_million = 2.5
+cached_per_million = 0.25
+
+[[entrypoint.models]]
 id = "Pro/deepseek-ai/DeepSeek-R1"
 supports_vision = false
 
@@ -224,6 +288,14 @@ input_per_million = 0.45
 output_per_million = 3.5
 
 [[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V4-Flash-Vision-Exp"
+
+[entrypoint.models.pricing]
+input_per_million = 0.44
+output_per_million = 1.32
+cached_per_million = 0.028
+
+[[entrypoint.models]]
 id = "moonshotai/Kimi-K2-Instruct-0905"
 supports_vision = false
 
@@ -254,6 +326,14 @@ supports_vision = false
 [entrypoint.models.pricing]
 input_per_million = 0.35
 output_per_million = 1.42
+
+[[entrypoint.models]]
+id = "MiniMaxAI/MiniMax-M3"
+
+[entrypoint.models.pricing]
+input_per_million = 0.3
+output_per_million = 1.2
+cached_per_million = 0.06
 
 [[entrypoint.models]]
 id = "MiniMaxAI/MiniMax-M2.5"
