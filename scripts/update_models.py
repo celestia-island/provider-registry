@@ -202,6 +202,8 @@ EXCLUDE_PATTERNS = [
     '-1106',
     '-0125',
     '-preview',  # Exclude preview versions unless they're the only version
+    ':batch',    # Aggregator batch-pricing variants: never routable, and they
+                 # pollute both the card catalog and tier-default selection
 ]
 
 # Tags to add based on model name patterns
@@ -529,19 +531,40 @@ def group_modelsdev_by_provider(raw_data: Dict) -> Dict[str, List[ModelInfo]]:
 # Multi-Source Merge
 # ============================================================
 
+# Merge precedence switch (set from --aggregator-priority in main();
+# tests may also pass the kwarg directly).
+AGGREGATOR_PRIORITY = False
+
+
 def merge_model_dicts(
     existing: Dict[str, ModelInfo],
     openrouter: Dict[str, ModelInfo],
     modelsdev: Dict[str, ModelInfo],
+    aggregator_priority: bool = False,
 ) -> Dict[str, ModelInfo]:
-    """Merge model data from multiple sources (additive only, no deletions)
+    """Merge model data from multiple sources.
 
-    Priority:
-      - pricing: models.dev > OpenRouter > existing
-      - capabilities: models.dev > OpenRouter > existing
-      - new models: added from any source
-      - existing models absent from sources: kept unchanged
+    Two precedence regimes share this merge:
+
+    - Curation-first (the default): any field already on disk with a
+      meaningful value (non-zero number, non-empty list, non-None score)
+      WINS — the scheduled sync then only fills blanks and adds NEW
+      models. Hand-verified official list prices (see PR #14) must never
+      be clobbered by aggregator FX noise or stale mirrors.
+    - Aggregator-priority (``--aggregator-priority``): the legacy regime
+      (models.dev > OpenRouter > existing), for wholesale refreshes where
+      the aggregator feeds are intentionally trusted over the tree.
+
+    In both regimes, models absent from every source are kept unchanged.
     """
+    priority = bool(aggregator_priority or AGGREGATOR_PRIORITY)
+
+    def num(*cands):
+        for v in cands:
+            if v is not None and v > 0:
+                return v
+        return 0.0
+
     merged = {}
 
     all_ids = set()
@@ -554,80 +577,121 @@ def merge_model_dicts(
         o = openrouter.get(model_id)
         m = modelsdev.get(model_id)
 
-        if m:
-            base = m
-        elif o:
-            base = o
-        else:
-            base = e
+        if priority or e is None:
+            # Legacy regime, and the stamping path for models new to the
+            # tree (no on-disk card to curate).
+            if m:
+                base = m
+            elif o:
+                base = o
+            else:
+                base = e
 
-        if base is None:
+            if base is None:
+                continue
+
+            merged[model_id] = ModelInfo(
+                id=model_id,
+                name=base.name,
+                context_window=base.context_window,
+                max_output_tokens=base.max_output_tokens,
+                supports_vision=base.supports_vision,
+                supports_function_calling=base.supports_function_calling,
+                supports_streaming=base.supports_streaming,
+                supports_reasoning=base.supports_reasoning,
+                tags=base.tags,
+                pricing_input=base.pricing_input,
+                pricing_output=base.pricing_output,
+                pricing_cached=base.pricing_cached,
+                score=base.score,
+                score_source=base.score_source,
+            )
+
+            if m:
+                # models.dev has priority, but it sometimes omits pricing/context
+                # (returns 0) for newly-listed models. Don't let those placeholder
+                # zeros clobber the real OpenRouter values — fall back to OpenRouter
+                # for any field models.dev reports as 0.
+                if m.pricing_input > 0 or o is None or o.pricing_input <= 0:
+                    merged[model_id].pricing_input = m.pricing_input
+                else:
+                    merged[model_id].pricing_input = o.pricing_input
+                if m.pricing_output > 0 or o is None or o.pricing_output <= 0:
+                    merged[model_id].pricing_output = m.pricing_output
+                else:
+                    merged[model_id].pricing_output = o.pricing_output
+                if m.pricing_cached > 0:
+                    merged[model_id].pricing_cached = m.pricing_cached
+                elif o is not None:
+                    merged[model_id].pricing_cached = o.pricing_cached
+                if m.context_window > 0:
+                    merged[model_id].context_window = m.context_window
+                elif o is not None and o.context_window > 0:
+                    merged[model_id].context_window = o.context_window
+                if m.max_output_tokens > 0:
+                    merged[model_id].max_output_tokens = m.max_output_tokens
+                elif o is not None and o.max_output_tokens > 0:
+                    merged[model_id].max_output_tokens = o.max_output_tokens
+                merged[model_id].supports_vision = m.supports_vision
+                merged[model_id].supports_reasoning = m.supports_reasoning
+                merged[model_id].supports_function_calling = m.supports_function_calling
+            elif o:
+                if o.pricing_input > 0:
+                    merged[model_id].pricing_input = o.pricing_input
+                if o.pricing_output > 0:
+                    merged[model_id].pricing_output = o.pricing_output
+                if o.pricing_cached > 0:
+                    merged[model_id].pricing_cached = o.pricing_cached
+                if e is None or e.context_window == 128000:
+                    merged[model_id].context_window = o.context_window
+
+            # Score merge: live OpenRouter benchmarks win; otherwise preserve any
+            # score already on disk (covers manual overrides and models absent from
+            # the live API). models.dev carries no benchmark data.
+            if o is not None and o.score is not None:
+                merged[model_id].score = o.score
+                merged[model_id].score_source = o.score_source
+            elif e is not None and e.score is not None:
+                merged[model_id].score = e.score
+                merged[model_id].score_source = e.score_source
             continue
 
-        merged[model_id] = ModelInfo(
-            id=model_id,
-            name=base.name,
-            context_window=base.context_window,
-            max_output_tokens=base.max_output_tokens,
-            supports_vision=base.supports_vision,
-            supports_function_calling=base.supports_function_calling,
-            supports_streaming=base.supports_streaming,
-            supports_reasoning=base.supports_reasoning,
-            tags=base.tags,
-            pricing_input=base.pricing_input,
-            pricing_output=base.pricing_output,
-            pricing_cached=base.pricing_cached,
-            score=base.score,
-            score_source=base.score_source,
+        # Curation-first: the on-disk card is authoritative; aggregator
+        # sources only fill blanks (zeroed pricing/context, missing score
+        # or tags).
+        card = ModelInfo(
+            id=e.id,
+            name=e.name,
+            context_window=e.context_window,
+            max_output_tokens=e.max_output_tokens,
+            supports_vision=e.supports_vision,
+            supports_function_calling=e.supports_function_calling,
+            supports_streaming=e.supports_streaming,
+            supports_reasoning=e.supports_reasoning,
+            tags=list(e.tags),
+            pricing_input=e.pricing_input,
+            pricing_output=e.pricing_output,
+            pricing_cached=e.pricing_cached,
+            score=e.score,
+            score_source=e.score_source,
         )
-
-        if m:
-            # models.dev has priority, but it sometimes omits pricing/context
-            # (returns 0) for newly-listed models. Don't let those placeholder
-            # zeros clobber the real OpenRouter values — fall back to OpenRouter
-            # for any field models.dev reports as 0.
-            if m.pricing_input > 0 or o is None or o.pricing_input <= 0:
-                merged[model_id].pricing_input = m.pricing_input
-            else:
-                merged[model_id].pricing_input = o.pricing_input
-            if m.pricing_output > 0 or o is None or o.pricing_output <= 0:
-                merged[model_id].pricing_output = m.pricing_output
-            else:
-                merged[model_id].pricing_output = o.pricing_output
-            if m.pricing_cached > 0:
-                merged[model_id].pricing_cached = m.pricing_cached
-            elif o is not None:
-                merged[model_id].pricing_cached = o.pricing_cached
-            if m.context_window > 0:
-                merged[model_id].context_window = m.context_window
-            elif o is not None and o.context_window > 0:
-                merged[model_id].context_window = o.context_window
-            if m.max_output_tokens > 0:
-                merged[model_id].max_output_tokens = m.max_output_tokens
-            elif o is not None and o.max_output_tokens > 0:
-                merged[model_id].max_output_tokens = o.max_output_tokens
-            merged[model_id].supports_vision = m.supports_vision
-            merged[model_id].supports_reasoning = m.supports_reasoning
-            merged[model_id].supports_function_calling = m.supports_function_calling
-        elif o:
-            if o.pricing_input > 0:
-                merged[model_id].pricing_input = o.pricing_input
-            if o.pricing_output > 0:
-                merged[model_id].pricing_output = o.pricing_output
-            if o.pricing_cached > 0:
-                merged[model_id].pricing_cached = o.pricing_cached
-            if e is None or e.context_window == 128000:
-                merged[model_id].context_window = o.context_window
-
-        # Score merge: live OpenRouter benchmarks win; otherwise preserve any
-        # score already on disk (covers manual overrides and models absent from
-        # the live API). models.dev carries no benchmark data.
-        if o is not None and o.score is not None:
-            merged[model_id].score = o.score
-            merged[model_id].score_source = o.score_source
-        elif e is not None and e.score is not None:
-            merged[model_id].score = e.score
-            merged[model_id].score_source = e.score_source
+        if card.pricing_input <= 0:
+            card.pricing_input = num(m and m.pricing_input, o and o.pricing_input)
+        if card.pricing_output <= 0:
+            card.pricing_output = num(m and m.pricing_output, o and o.pricing_output)
+        if card.pricing_cached <= 0:
+            card.pricing_cached = num(m and m.pricing_cached, o and o.pricing_cached)
+        if card.context_window <= 0:
+            card.context_window = int(num(m and m.context_window, o and o.context_window)) or card.context_window
+        if card.max_output_tokens <= 0:
+            card.max_output_tokens = int(num(m and m.max_output_tokens, o and o.max_output_tokens)) or card.max_output_tokens
+        if not card.tags:
+            card.tags = list((m.tags if m and m.tags else (o.tags if o and o.tags else [])) or [])
+        if card.score is None:
+            if o is not None and o.score is not None:
+                card.score = o.score
+                card.score_source = o.score_source
+        merged[model_id] = card
 
     return merged
 
@@ -961,6 +1025,56 @@ def save_individual_model_files(
     return saved_count
 
 
+
+def curate_entrypoint_blocks(
+    new_blocks: List[Dict[str, Any]],
+    existing_blocks: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Curation-first merge for an entrypoint's [[entrypoint.models]] blocks.
+
+    For a model id already on disk the EXISTING block wins verbatim — the
+    inline pricing of a standard entrypoint mirrors the hand-verified card
+    (and in coding plans it IS the plan's charge multiplier, not a retail
+    price), so a scheduled sync must never rewrite it. New ids are appended
+    in the incoming order; ids present on disk but absent from the new list
+    are retained (never dropped by a cap or a feed gap).
+    """
+    by_id = {b.get("id"): b for b in existing_blocks or [] if b.get("id")}
+    out: List[Dict[str, Any]] = []
+    seen = set()
+    for b in new_blocks or []:
+        mid = b.get("id")
+        if not mid or mid in seen:
+            continue
+        seen.add(mid)
+        out.append(by_id.get(mid, b))
+    for b in existing_blocks or []:
+        mid = b.get("id")
+        if mid and mid not in seen:
+            seen.add(mid)
+            out.append(b)
+    return out
+
+
+def preserve_coding_plan_tiers(
+    old_defaults: Dict[str, Any],
+    selected: Dict[str, Optional[str]],
+    merged_ids: set,
+) -> Dict[str, Optional[str]]:
+    """Keep a coding plan's hand-curated tier picks unless they broke.
+
+    A tier is re-selected only when it is missing on disk or its model no
+    longer exists in the merged catalog; a still-valid existing pick wins.
+    """
+    for tier in ("deep", "normal", "basic"):
+        current = old_defaults.get(tier)
+        if isinstance(current, str) and current in merged_ids:
+            selected[tier] = current
+        elif tier not in selected:
+            selected[tier] = None
+    return selected
+
+
 def select_tier_models_from_list(
     models: List[ModelInfo], limit: int = 3, is_coding_plan: bool = False
 ) -> Dict[str, Optional[str]]:
@@ -1111,6 +1225,13 @@ def update_entrypoint_config(
     if is_coding_plan_entrypoint:
         # Select top models for each tier (coding plans restrict to ≥1x pool)
         selected = select_tier_models_from_list(models, limit=3, is_coding_plan=True)
+        # Curation-first: a coding plan's tiers and charge multipliers are
+        # hand-curated billing data — only re-select tiers that are missing
+        # or whose model vanished from the merged catalog.
+        old_def_defaults = (existing_config.get('entrypoint', {}) or {}).get('defaults') or {}
+        selected = preserve_coding_plan_tiers(
+            old_def_defaults, selected, {m.id for m in models}
+        )
         # Get selected model objects
         selected_models = []
         for tier in ['deep', 'normal', 'basic']:
@@ -1129,8 +1250,11 @@ def update_entrypoint_config(
                 seen.add(m.id)
                 unique_models.append(m)
 
-        # Use simplified entrypoint format (only id + pricing)
-        config['entrypoint']['models'] = [m.to_entrypoint_dict() for m in unique_models]
+        # Use simplified entrypoint format (only id + pricing); blocks for
+        # returning ids keep their on-disk pricing (charge multipliers).
+        new_blocks = [m.to_entrypoint_dict() for m in unique_models]
+        old_blocks = (existing_config.get('entrypoint', {}) or {}).get('models') or []
+        config['entrypoint']['models'] = curate_entrypoint_blocks(new_blocks, old_blocks)
 
         # Update defaults to match selected models
         if update_defaults and 'defaults' in config['entrypoint']:
@@ -1164,8 +1288,12 @@ def update_entrypoint_config(
                 seen_ids.add(model.id)
                 unique_models.append(model)
 
-        # Use simplified entrypoint format (only id + pricing)
-        config['entrypoint']['models'] = [m.to_entrypoint_dict() for m in unique_models[:50]]
+        # Use simplified entrypoint format (only id + pricing). The cap
+        # bounds NEW additions only — existing blocks are always retained
+        # (curation-first; see curate_entrypoint_blocks).
+        new_blocks = [m.to_entrypoint_dict() for m in unique_models[:50]]
+        old_blocks = (existing_config.get('entrypoint', {}) or {}).get('models') or []
+        config['entrypoint']['models'] = curate_entrypoint_blocks(new_blocks, old_blocks)
 
         print(f"   Updated {len(unique_models[:50])} models")
 
@@ -1386,6 +1514,13 @@ Examples:
         help='Data source: openrouter (default), modelsdev, all (merge both)'
     )
     parser.add_argument(
+        '--aggregator-priority',
+        action='store_true',
+        help='Trust aggregator feeds over on-disk values (legacy precedence '
+             'models.dev > OpenRouter > existing). Default is curation-first: '
+             'existing non-empty values win and sources only fill blanks.'
+    )
+    parser.add_argument(
         '--providers',
         type=str,
         default='all',
@@ -1419,6 +1554,8 @@ Examples:
     )
 
     args = parser.parse_args()
+    global AGGREGATOR_PRIORITY
+    AGGREGATOR_PRIORITY = getattr(args, 'aggregator_priority', False)
 
     use_entrypoint_mode = args.entrypoint_mode
     if not use_entrypoint_mode:
@@ -1491,11 +1628,15 @@ Examples:
         elif source == 'modelsdev':
             if not md_models:
                 return []
-            return list(md_models.values())
+            existing_models_dir = load_existing_models_from_dir(provider_id, config_dir)
+            merged = merge_model_dicts(existing_models_dir, {}, md_models)
+            return list(merged.values())
         else:
             if not or_models:
                 return []
-            return list(or_models.values())
+            existing_models_dir = load_existing_models_from_dir(provider_id, config_dir)
+            merged = merge_model_dicts(existing_models_dir, or_models, {})
+            return list(merged.values())
 
     def get_merged_models_dict(provider_id: str) -> Dict[str, ModelInfo]:
         return {m.id: m for m in get_merged_models(provider_id)}
