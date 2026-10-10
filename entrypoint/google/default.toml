@@ -64,6 +64,13 @@ output_per_million = 9.0
 cached_per_million = 0.15
 
 [[entrypoint.models]]
+id = "gemini-nano-banana-2.1"
+
+[entrypoint.models.pricing]
+input_per_million = 1.5
+output_per_million = 7.5
+
+[[entrypoint.models]]
 id = "gemini-2.5-pro"
 supports_vision = true
 
