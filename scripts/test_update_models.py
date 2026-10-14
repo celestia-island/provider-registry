@@ -172,6 +172,23 @@ def test_coding_plan_tier_stability():
     assert sel2["deep"] == "glm-5.3", sel2
 
 
+def test_malformed_record_skipped_not_fatal():
+    # Audit preg-R1-5: a single malformed record degrades to a skip.
+    bad = {"id": "bad/record", "pricing": {"prompt": "not-a-number"}}
+    assert um.parse_openrouter_model(bad) is None
+
+
+def test_negative_pricing_rejected():
+    # Audit preg-R1-3: negative upstream pricing is refused at ingestion.
+    neg = {"id": "bad/pricing", "pricing": {"prompt": "-0.5", "completion": "0.1"}}
+    assert um.parse_openrouter_model(neg) is None
+
+
+def test_absurd_pricing_rejected():
+    absurd = {"id": "bad/pricing", "pricing": {"prompt": "999999", "completion": "0.1"}}
+    assert um.parse_openrouter_model(absurd) is None
+
+
 def main() -> int:
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     assert len(tests) >= 12, f"expected >=10 tests, found {len(tests)}"

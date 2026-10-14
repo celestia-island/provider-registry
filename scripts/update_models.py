@@ -327,11 +327,34 @@ def parse_openrouter_model(model_data: Dict) -> Optional[ModelInfo]:
 
     provider_prefix, model_name = model_id.split('/', 1)
 
+    # Audit preg-R1-5: a single malformed record must not abort the whole
+    # 6h sync — degrade to a warning + skip.
+    try:
+        return _parse_openrouter_model_inner(model_data, model_id, model_name)
+    except (ValueError, KeyError, TypeError) as e:
+        print(f"   ⚠️  Skipping malformed model record {model_id!r}: {e}")
+        return None
+
+
+def _parse_openrouter_model_inner(
+    model_data: Dict, model_id: str, model_name: str
+) -> Optional[ModelInfo]:
     # Get pricing (OpenRouter prices are per token, convert to per million)
     pricing = model_data.get('pricing', {})
     prompt_price = float(pricing.get('prompt', 0)) * 1_000_000
     completion_price = float(pricing.get('completion', 0)) * 1_000_000
     cache_price = float(pricing.get('input_cache_read', 0)) * 1_000_000
+
+    # Audit preg-R1-3: sanity gate on upstream pricing — an unauthenticated
+    # feed must not ship negative or absurd values into the billing chain.
+    # The range form (not chained comparisons) also rejects NaN, which
+    # float("nan") from the feed would otherwise slip past both bounds.
+    for label, price in (("prompt", prompt_price), ("completion", completion_price)):
+        if not (0 <= price <= 100_000):
+            raise ValueError(
+                f"pricing out of sane range ({label}={price} per million); "
+                "refusing to ingest this record"
+            )
 
     # Get context length
     context_length = model_data.get('context_length', 128000)
