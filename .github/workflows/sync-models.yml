@@ -84,6 +84,37 @@ jobs:
             } >> $GITHUB_OUTPUT
           fi
 
+      - name: Validate registry data (audit preg-R1-2)
+        if: steps.sync.outputs.has_changes == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run == true)
+        run: |
+          python3 scripts/test_update_models.py
+          python3 - << 'PY'
+          import sys, tomllib
+          from pathlib import Path
+
+          bad = []
+          for pattern in ("registry.toml", "entrypoint/*.toml", "models/*/*.toml"):
+              for f in Path(".").glob(pattern):
+                  try:
+                      tomllib.load(open(f, "rb"))
+                  except tomllib.TOMLDecodeError as e:
+                      bad.append(f"{f}: {e}")
+          if bad:
+              for b in bad:
+                  print(f"::error::invalid TOML: {b}")
+              sys.exit(1)
+          # Audit preg-R1-4: three-way reference consistency — orphaned
+          # providers are warned (possibly intentional delisting) but do
+          # not block the sync.
+          import re
+          registry = Path("registry.toml").read_text()
+          registered = set(re.findall(r"^\[(?:.*)\]", registry, re.M))
+          for models_dir in sorted(Path("models").iterdir()):
+              if models_dir.is_dir() and models_dir.name not in registry:
+                  print(f"::warning::models/{models_dir.name} exists but is not registered in registry.toml (orphan)")
+          print("TOML parse OK")
+          PY
+
       - name: Push sync branch and open auto-merge PR
         if: steps.sync.outputs.has_changes == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.dry_run == true)
         env:
