@@ -347,8 +347,10 @@ def _parse_openrouter_model_inner(
 
     # Audit preg-R1-3: sanity gate on upstream pricing — an unauthenticated
     # feed must not ship negative or absurd values into the billing chain.
+    # The range form (not chained comparisons) also rejects NaN, which
+    # float("nan") from the feed would otherwise slip past both bounds.
     for label, price in (("prompt", prompt_price), ("completion", completion_price)):
-        if price < 0 or price > 100_000:
+        if not (0 <= price <= 100_000):
             raise ValueError(
                 f"pricing out of sane range ({label}={price} per million); "
                 "refusing to ingest this record"

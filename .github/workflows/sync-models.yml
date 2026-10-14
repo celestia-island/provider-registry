@@ -106,11 +106,9 @@ jobs:
           # Audit preg-R1-4: three-way reference consistency — orphaned
           # providers are warned (possibly intentional delisting) but do
           # not block the sync.
-          import re
-          registry = Path("registry.toml").read_text()
-          registered = set(re.findall(r"^\[(?:.*)\]", registry, re.M))
+          registry_text = Path("registry.toml").read_text()
           for models_dir in sorted(Path("models").iterdir()):
-              if models_dir.is_dir() and models_dir.name not in registry:
+              if models_dir.is_dir() and models_dir.name not in registry_text:
                   print(f"::warning::models/{models_dir.name} exists but is not registered in registry.toml (orphan)")
           print("TOML parse OK")
           PY
