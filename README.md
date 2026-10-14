@@ -107,7 +107,7 @@ just sync-all
 
 # Sync from specific source
 just sync-openrouter
-just sync-modelsdev
+just sync
 
 # Sync specific providers
 just sync all openai,anthropic
@@ -135,7 +135,7 @@ just validate-descriptors   # structural validation of descriptors/
 
 ## CI
 
-A daily GitHub Actions workflow fetches the latest model lists from [OpenRouter](https://openrouter.ai/) and [models.dev](https://models.dev/) and commits changes to the `dev` branch.
+A daily GitHub Actions workflow fetches the latest model lists from [OpenRouter](https://openrouter.ai/) and [models.dev](https://models.dev/) and opens an auto-merge pull request against `master` (squash-only; a validation step gates the PR).
 
 Manual triggers are available via the Actions tab with configurable source and provider filters.
 
