@@ -1,6 +1,6 @@
+# Audit preg-R1-6: trimmed to the crates the scripts actually import
+# (requests for HTTP fetch in update_models.py; toml for TOML I/O).
+# The previous list (beautifulsoup4/aiohttp/playwright/rich) had zero
+# imports across all scripts in this directory.
 requests>=2.31.0
-beautifulsoup4>=4.12.0
 toml>=0.10.2
-aiohttp>=3.9.0
-playwright>=1.40.0
-rich>=13.7.0
