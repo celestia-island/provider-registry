@@ -53,7 +53,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install toml
+        run: pip install "toml>=0.10,<1.0"
 
       - name: Sync models (OpenRouter + models.dev)
         id: sync
