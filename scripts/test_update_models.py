@@ -289,9 +289,43 @@ def test_basic_tier_skips_zero_price_placeholder():
     assert sel["basic"] == "real-budget", sel
 
 
+def test_stale_cost_effective_tag_no_longer_bars_normal():
+    # Audit R2: 'flash' was dropped from cost_effective TAG_PATTERNS
+    # (2026-10-21) but the tag stays stamped on existing cards
+    # (additive-only sync). A stale tag must not keep the current-gen
+    # mainline flash out of the normal tier — that left google normal on
+    # gemma-4-31b-it while every gemini flash sat excluded.
+    models = [
+        M(id="gemini-4-argon", tags=["flagship", "cost_effective"],
+          score=66.16, score_source="design_arena", supports_reasoning=True),
+        M(id="gemini-3.8-flash", tags=["cost_effective"],
+          score=60.11, score_source="design_arena", supports_reasoning=True),
+        M(id="gemma-4-31b-it", score=43.4, score_source="artificial_analysis"),
+    ]
+    sel = um.select_tier_models_from_list(
+        models, family_prefixes=um.PROVIDER_FAMILY_PREFIXES["google"]
+    )
+    assert sel["normal"] == "gemini-3.8-flash", sel
+    # A genuine budget line (id still matches a current cost_effective
+    # pattern, e.g. "lite") stays excluded from normal.
+    models2 = [
+        M(id="glm-5", tags=["flagship"], supports_reasoning=True),
+        M(id="glm-5.2-air", tags=["cost_effective"], score=70.0, score_source="design_arena"),
+        M(id="glm-5.1", score=60.0, score_source="design_arena"),
+    ]
+    sel2 = um.select_tier_models_from_list(
+        models2, family_prefixes=um.PROVIDER_FAMILY_PREFIXES["zhipu_glm"]
+    )
+    assert sel2["normal"] == "glm-5.1", sel2
+
+
 def test_score_outranks_stale_reasoning_pick():
     # deepseek-reasoner is an unscored alias that merely *claims* reasoning;
     # a scored current-gen model must take the deep tier.
+    # Audit R2 update: deepseek-v4-flash is DeepSeek's mainline mid tier
+    # (stale cost_effective tag no longer bars it), so it lands in NORMAL;
+    # the only remaining candidate for basic is the unpriced alias, which
+    # the 0-price guard correctly refuses.
     models = [
         M(id="deepseek-reasoner", supports_reasoning=True),
         M(id="deepseek-v4-pro-0813", score=68.8, score_source="artificial_analysis"),
@@ -299,7 +333,8 @@ def test_score_outranks_stale_reasoning_pick():
     ]
     sel = um.select_tier_models_from_list(models, family_prefixes=um.PROVIDER_FAMILY_PREFIXES["deepseek"])
     assert sel["deep"] == "deepseek-v4-pro-0813", sel
-    assert sel["basic"] == "deepseek-v4-flash", sel
+    assert sel["normal"] == "deepseek-v4-flash", sel
+    assert sel["basic"] is None, sel
 
 
 def test_entrypoint_twin_blocks_deduped():

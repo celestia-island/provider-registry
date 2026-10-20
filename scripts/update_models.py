@@ -225,7 +225,12 @@ TAG_PATTERNS = {
     'reasoning': ['o1', 'o2', 'o3', 'o4', 'reasoner', 'thinking', 'glm-z1'],
     'coding': ['codex', 'coder', 'code'],
     'vision': ['vision', 'v-', '-v', '4o', 'multimodal'],
-    'cost_effective': ['mini', 'air', 'turbo', 'lite'],
+    # '-mini' not 'mini' (audit R2): 'mini' is a substring of 'gemini',
+    # so every gemini id — flagship flash lines included — live-tagged
+    # as cost_effective and the normal tier barred them (google normal
+    # sat on gemma while every gemini flash was "budget"). '-mini'
+    # keeps gpt-4o-mini etc.; 'ministral' keeps Mistral's small line.
+    'cost_effective': ['-mini', 'ministral', 'air', 'turbo', 'lite'],
     # 'flash' removed 2026-10-21: at Google/Qwen/DeepSeek "flash" is the
     # current-gen MAINLINE mid tier, not a budget line — keeping it here
     # barred gemini-3.8-flash etc. from the normal tier and left google
@@ -1373,6 +1378,19 @@ def _is_chat_model(m: ModelInfo) -> bool:
                          'audio_video', 'embedding') for t in (m.tags or []))
 
 
+def _live_tags(model_id: str) -> List[str]:
+    """Tags today's TAG_PATTERNS would stamp on this id."""
+    mid = model_id.lower()
+    out: List[str] = []
+    for tag, patterns in TAG_PATTERNS.items():
+        for pattern in patterns:
+            if pattern in mid:
+                if tag not in out:
+                    out.append(tag)
+                break
+    return out
+
+
 def _matches_family(m: ModelInfo, prefixes) -> bool:
     if not prefixes:
         return True
@@ -1439,7 +1457,20 @@ def select_tier_models_from_list(
     def is_normal_candidate(m: ModelInfo) -> bool:
         if deep is not None and m.id == deep.id:
             return False
-        return 'free' not in m.tags and 'cost_effective' not in m.tags
+        if 'free' in m.tags:
+            return False
+        # Stale auto-tag compat (audit R2): TAG_PATTERNS dropped 'flash'
+        # from cost_effective on 2026-10-21 (flash is the current-gen
+        # MAINLINE mid tier at Google/Qwen/DeepSeek), but additive-only
+        # sync leaves the old tag stamped on existing cards — which kept
+        # every gemini flash out of the normal tier and left google
+        # normal on gemma. Disk tags carry no provenance marker, so the
+        # exclusion only bites when the id still matches a CURRENT
+        # cost_effective pattern; genuine budget lines (mini/air/turbo/
+        # lite) keep excluding as before.
+        if 'cost_effective' in m.tags and 'cost_effective' in _live_tags(m.id):
+            return False
+        return True
 
     normal_candidates = [m for m in pool if is_normal_candidate(m)]
     if normal_candidates:
