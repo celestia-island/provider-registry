@@ -1371,7 +1371,7 @@ def _quality_rank(m: ModelInfo) -> float:
     inverting the order:
 
     - Generational floor: an unscored (or pathetically scored) model never
-      ranks below its generation's proxy (major.minor * 10, +25 when it is
+      ranks below its generation's proxy (major.minor * 10, +35 when it is
       a flagship of the current generation). Without this, a scored relic
       (gemma-2 at DA~20, or 2025-07 qwen-plus at ~55) outranked the
       unscored 2026-10 flagships (qwen3.8-max, gpt-6 family).
