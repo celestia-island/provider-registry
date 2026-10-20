@@ -1466,12 +1466,16 @@ def select_tier_models_from_list(
     if not pool:
         # The family filter wiped everything (e.g. a provider whose whole
         # feed is third-party) — degrade to the unfiltered non-legacy list
-        # instead of emitting empty tiers.
+        # instead of emitting empty tiers. The coding-plan >=1x charge
+        # threshold survives the degrade (audit R2: the fallback used to
+        # lose it, letting sub-1x models into a premium plan's tiers).
         pool = [
             m for m in models
             if 'legacy' not in m.tags and 'legacy' not in _live_tags(m.id)
             and _is_chat_model(m)
         ]
+        if is_coding_plan:
+            pool = [m for m in pool if m.pricing_input >= 1.0]
 
     pool.sort(key=lambda m: (-_quality_rank(m), m.id))
 

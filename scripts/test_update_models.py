@@ -543,6 +543,23 @@ def test_normal_skips_snapshot_alias_of_deep():
     assert not um._is_snapshot_alias("qwen3.8-max", "qwen3.8-max")
 
 
+def test_coding_plan_fallback_keeps_1x_threshold():
+    # Audit R2: when the family filter wiped the pool, the fallback list
+    # lost the >=1x charge-multiplier gate and sub-1x models could enter
+    # a premium plan's tiers.
+    models = [  # family prefix matches nothing → fallback pool
+        M(id="glm-5.3-go", tags=["flagship"], supports_reasoning=True, pricing_input=0.5),
+        M(id="glm-5.3", tags=["flagship"], supports_reasoning=True, pricing_input=1.0),
+        M(id="glm-5.2", pricing_input=1.0),
+    ]
+    sel = um.select_tier_models_from_list(
+        models, is_coding_plan=True, family_prefixes=("nomatch-",)
+    )
+    assert sel["deep"] == "glm-5.3", sel
+    assert sel["normal"] == "glm-5.2", sel
+    assert sel["basic"] is None, sel  # no sub-1x pick in a premium plan
+
+
 def main() -> int:
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     assert len(tests) >= 12, f"expected >=10 tests, found {len(tests)}"
