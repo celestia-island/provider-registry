@@ -672,6 +672,22 @@ SEPARATOR_CHARS = "-._/"
 import re as _re
 _TRAILING_SNAPSHOT_ZERO = _re.compile(r'(\w)[-_.]0$')
 
+# Trailing date/snapshot suffixes (qwen3.8-max-0902, deepseek-v4.1-flash-
+# 1017, mistral-medium-2505): same base model, different pin. Used by the
+# tier selector so the normal tier never just repeats the deep pick under
+# a date alias.
+_SNAPSHOT_SUFFIX = _re.compile(r'[-_.]\d{4,8}([-_.]\d{2}){0,2}$')
+
+
+def _is_snapshot_alias(a: str, b: str) -> bool:
+    """True when two ids denote the same model pinned at different
+    snapshots (or one pinned, one floating)."""
+    if a == b:
+        return False
+    return canonical_id(_SNAPSHOT_SUFFIX.sub('', a.lower())) == canonical_id(
+        _SNAPSHOT_SUFFIX.sub('', b.lower())
+    )
+
 
 def canonical_id(mid: str) -> str:
     """Case/separator-insensitive identity of a model id."""
@@ -1478,6 +1494,11 @@ def select_tier_models_from_list(
     def is_normal_candidate(m: ModelInfo) -> bool:
         if deep is not None and m.id == deep.id:
             return False
+        # A date-snapshot pin of the deep model (qwen3.8-max-0902 next to
+        # deep=qwen3.8-max) is the SAME model — the normal tier must be a
+        # different model, not the deep pick repeated under an alias.
+        if deep is not None and _is_snapshot_alias(m.id, deep.id):
+            return False
         if 'free' in m.tags:
             return False
         # Stale auto-tag compat (audit R2): TAG_PATTERNS dropped 'flash'
@@ -1500,6 +1521,13 @@ def select_tier_models_from_list(
         def is_plain_base(mid: str) -> bool:
             return bool(_re.fullmatch(r'[a-z]+-\d+', mid.lower()))
 
+        # Equal-rank tiebreak: a model still carrying a cost_effective
+        # tag (live OR stale) reads as its family's budget line; at
+        # equal rank the untagged sibling wins normal (qwen3.8-plus
+        # over qwen3.8-flash when deep is qwen3.8-max).
+        normal_candidates.sort(
+            key=lambda m: (-_quality_rank(m), 'cost_effective' in m.tags, m.id)
+        )
         plain_bases = [m for m in normal_candidates if is_plain_base(m.id)]
         normal = (plain_bases[0] if plain_bases else normal_candidates[0]).id
     else:

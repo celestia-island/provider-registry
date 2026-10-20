@@ -525,6 +525,24 @@ def test_stale_legacy_picks_leave_the_pool():
     assert sel2["basic"] == "gpt-6-mini", sel2
 
 
+def test_normal_skips_snapshot_alias_of_deep():
+    # Audit R2: qwen normal was qwen3.8-max-0902 — the SAME model as
+    # deep=qwen3.8-max, pinned at a date. Normal must be a different
+    # model.
+    models = [
+        M(id="qwen3.8-max", tags=["flagship"], supports_reasoning=True, pricing_input=1.2),
+        M(id="qwen3.8-max-0902", tags=["flagship"], supports_reasoning=True, pricing_input=1.2),
+        M(id="qwen3.8-plus", pricing_input=0.8),
+        M(id="qwen3.8-flash", tags=["cost_effective"], pricing_input=0.05),
+    ]
+    sel = um.select_tier_models_from_list(models, family_prefixes=um.PROVIDER_FAMILY_PREFIXES["qwen"])
+    assert sel["deep"] == "qwen3.8-max", sel
+    assert sel["normal"] == "qwen3.8-plus", sel
+    assert um._is_snapshot_alias("qwen3.8-max-0902", "qwen3.8-max")
+    assert not um._is_snapshot_alias("qwen3.8-plus", "qwen3.8-max")
+    assert not um._is_snapshot_alias("qwen3.8-max", "qwen3.8-max")
+
+
 def main() -> int:
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     assert len(tests) >= 12, f"expected >=10 tests, found {len(tests)}"
