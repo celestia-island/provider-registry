@@ -351,6 +351,37 @@ def test_entrypoint_twin_blocks_deduped():
     assert out[0]["pricing"]["input_per_million"] == 1.25  # existing block wins
 
 
+def test_fold_keeps_entrypoint_spelling_like_curate():
+    # Audit R2 (spelling contract): the existing catalog is built
+    # entrypoint-first (load_existing_catalog), so the fold winner is
+    # the ENTRYPOINT block spelling — exactly the spelling
+    # curate_entrypoint_blocks emits. Before this, the fold saw only
+    # dir-sorted spellings and minimax normal flipped between
+    # "MiniMax-M3" and "minimax-m3" across runs (default pointing at a
+    # block id that was never emitted).
+    ep_card = M(id="minimax-m3", pricing_input=0.3, context_window=0)
+    dir_card = M(id="MiniMax-M3", pricing_input=0.3,
+                 context_window=204800, tags=["cost_effective"])
+    existing = {"minimax-m3": ep_card, "MiniMax-M3": dir_card}  # ep first
+    folded = um.fold_by_canonical(dict(existing))
+    assert set(folded) == {"minimax-m3"}, folded
+    # the dir twin only fills blanks on the kept card
+    assert folded["minimax-m3"].context_window == 204800
+    assert folded["minimax-m3"].tags == ["cost_effective"]
+    # feeds rekey onto the same spelling …
+    feed = um.rekey_onto_existing(
+        {"MiniMax-M3": M(id="MiniMax-M3", score=61.2, score_source="design_arena")},
+        folded,
+    )
+    assert set(feed) == {"minimax-m3"}, feed
+    # … and curate keeps the entrypoint block spelling for that model.
+    blocks = um.curate_entrypoint_blocks(
+        [{"id": "minimax-m3", "pricing": {"input_per_million": 0.3}}],
+        [{"id": "minimax-m3", "pricing": {"input_per_million": 0.3}}],
+    )
+    assert [b["id"] for b in blocks] == ["minimax-m3"], blocks
+
+
 def test_individual_pass_score_backfill():
     # The --individual-models pass feeds the merged dict through the
     # openrouter slot: a score fetched for a pre-existing card must land.

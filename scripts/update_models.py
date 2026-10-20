@@ -1800,6 +1800,32 @@ def update_provider_config(
     return True
 
 
+def load_existing_catalog(
+    provider_id: str, config_dir: Path, include_entrypoint: bool = True
+) -> Dict[str, ModelInfo]:
+    """Existing cards for a provider in ONE canonical insertion order:
+    entrypoint blocks first, then models/ dir cards.
+
+    The order IS the spelling contract (audit R2): fold_by_canonical
+    keeps the FIRST spelling it meets, and curate_entrypoint_blocks
+    keeps the existing entrypoint block's spelling — building the
+    existing dict entrypoint-first makes the fold winner and the
+    emitted block id the SAME string, so tier defaults cannot dangle
+    on a case variant of an emitted block (minimax normal flipped
+    between "MiniMax-M3" and "minimax-m3" across runs before this).
+    """
+    existing: Dict[str, ModelInfo] = {}
+    if include_entrypoint:
+        for ep_provider, _ep_file, _desc in ENTRYPOINT_FILES:
+            if ep_provider == provider_id:
+                existing.update(
+                    load_existing_models_from_entrypoint(provider_id, _ep_file, config_dir)
+                )
+                break
+    existing.update(load_existing_models_from_dir(provider_id, config_dir))
+    return existing
+
+
 # ============================================================
 # Main
 # ============================================================
@@ -1953,15 +1979,13 @@ Examples:
         md_models = md_models_by_provider.get(provider_id, {})
 
         if source == 'all' and use_entrypoint_mode:
-            existing_ep = {}
-            for _, ep_file, _ in ENTRYPOINT_FILES:
-                if _ == provider_id:
-                    existing_ep = load_existing_models_from_entrypoint(
-                        provider_id, ep_file, config_dir
-                    )
-                    break
-            existing_models_dir = load_existing_models_from_dir(provider_id, config_dir)
-            existing = {**existing_ep, **existing_models_dir}
+            # Audit R2: the old loop `for _, ep_file, _ in ENTRYPOINT_FILES:
+            # if _ == provider_id` shadowed the provider with the
+            # DESCRIPTION tuple slot, so existing_ep was ALWAYS empty and
+            # the fold fell back to dir-sorted spellings — which then
+            # mismatched the entrypoint block spellings that
+            # curate_entrypoint_blocks keeps (minimax normal dangled).
+            existing = load_existing_catalog(provider_id, config_dir)
 
             return fold_provider_sources(provider_id, or_models, md_models, existing)
         elif source == 'all':
@@ -2059,7 +2083,13 @@ Examples:
             if not models_dict:
                 continue
 
-            existing = load_existing_models_from_dir(provider_id, config_dir)
+            # Same spelling universe as the entrypoint pass: fold the
+            # entrypoint-first existing catalog so the individual cards
+            # keep the entrypoint block spelling (fold winner) instead
+            # of re-keying twin spellings from the dir sort order.
+            existing = fold_by_canonical(
+                load_existing_catalog(provider_id, config_dir)
+            )
 
             # Pass the merged dict in the OPENROUTER slot: curation-first
             # score backfill only reads that slot, and the merged dict is
