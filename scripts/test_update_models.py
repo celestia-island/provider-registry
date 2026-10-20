@@ -382,6 +382,49 @@ def test_fold_keeps_entrypoint_spelling_like_curate():
     assert [b["id"] for b in blocks] == ["minimax-m3"], blocks
 
 
+def test_tier_picks_beyond_the_cap_are_still_emitted():
+    # Audit R2 (dangling tiers): the selector ran on the untruncated
+    # list while emission capped NEW blocks at 50 — and the price-DESC
+    # emission order puts the CHEAPEST models last, exactly where the
+    # basic tier picks them. Providers with >50 models ended up with
+    # basic defaults pointing at blocks that were never emitted.
+    import tempfile
+    import toml
+
+    models = [M(id="zflag", tags=["flagship"], supports_reasoning=True, pricing_input=50.0)]
+    # letter-only filler ids: digits would inflate _extract_version and
+    # warp the ranking this test relies on
+    filler_ids = [f"{a}{b}" for a in "abc" for b in "abcdefghijklmnopqrstuvwxyz"][:55]
+    for mid, price in zip(filler_ids, [float(100 - i) for i in range(55)]):
+        models.append(M(id=mid, pricing_input=price))
+    models.append(M(id="zfcheap", tags=["cost_effective"], pricing_input=0.01))
+
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+        ep_dir = root / "entrypoint" / "testprov"
+        ep_dir.mkdir(parents=True)
+        (ep_dir / "default.toml").write_text(
+            "[entrypoint]\n"
+            '[entrypoint.name]\nen = "Test"\n'
+            "[entrypoint.defaults]\ndeep = \"x\"\nnormal = \"y\"\nbasic = \"z\"\n",
+            encoding="utf-8",
+        )
+        ok = um.update_entrypoint_config("testprov", "default.toml", models, root)
+        assert ok
+        saved = toml.load(ep_dir / "default.toml")
+        block_ids = {b["id"] for b in saved["entrypoint"]["models"]}
+        defaults = saved["entrypoint"]["defaults"]
+        assert defaults["deep"] == "zflag", defaults
+        assert defaults["basic"] == "zfcheap", defaults
+        assert defaults["normal"] == "aa", defaults
+        # every tier default references an emitted block — no dangling
+        for tier in ("deep", "normal", "basic"):
+            assert defaults[tier] in block_ids, (tier, defaults[tier])
+        # the fix specifically: the cheapest pick (sorted beyond the
+        # 50-cap) is present in the emitted set
+        assert "zfcheap" in block_ids, sorted(block_ids)[:5]
+
+
 def test_individual_pass_score_backfill():
     # The --individual-models pass feeds the merged dict through the
     # openrouter slot: a score fetched for a pre-existing card must land.

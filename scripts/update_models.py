@@ -1611,21 +1611,46 @@ def update_entrypoint_config(
                 seen_ids.add(model.id)
                 unique_models.append(model)
 
-        # Use simplified entrypoint format (only id + pricing). The cap
-        # bounds NEW additions only — existing blocks are always retained
-        # (curation-first; see curate_entrypoint_blocks).
-        new_blocks = [m.to_entrypoint_dict() for m in unique_models[:50]]
-        old_blocks = (existing_config.get('entrypoint', {}) or {}).get('models') or []
-        config['entrypoint']['models'] = curate_entrypoint_blocks(new_blocks, old_blocks)
-
-        print(f"   Updated {len(unique_models[:50])} models")
-
-        # Update defaults
+        # Tier selection runs on the FULL merged catalog (quality must
+        # not be warped by the emission cap), but the picks must land in
+        # the emitted block set — a default pointing at a block that is
+        # not there is a dangling tier (audit R2: 6 providers had basic
+        # defaults for models sorted beyond the cap, because the price
+        # ASC order that picks "cheapest" also sorts cheapest LAST).
+        selected = None
         if update_defaults:
             selected = select_tier_models_from_list(
                 unique_models, limit=3, family_prefixes=family_prefixes
             )
+
+        # Use simplified entrypoint format (only id + pricing). The cap
+        # bounds NEW additions only — existing blocks are always retained
+        # (curation-first; see curate_entrypoint_blocks) — and the tier
+        # picks are always emitted alongside the capped list.
+        tier_ids = {mid for mid in (selected or {}).values() if mid}
+        emitted = list(unique_models[:50])
+        emitted.extend(m for m in unique_models[50:] if m.id in tier_ids)
+        new_blocks = [m.to_entrypoint_dict() for m in emitted]
+        old_blocks = (existing_config.get('entrypoint', {}) or {}).get('models') or []
+        final_blocks = curate_entrypoint_blocks(new_blocks, old_blocks)
+        config['entrypoint']['models'] = final_blocks
+
+        print(f"   Updated {len(emitted)} models")
+
+        # Update defaults
+        if update_defaults:
             if 'defaults' in config['entrypoint']:
+                # Reconcile each pick onto the spelling ACTUALLY emitted:
+                # curate folds canonical twins onto the existing block, so
+                # the emitted id is the anchor a default must reference.
+                emitted_by_canon = {
+                    canonical_id(b.get("id", "")): b.get("id")
+                    for b in final_blocks if b.get("id")
+                }
+                selected = {
+                    tier: (emitted_by_canon.get(canonical_id(mid), mid) if mid else mid)
+                    for tier, mid in selected.items()
+                }
                 old_defaults = config['entrypoint']['defaults']
                 preserved_keys = {
                     k: v for k, v in old_defaults.items()
