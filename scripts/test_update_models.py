@@ -498,6 +498,33 @@ def test_fold_chain_collapses_new_model_twins_across_feeds():
     assert merged2["gpt-future-0"].pricing_input == 1.0, merged2["gpt-future-0"]
 
 
+def test_stale_legacy_picks_leave_the_pool():
+    # Audit R2: grok-3 / gpt-4o-mini / minimax-01 cards carry
+    # pre-legacy tags on disk (curation-first never rewrites them) and
+    # kept winning basic. The pool re-derives legacy from the CURRENT
+    # pattern list.
+    models = [
+        M(id="grok-4.7", tags=["flagship"], supports_reasoning=True, pricing_input=3.0),
+        M(id="grok-4", pricing_input=2.0),
+        M(id="grok-3-mini", tags=["cost_effective"], pricing_input=0.2),
+        M(id="grok-3", tags=["cost_effective"], pricing_input=0.5),
+    ]
+    sel = um.select_tier_models_from_list(models, family_prefixes=um.PROVIDER_FAMILY_PREFIXES["xai"])
+    assert sel["basic"] not in ("grok-3", "grok-3-mini"), sel
+
+    # 'gpt-4o' never matched the old 'gpt-4-' pattern (no dash after 4)
+    assert 'legacy' in um._live_tags("gpt-4o-mini")
+    assert 'legacy' not in um._live_tags("gpt-6-mini")
+    models2 = [
+        M(id="gpt-6-luna", tags=["flagship"], supports_reasoning=True, pricing_input=5.0),
+        M(id="gpt-5", pricing_input=1.25),
+        M(id="gpt-4o-mini", tags=["cost_effective"], pricing_input=0.15),
+        M(id="gpt-6-mini", tags=["cost_effective"], pricing_input=0.25),
+    ]
+    sel2 = um.select_tier_models_from_list(models2, family_prefixes=um.PROVIDER_FAMILY_PREFIXES["openai"])
+    assert sel2["basic"] == "gpt-6-mini", sel2
+
+
 def main() -> int:
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     assert len(tests) >= 12, f"expected >=10 tests, found {len(tests)}"

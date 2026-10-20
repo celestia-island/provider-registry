@@ -236,7 +236,12 @@ TAG_PATTERNS = {
     # barred gemini-3.8-flash etc. from the normal tier and left google
     # normal on gemma-2-27b (a 2024 open model).
     'free': ['free', ':free'],
-    'legacy': ['gpt-3', 'gpt-4-', 'glm-4-', 'claude-3-'],
+    # legacy = superseded generations that must not haunt tier defaults.
+    # Audit R2 additions: 'grok-3', 'gpt-4o' (note: the old 'gpt-4-'
+    # pattern never matched "gpt-4o" — no dash after the 4), and
+    # 'minimax-01' were still being picked as stale basic defaults.
+    'legacy': ['gpt-3', 'gpt-4-', 'gpt-4o', 'glm-4-', 'claude-3-',
+               'grok-3', 'minimax-01'],
 }
 
 # Non-chat modalities never belong in conversational tier defaults
@@ -1379,7 +1384,12 @@ def _is_chat_model(m: ModelInfo) -> bool:
 
 
 def _live_tags(model_id: str) -> List[str]:
-    """Tags today's TAG_PATTERNS would stamp on this id."""
+    """Tags today's TAG_PATTERNS would stamp on this id.
+
+    Applies the same flagship-beats-legacy conflict rule as the feed
+    parsers, so a card whose id live-derives BOTH (none today, but the
+    parse path resolves it) behaves identically here.
+    """
     mid = model_id.lower()
     out: List[str] = []
     for tag, patterns in TAG_PATTERNS.items():
@@ -1388,6 +1398,8 @@ def _live_tags(model_id: str) -> List[str]:
                 if tag not in out:
                     out.append(tag)
                 break
+    if 'flagship' in out and 'legacy' in out:
+        out.remove('legacy')
     return out
 
 
@@ -1424,6 +1436,11 @@ def select_tier_models_from_list(
     pool = [
         m for m in models
         if 'legacy' not in m.tags and 'deprecated' not in m.tags
+        # Stale auto-tag compat (audit R2): additive-only sync leaves the
+        # tag list a model was FIRST stamped with; grok-3 / gpt-4o-mini /
+        # minimax-01 sat in pools with pre-legacy tags and kept winning
+        # basic. The id is re-derived against the CURRENT legacy list.
+        and 'legacy' not in _live_tags(m.id)
         and _is_chat_model(m) and _matches_family(m, family_prefixes)
     ]
 
@@ -1434,7 +1451,11 @@ def select_tier_models_from_list(
         # The family filter wiped everything (e.g. a provider whose whole
         # feed is third-party) — degrade to the unfiltered non-legacy list
         # instead of emitting empty tiers.
-        pool = [m for m in models if 'legacy' not in m.tags and _is_chat_model(m)]
+        pool = [
+            m for m in models
+            if 'legacy' not in m.tags and 'legacy' not in _live_tags(m.id)
+            and _is_chat_model(m)
+        ]
 
     pool.sort(key=lambda m: (-_quality_rank(m), m.id))
 
