@@ -28,7 +28,7 @@ ru = "Qwen (Китай Разовая оплата)"
 
 [entrypoint.defaults]
 deep = "qwen3.8-max"
-normal = "qwen3.8-max-0902"
+normal = "qwen3.8-max-prime"
 basic = "qwen-flash"
 
 [entrypoint.defaults.max_concurrent]
@@ -283,6 +283,14 @@ input_per_million = 0.574
 output_per_million = 1.721
 
 [[entrypoint.models]]
+id = "qwen2-5-72b-instruct"
+supports_vision = false
+
+[entrypoint.models.pricing]
+input_per_million = 0.574
+output_per_million = 1.721
+
+[[entrypoint.models]]
 id = "qwen2-5-math-72b-instruct"
 supports_vision = false
 
@@ -366,14 +374,6 @@ input_per_million = 0.4
 output_per_million = 3.2
 
 [[entrypoint.models]]
-id = "qwen2-5-72b-instruct"
-supports_vision = false
-
-[entrypoint.models.pricing]
-input_per_million = 0.574
-output_per_million = 1.721
-
-[[entrypoint.models]]
 id = "qwen-max"
 supports_vision = false
 
@@ -446,6 +446,13 @@ supports_vision = false
 [entrypoint.models.pricing]
 input_per_million = 0.287
 output_per_million = 0.861
+
+[[entrypoint.models]]
+id = "qwen-flash"
+
+[entrypoint.models.pricing]
+input_per_million = 0.022
+output_per_million = 0.216
 
 [[entrypoint.models]]
 id = "deepseek-v3"

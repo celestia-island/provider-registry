@@ -29,7 +29,7 @@ ru = "xAI Grok (Официальный)"
 [entrypoint.defaults]
 deep = "grok-4.7"
 normal = "grok-4"
-basic = "grok-3-mini"
+basic = "grok-4-fast"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1

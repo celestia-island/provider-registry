@@ -29,7 +29,7 @@ ru = "Cohere (Официальный)"
 [entrypoint.defaults]
 deep = "north-mini-code-1-0"
 normal = "c4ai-aya-expanse-32b"
-basic = "c4ai-aya-expanse-8b"
+basic = "command-r7b-12-2024"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1

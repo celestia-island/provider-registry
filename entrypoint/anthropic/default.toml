@@ -108,7 +108,7 @@ output_per_million = 150.0
 cached_per_million = 3.0
 
 [[entrypoint.models]]
-id = "claude-opus-4-20250514"
+id = "claude-opus-4"
 supports_vision = true
 
 [entrypoint.models.pricing]
@@ -117,7 +117,7 @@ output_per_million = 75.0
 cached_per_million = 1.5
 
 [[entrypoint.models]]
-id = "claude-opus-4"
+id = "claude-opus-4-20250514"
 supports_vision = true
 
 [entrypoint.models.pricing]
@@ -225,7 +225,7 @@ output_per_million = 15.0
 cached_per_million = 0.3
 
 [[entrypoint.models]]
-id = "claude-sonnet-4-20250514"
+id = "claude-sonnet-4"
 supports_vision = true
 
 [entrypoint.models.pricing]
@@ -234,7 +234,7 @@ output_per_million = 15.0
 cached_per_million = 0.3
 
 [[entrypoint.models]]
-id = "claude-sonnet-4"
+id = "claude-sonnet-4-20250514"
 supports_vision = true
 
 [entrypoint.models.pricing]

@@ -28,7 +28,7 @@ ru = "Together AI"
 
 [entrypoint.defaults]
 deep = "zai-org/GLM-5.3"
-normal = "zai-org/GLM-5.2"
+normal = "zai-org/GLM-5.3-Flash"
 basic = "deepseek-ai/DeepSeek-V4-Flash-0731"
 
 [entrypoint.defaults.max_concurrent]

@@ -29,7 +29,7 @@ ru = "Mistral AI (Официальный)"
 [entrypoint.defaults]
 deep = "mistral-large-4"
 normal = "codestral-2508"
-basic = "voxtral-mini-latest"
+basic = "ministral-3b-latest"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
@@ -453,6 +453,14 @@ output_per_million = 0.3
 cached_per_million = 0.01
 
 [[entrypoint.models]]
+id = "ministral-3b-latest"
+supports_vision = false
+
+[entrypoint.models.pricing]
+input_per_million = 0.04
+output_per_million = 0.04
+
+[[entrypoint.models]]
 id = "mistral-small-creative"
 supports_vision = false
 
@@ -477,11 +485,3 @@ supports_vision = false
 [entrypoint.models.pricing]
 input_per_million = 0.05
 output_per_million = 0.08
-
-[[entrypoint.models]]
-id = "ministral-3b-latest"
-supports_vision = false
-
-[entrypoint.models.pricing]
-input_per_million = 0.04
-output_per_million = 0.04

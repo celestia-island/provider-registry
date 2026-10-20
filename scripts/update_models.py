@@ -2105,6 +2105,17 @@ Examples:
             ]
 
         for provider_id, entrypoint_file, description in entrypoints_to_update:
+            # Feed-less providers (doubao, baidu — domestic APIs absent
+            # from both aggregators) keep their hand-curated files
+            # untouched: the entrypoint's own blocks are the ONLY data
+            # the sync would see, and re-selecting tiers from id-only
+            # pseudo cards degrades curated defaults and rewrites the
+            # file layout for no information gain.
+            if (provider_id not in or_models_by_provider
+                    and provider_id not in md_models_by_provider):
+                cf.warn(f"Skipping {provider_id}/{entrypoint_file} (no feed data for provider)")
+                continue
+
             models = get_merged_models(provider_id)
             if not models:
                 cf.warn(f"Skipping {provider_id}/{entrypoint_file} (no model data found)")

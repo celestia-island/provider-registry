@@ -28,7 +28,7 @@ ru = "Google Gemini (Официальный)"
 
 [entrypoint.defaults]
 deep = "gemini-4-argon"
-normal = "gemma-4-31b-it"
+normal = "gemini-3.7-flash"
 basic = "gemini-2.0-flash-lite-001"
 
 [entrypoint.defaults.max_concurrent]
@@ -43,6 +43,14 @@ id = "gemini-4-argon"
 input_per_million = 2.0
 output_per_million = 10.0
 cached_per_million = 0.1
+
+[[entrypoint.models]]
+id = "gemini-pro-latest"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 12.0
+cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "gemini-3-pro-image"

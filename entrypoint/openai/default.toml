@@ -29,7 +29,7 @@ ru = "OpenAI (Официальный)"
 [entrypoint.defaults]
 deep = "gpt-6.1-sol"
 normal = "gpt-5"
-basic = "gpt-4o-mini"
+basic = "gpt-5-mini"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
@@ -474,15 +474,6 @@ output_per_million = 14.0
 cached_per_million = 0.175
 
 [[entrypoint.models]]
-id = "gpt-5.3-codex-spark"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 1.75
-output_per_million = 14.0
-cached_per_million = 0.175
-
-[[entrypoint.models]]
 id = "gpt-5"
 supports_vision = true
 
@@ -490,6 +481,23 @@ supports_vision = true
 input_per_million = 1.25
 output_per_million = 10.0
 cached_per_million = 0.125
+
+[[entrypoint.models]]
+id = "gpt-5-mini"
+
+[entrypoint.models.pricing]
+input_per_million = 0.25
+output_per_million = 2.0
+cached_per_million = 0.025
+
+[[entrypoint.models]]
+id = "gpt-5.3-codex-spark"
+supports_vision = true
+
+[entrypoint.models.pricing]
+input_per_million = 1.75
+output_per_million = 14.0
+cached_per_million = 0.175
 
 [[entrypoint.models]]
 id = "gpt-5-chat"
