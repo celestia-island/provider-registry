@@ -28,8 +28,8 @@ ru = "GLM Международный (Разовая оплата)"
 
 [entrypoint.defaults]
 deep = "glm-5.3"
-normal = "glm-5.3-prime"
-basic = "glm-5.3-flashx"
+normal = "glm-5"
+basic = "glm-4.5-flash"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1

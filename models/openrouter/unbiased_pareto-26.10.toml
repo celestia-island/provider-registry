@@ -1,0 +1,20 @@
+# Pareto 26.10
+# Provider: openrouter
+
+[model]
+id = "unbiased/pareto-26.10"
+name = "Pareto 26.10"
+provider_id = "openrouter"
+
+context_window = 1048576
+max_output_tokens = 131072
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = []
+
+[model.pricing]
+input_per_million = 0.8
+output_per_million = 3.2
+cached_per_million = 0.03

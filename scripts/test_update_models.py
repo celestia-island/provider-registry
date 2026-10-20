@@ -189,6 +189,114 @@ def test_absurd_pricing_rejected():
     assert um.parse_openrouter_model(absurd) is None
 
 
+# ------------------------------------------------------------
+# Audit 2026-10-21: twin spellings, tier ranking, models.dev hardening
+# ------------------------------------------------------------
+
+def test_twin_spelling_folds_onto_disk_card():
+    # OpenRouter spells "claude-haiku-5.5", the disk card (models.dev
+    # spelling) is "claude-haiku-5-5" — one model, one card, disk spelling.
+    existing = um.fold_by_canonical({"claude-haiku-5-5": M(id="claude-haiku-5-5", pricing_input=0.1)})
+    or_feed = um.rekey_onto_existing(
+        {"claude-haiku-5.5": M(id="claude-haiku-5.5", pricing_input=0.1, score=65.5, score_source="design_arena")},
+        existing,
+    )
+    assert list(or_feed) == ["claude-haiku-5-5"], or_feed
+    merged = um.merge_model_dicts(existing, or_feed, {})
+    assert set(merged) == {"claude-haiku-5-5"}, merged
+    assert merged["claude-haiku-5-5"].score == 65.5  # blank filled, not a twin
+
+
+def test_new_twin_not_minted():
+    # Both feeds carry a NEW model under different spellings: the merge
+    # must emit a single card (models.dev spelling outside the openrouter
+    # dir, OpenRouter spelling inside it).
+    or_feed = {"mistral-large-4-0": M(id="mistral-large-4-0", score=58.2, score_source="design_arena")}
+    md_feed = {"mistral-large-4": M(id="mistral-large-4", pricing_input=0.68, pricing_output=2.09)}
+    um.resolve_shared_new_ids(or_feed, md_feed, prefer_openrouter=False)
+    assert set(or_feed) == {"mistral-large-4"} and set(md_feed) == {"mistral-large-4"}
+    merged = um.merge_model_dicts({}, or_feed, md_feed)
+    assert set(merged) == {"mistral-large-4"}, merged
+
+    or_feed2 = {"openai/gpt-future": M(id="openai/gpt-future")}
+    md_feed2 = {"openai/gpt-future-0": M(id="openai/gpt-future-0")}
+    um.resolve_shared_new_ids(or_feed2, md_feed2, prefer_openrouter=True)
+    assert set(md_feed2) == {"openai/gpt-future"}, md_feed2
+
+
+def test_modelsdev_malformed_skipped_not_fatal():
+    # The models.dev parser never inherited #19's tolerance — one bad
+    # record used to abort the whole run.
+    bad = {"id": "bad/md-record", "cost": {"input": "oops"}}
+    assert um.parse_modelsdev_model(bad, "x") is None
+
+
+def test_modelsdev_negative_pricing_rejected():
+    neg = {"id": "bad/md-pricing", "cost": {"input": -0.5, "output": 0.1}}
+    assert um.parse_modelsdev_model(neg, "x") is None
+
+
+def test_family_prefix_keeps_tiers_in_family():
+    # models.dev alibaba-cn lists hosted GLM/MiniMax models alongside Qwen;
+    # a higher-scored glm must not become the *qwen* entrypoint's deep tier.
+    models = [
+        M(id="glm-5.3", score=61.4, score_source="design_arena", supports_reasoning=True),
+        M(id="qwen3.8-max", tags=["flagship"], supports_reasoning=True),
+        M(id="qwen3.8-plus", pricing_input=1.2),
+        M(id="qwen3.8-flash", tags=["cost_effective"], pricing_input=0.05),
+    ]
+    sel = um.select_tier_models_from_list(models, family_prefixes=um.PROVIDER_FAMILY_PREFIXES["qwen"])
+    assert sel["deep"].startswith("qwen3.8"), sel
+    assert sel["normal"].startswith("qwen3.8"), sel
+    assert sel["basic"].startswith("qwen3.8"), sel
+
+
+def test_non_chat_and_deprecated_excluded_from_tiers():
+    models = [
+        M(id="gpt-5.4-image-2", score=90.0, score_source="design_arena"),  # image: no chat tier
+        M(id="old-flagship", score=80.0, score_source="design_arena", tags=["deprecated"]),
+        M(id="gpt-6-astra", score=76.9, score_source="artificial_analysis", supports_reasoning=True),
+    ]
+    sel = um.select_tier_models_from_list(models, family_prefixes=um.PROVIDER_FAMILY_PREFIXES["openai"])
+    assert sel["deep"] == "gpt-6-astra", sel
+
+
+def test_score_outranks_stale_reasoning_pick():
+    # deepseek-reasoner is an unscored alias that merely *claims* reasoning;
+    # a scored current-gen model must take the deep tier.
+    models = [
+        M(id="deepseek-reasoner", supports_reasoning=True),
+        M(id="deepseek-v4-pro-0813", score=68.8, score_source="artificial_analysis"),
+        M(id="deepseek-v4-flash", score=39.5, score_source="design_arena", tags=["cost_effective"], pricing_input=0.15),
+    ]
+    sel = um.select_tier_models_from_list(models, family_prefixes=um.PROVIDER_FAMILY_PREFIXES["deepseek"])
+    assert sel["deep"] == "deepseek-v4-pro-0813", sel
+    assert sel["basic"] == "deepseek-v4-flash", sel
+
+
+def test_entrypoint_twin_blocks_deduped():
+    # Twin-spelled blocks denote one model: keep the existing curated block,
+    # never emit both spellings.
+    new = [{"id": "claude-opus-5.5"}]
+    old = [
+        {"id": "claude-opus-5-5", "pricing": {"input_per_million": 1.25}},
+        {"id": "claude-opus-5.5", "pricing": {"input_per_million": 9.9}},
+    ]
+    out = um.curate_entrypoint_blocks(new, old)
+    ids = [b["id"] for b in out]
+    assert ids == ["claude-opus-5-5"], ids
+    assert out[0]["pricing"]["input_per_million"] == 1.25  # existing block wins
+
+
+def test_individual_pass_score_backfill():
+    # The --individual-models pass feeds the merged dict through the
+    # openrouter slot: a score fetched for a pre-existing card must land.
+    existing = {"gpt-6-astra": M(id="gpt-6-astra", pricing_input=10.0)}
+    merged = {"gpt-6-astra": M(id="gpt-6-astra", pricing_input=10.0, score=76.9, score_source="artificial_analysis")}
+    out = um.merge_model_dicts(existing, merged, {})
+    assert (out["gpt-6-astra"].score, out["gpt-6-astra"].score_source) == (76.9, "artificial_analysis"), out
+
+
 def main() -> int:
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     assert len(tests) >= 12, f"expected >=10 tests, found {len(tests)}"
@@ -197,9 +305,9 @@ def main() -> int:
         try:
             t()
             print(f"  PASS {t.__name__}")
-        except AssertionError as e:
+        except Exception as e:  # a crashing test must fail the run, not abort it
             failed += 1
-            print(f"  FAIL {t.__name__}: {e}")
+            print(f"  FAIL {t.__name__}: {type(e).__name__}: {e}")
     print(f"{len(tests) - failed}/{len(tests)} passed")
     return 1 if failed else 0
 

@@ -27,14 +27,46 @@ es = "Qwen (China Pago único)"
 ru = "Qwen (Китай Разовая оплата)"
 
 [entrypoint.defaults]
-deep = "glm-5.3"
-normal = "glm-5"
-basic = "MiniMax/MiniMax-M2.7"
+deep = "qwen3.8-max"
+normal = "qwen3.8-max-0902"
+basic = "qwen-flash"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
 normal = 1
 basic = 2
+
+[[entrypoint.models]]
+id = "qwen3.8-max-prime"
+
+[entrypoint.models.pricing]
+input_per_million = 4.0
+output_per_million = 12.0
+cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "kimi-k3"
+
+[entrypoint.models.pricing]
+input_per_million = 2.827
+output_per_million = 14.133
+cached_per_million = 0.283
+
+[[entrypoint.models]]
+id = "qwen3.8-max-0902"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 6.0
+cached_per_million = 0.25
+
+[[entrypoint.models]]
+id = "qwen3.8-max"
+
+[entrypoint.models.pricing]
+input_per_million = 1.7774
+output_per_million = 5.3323
+cached_per_million = 0.22218
 
 [[entrypoint.models]]
 id = "glm-5.2"
@@ -87,22 +119,6 @@ input_per_million = 7.742
 output_per_million = 23.367
 
 [[entrypoint.models]]
-id = "qwen3.8-max-prime"
-
-[entrypoint.models.pricing]
-input_per_million = 4.0
-output_per_million = 12.0
-cached_per_million = 0.5
-
-[[entrypoint.models]]
-id = "kimi-k3"
-
-[entrypoint.models.pricing]
-input_per_million = 2.827
-output_per_million = 14.133
-cached_per_million = 0.283
-
-[[entrypoint.models]]
 id = "qwen3.7-max"
 supports_vision = false
 
@@ -126,22 +142,6 @@ id = "qwen3.8-2.4t-a95b"
 input_per_million = 2.0
 output_per_million = 6.0
 cached_per_million = 0.25
-
-[[entrypoint.models]]
-id = "qwen3.8-max-0902"
-
-[entrypoint.models.pricing]
-input_per_million = 2.0
-output_per_million = 6.0
-cached_per_million = 0.25
-
-[[entrypoint.models]]
-id = "qwen3.8-max"
-
-[entrypoint.models.pricing]
-input_per_million = 1.7774
-output_per_million = 5.3323
-cached_per_million = 0.22218
 
 [[entrypoint.models]]
 id = "qvq-max"
@@ -184,15 +184,6 @@ supports_vision = false
 [entrypoint.models.pricing]
 input_per_million = 0.861
 output_per_million = 3.441
-
-[[entrypoint.models]]
-id = "qwen2.5-vl-72b-instruct"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 0.8
-output_per_million = 1.0
-cached_per_million = 0.4
 
 [[entrypoint.models]]
 id = "qwen3-max-thinking"
@@ -292,14 +283,6 @@ input_per_million = 0.574
 output_per_million = 1.721
 
 [[entrypoint.models]]
-id = "qwen2-5-72b-instruct"
-supports_vision = false
-
-[entrypoint.models.pricing]
-input_per_million = 0.574
-output_per_million = 1.721
-
-[[entrypoint.models]]
 id = "qwen2-5-math-72b-instruct"
 supports_vision = false
 
@@ -383,12 +366,12 @@ input_per_million = 0.4
 output_per_million = 3.2
 
 [[entrypoint.models]]
-id = "qwen-2.5-72b-instruct"
+id = "qwen2-5-72b-instruct"
 supports_vision = false
 
 [entrypoint.models.pricing]
-input_per_million = 0.36
-output_per_million = 0.4
+input_per_million = 0.574
+output_per_million = 1.721
 
 [[entrypoint.models]]
 id = "qwen-max"
@@ -490,14 +473,6 @@ output_per_million = 0.861
 
 [[entrypoint.models]]
 id = "qwen2-5-32b-instruct"
-supports_vision = false
-
-[entrypoint.models.pricing]
-input_per_million = 0.287
-output_per_million = 0.861
-
-[[entrypoint.models]]
-id = "qwen2-5-coder-32b-instruct"
 supports_vision = false
 
 [entrypoint.models.pricing]

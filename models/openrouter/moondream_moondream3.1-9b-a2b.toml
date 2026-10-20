@@ -1,0 +1,19 @@
+# Moondream 3.1
+# Provider: openrouter
+
+[model]
+id = "moondream/moondream3.1-9b-a2b"
+name = "Moondream 3.1"
+provider_id = "openrouter"
+
+context_window = 32000
+max_output_tokens = 4096
+supports_vision = true
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.3
+output_per_million = 2.5

@@ -1,0 +1,20 @@
+# Beam 1.0 501B A23B
+# Provider: openrouter
+
+[model]
+id = "reflection/beam-1.0-501b-a23b"
+name = "Beam 1.0 501B A23B"
+provider_id = "openrouter"
+
+context_window = 1048576
+max_output_tokens = 943718
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = []
+
+[model.pricing]
+input_per_million = 0.3
+output_per_million = 1.0
+cached_per_million = 0.04

@@ -27,9 +27,9 @@ es = "Cohere (Oficial)"
 ru = "Cohere (Официальный)"
 
 [entrypoint.defaults]
-deep = "command-a-reasoning-08-2025"
-normal = "north-mini-code-1-0"
-basic = "c4ai-aya-vision-8b"
+deep = "north-mini-code-1-0"
+normal = "c4ai-aya-expanse-32b"
+basic = "c4ai-aya-expanse-8b"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
@@ -85,6 +85,10 @@ input_per_million = 2.5
 output_per_million = 10.0
 
 [[entrypoint.models]]
+id = "c4ai-aya-expanse-32b"
+supports_vision = false
+
+[[entrypoint.models]]
 id = "command-r-08-2024"
 supports_vision = false
 
@@ -107,10 +111,6 @@ supports_vision = false
 [entrypoint.models.pricing]
 input_per_million = 0.0375
 output_per_million = 0.15
-
-[[entrypoint.models]]
-id = "c4ai-aya-expanse-32b"
-supports_vision = false
 
 [[entrypoint.models]]
 id = "c4ai-aya-expanse-8b"
