@@ -236,10 +236,13 @@ TAG_PATTERNS = {
 
 # Non-chat modalities never belong in conversational tier defaults
 # (gpt-5.4-image-2 was being selected as OpenAI's *normal* tier).
+# 'voxtral' (audit R2): Mistral's speech/audio brand slipped past the
+# keyword list — voxtral-mini-latest became mistral's *basic* tier even
+# though it is an ASR model with a 0-price placeholder card.
 NON_CHAT_ID_PATTERNS = (
     'image', 'tts', 'audio', 'realtime', 'embed', 'video', 'sora',
     'dall-e', 'imagine', 'banana', 'asr', 'ocr', 'guard', 'moderation',
-    'transcribe', 'whisper', 'translate',
+    'transcribe', 'whisper', 'translate', 'voxtral',
 )
 
 # First-party developer entrypoints: tier defaults must stay inside the
@@ -1452,11 +1455,17 @@ def select_tier_models_from_list(
         normal = others[0].id if others else (deep.id if deep else None)
 
     # Basic tier: cheapest cost-effective line (price ASC, id as tiebreak).
+    # A 0 input price here is a placeholder (feed gap or aggregator
+    # stub like voxtral-mini-latest), not a real budget line — sorting
+    # ASC would crown it — so only priced cards compete.
     if is_coding_plan:
         basic = None
     else:
         deep_id = deep.id if deep else None
-        basic_pool = [m for m in pool if m.id not in (deep_id, normal)]
+        basic_pool = [
+            m for m in pool
+            if m.id not in (deep_id, normal) and m.pricing_input > 0
+        ]
         tagged = [m for m in basic_pool if 'cost_effective' in m.tags or 'free' in m.tags]
         if tagged:
             basic = min(tagged, key=lambda m: (m.pricing_input, m.id)).id

@@ -261,6 +261,34 @@ def test_non_chat_and_deprecated_excluded_from_tiers():
     assert sel["deep"] == "gpt-6-astra", sel
 
 
+def test_voxtral_never_enters_chat_tiers():
+    # Audit R2: voxtral-mini-latest (an ASR model with a 0-price
+    # placeholder card) was mistral's basic tier.
+    models = [
+        M(id="mistral-large-4", tags=["flagship"], supports_reasoning=True),
+        M(id="codestral-2508", tags=["coding"], pricing_input=0.3),
+        M(id="voxtral-mini-latest", tags=["cost_effective"], pricing_input=0.0),
+        M(id="ministral-3b-latest", tags=["cost_effective"], pricing_input=0.05),
+    ]
+    sel = um.select_tier_models_from_list(models, family_prefixes=um.PROVIDER_FAMILY_PREFIXES["mistral"])
+    assert "voxtral" not in (sel["deep"] or ""), sel
+    assert "voxtral" not in (sel["normal"] or ""), sel
+    assert "voxtral" not in (sel["basic"] or ""), sel
+
+
+def test_basic_tier_skips_zero_price_placeholder():
+    # A 0 input price is a feed-gap placeholder; ASC price sort must not
+    # crown it as the budget pick.
+    models = [
+        M(id="model-flag", tags=["flagship"], supports_reasoning=True),
+        M(id="model-chat", pricing_input=1.0),
+        M(id="placeholder-budget", tags=["cost_effective"], pricing_input=0.0),
+        M(id="real-budget", tags=["cost_effective"], pricing_input=0.4),
+    ]
+    sel = um.select_tier_models_from_list(models)
+    assert sel["basic"] == "real-budget", sel
+
+
 def test_score_outranks_stale_reasoning_pick():
     # deepseek-reasoner is an unscored alias that merely *claims* reasoning;
     # a scored current-gen model must take the deep tier.
