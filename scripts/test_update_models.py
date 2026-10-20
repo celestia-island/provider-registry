@@ -434,6 +434,70 @@ def test_individual_pass_score_backfill():
     assert (out["gpt-6-astra"].score, out["gpt-6-astra"].score_source) == (76.9, "artificial_analysis"), out
 
 
+# ------------------------------------------------------------
+# Audit R2: chain-level fold behavior
+# ------------------------------------------------------------
+
+def _fold_chain(existing, or_feed, md_feed, prefer_openrouter=False):
+    """The exact fold -> rekey -> resolve -> merge chain that
+    fold_provider_sources executes inside main()."""
+    existing = um.fold_by_canonical(dict(existing))
+    or_feed = um.rekey_onto_existing(um.fold_by_canonical(dict(or_feed)), existing)
+    md_feed = um.rekey_onto_existing(um.fold_by_canonical(dict(md_feed)), existing)
+    um.resolve_shared_new_ids(or_feed, md_feed, prefer_openrouter=prefer_openrouter)
+    return um.merge_model_dicts(existing, or_feed, md_feed)
+
+
+def test_fold_chain_yields_one_card_per_model():
+    # Audit R2: disabling fold_by_canonical used to leave the whole
+    # suite green — only canonical_id/rekey had direct calls. This pins
+    # the CHAIN: pre-existing twin spellings on disk plus twin spellings
+    # in both feeds must collapse into exactly one card per model, with
+    # blanks filled and curated values intact.
+    existing = {
+        "minimax-m3": M(id="minimax-m3", pricing_input=0.3, context_window=0),
+        "MiniMax-M3": M(id="MiniMax-M3", pricing_input=0.3,
+                        context_window=204800, tags=["cost_effective"]),
+    }
+    or_feed = {"MiniMax-M3": M(id="MiniMax-M3", score=61.2, score_source="design_arena")}
+    md_feed = {"MiniMax-M3": M(id="MiniMax-M3", pricing_input=0.32)}
+
+    merged = _fold_chain(existing, or_feed, md_feed)
+
+    canon = [um.canonical_id(k) for k in merged]
+    assert len(canon) == len(set(canon)), f"twin cards minted: {sorted(merged)}"
+    assert set(merged) == {"minimax-m3"}, merged  # entrypoint spelling kept
+    card = merged["minimax-m3"]
+    assert card.context_window == 204800, card   # twin filled the blank
+    assert card.pricing_input == 0.3, card       # curation-first: disk price wins
+    assert card.score == 61.2, card              # feed score backfilled
+
+
+def test_fold_chain_collapses_new_model_twins_across_feeds():
+    # A model NEW to the tree carried by both feeds under different
+    # spellings: the chain must stamp exactly one card (models.dev
+    # spelling outside the openrouter dir) carrying both feeds' data.
+    merged = _fold_chain(
+        {},
+        {"mistral-large-4-0": M(id="mistral-large-4-0", score=58.2, score_source="design_arena")},
+        {"mistral-large-4": M(id="mistral-large-4", pricing_input=0.68, pricing_output=2.09)},
+    )
+    assert set(merged) == {"mistral-large-4"}, merged
+    card = merged["mistral-large-4"]
+    assert (card.pricing_input, card.pricing_output) == (0.68, 2.09), card
+    assert card.score == 58.2, card
+
+    # Inside the openrouter provider dir the OpenRouter spelling wins.
+    merged2 = _fold_chain(
+        {},
+        {"gpt-future-0": M(id="gpt-future-0", score=70.0, score_source="design_arena")},
+        {"gpt-future": M(id="gpt-future", pricing_input=1.0)},
+        prefer_openrouter=True,
+    )
+    assert set(merged2) == {"gpt-future-0"}, merged2
+    assert merged2["gpt-future-0"].pricing_input == 1.0, merged2["gpt-future-0"]
+
+
 def main() -> int:
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     assert len(tests) >= 12, f"expected >=10 tests, found {len(tests)}"
