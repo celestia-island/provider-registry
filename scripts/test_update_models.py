@@ -560,6 +560,140 @@ def test_coding_plan_fallback_keeps_1x_threshold():
     assert sel["basic"] is None, sel  # no sub-1x pick in a premium plan
 
 
+def test_openrouter_parser_uses_endpoint_limits_and_typed_reasoning():
+    # The old parser capped every model at 16K and missed reasoners whose
+    # names lacked words like "thinking". OpenRouter exposes the served
+    # completion limit and a typed reasoning block/parameters; use them.
+    info = um.parse_openrouter_model(
+        {
+            "id": "deepseek/deepseek-v4.1-flash",
+            "name": "DeepSeek: DeepSeek V4.1 Flash",
+            "context_length": 1048576,
+            "architecture": {
+                "input_modalities": ["text", "image"],
+                "output_modalities": ["text"],
+            },
+            "pricing": {
+                "prompt": "0.000000049",
+                "completion": "0.000000525",
+                "input_cache_read": "0.000000001",
+            },
+            "top_provider": {
+                "context_length": 1048576,
+                "max_completion_tokens": 393216,
+            },
+            "supported_parameters": ["reasoning", "tools", "max_tokens"],
+            "reasoning": {"default_enabled": True},
+        }
+    )
+    assert info is not None
+    assert info.max_output_tokens == 393216, info
+    assert info.supports_reasoning is True, info
+    assert info.supports_vision is True, info
+    assert "vision" in info.tags and "reasoning" in info.tags, info.tags
+
+
+def test_openrouter_parser_does_not_tag_text_only_v4_as_vision():
+    # Regression pin for TAG_PATTERNS' old '-v' substring: it matched
+    # deepseek-v4-pro and stamped a text-only model as vision.
+    info = um.parse_openrouter_model(
+        {
+            "id": "deepseek/deepseek-v4-pro-0813",
+            "name": "DeepSeek: DeepSeek V4 Pro 0813",
+            "context_length": 1048576,
+            "architecture": {
+                "input_modalities": ["text"],
+                "output_modalities": ["text"],
+            },
+            "pricing": {"prompt": "0.00000066", "completion": "0.00000198"},
+            "top_provider": {"max_completion_tokens": 384000},
+            "supported_parameters": ["reasoning", "tools"],
+            "reasoning": {"default_enabled": True},
+        }
+    )
+    assert info is not None
+    assert info.supports_vision is False, info
+    assert "vision" not in info.tags, info.tags
+    assert info.supports_reasoning is True, info
+
+
+def test_frontier_cards_keep_authoritative_capabilities():
+    # Data regression pins for the cards corrected after the 2026-10-21
+    # sync produced 16K/vision-only/false-reasoning metadata.
+    import tomllib
+
+    repo = Path(__file__).resolve().parent.parent
+    # Direct-provider cards are curated from vendor docs / models.dev, not
+    # from OpenRouter's served-wrapper limits (which can differ slightly).
+    expected = {
+        "deepseek-v4.1-flash": ("deepseek", 1048576, 393216),
+        "deepseek-v4.1-flash-1017": ("deepseek", 1048576, 393216),
+        "deepseek-v4-pro": ("deepseek", 1048576, 393216),
+        "deepseek-v4-pro-0813": ("deepseek", 1048576, 393216),
+        "deepseek-v4-flash-0731": ("deepseek", 1048576, 131072),
+        "claude-fable-5.1": ("anthropic", 1000000, 128000),
+    }
+    for model_id, (provider, context_window, output_tokens) in expected.items():
+        path = repo / "models" / provider / f"{model_id}.toml"
+        with path.open("rb") as fh:
+            model = tomllib.load(fh)["model"]
+        assert model["supports_reasoning"] is True, (path, model)
+        assert model["context_window"] == context_window, (path, model)
+        assert model["max_output_tokens"] == output_tokens, (path, model)
+    for model_id in ("deepseek-v4-pro", "deepseek-v4-pro-0813"):
+        path = repo / "models" / "deepseek" / f"{model_id}.toml"
+        with path.open("rb") as fh:
+            model = tomllib.load(fh)["model"]
+        assert model["supports_vision"] is False, (path, model)
+        assert "vision" not in model["tags"], (path, model["tags"])
+
+    # The dotted spelling is a compatibility alias for the canonical dashed
+    # API id. Capabilities must stay identical even while both cards exist.
+    alias = tomllib.loads(
+        (repo / "models" / "anthropic" / "claude-fable-5.1.toml").read_text()
+    )["model"]
+    canonical = tomllib.loads(
+        (repo / "models" / "anthropic" / "claude-fable-5-1.toml").read_text()
+    )["model"]
+    for field in (
+        "context_window",
+        "max_output_tokens",
+        "supports_vision",
+        "supports_function_calling",
+        "supports_streaming",
+        "supports_reasoning",
+        "tags",
+        "pricing",
+        "score",
+    ):
+        assert alias[field] == canonical[field], (field, alias[field], canonical[field])
+
+
+
+def test_openrouter_parser_prefers_model_context_over_wrapper_context():
+    # top_provider is a served-wrapper limit; it must not shrink the model's
+    # advertised context when the feed publishes both fields.
+    info = um.parse_openrouter_model(
+        {
+            "id": "deepseek/deepseek-v4-pro-0813",
+            "name": "DeepSeek: DeepSeek V4 Pro 0813",
+            "context_length": 1048576,
+            "architecture": {"input_modalities": ["text"], "output_modalities": ["text"]},
+            "pricing": {"prompt": "0.00000066", "completion": "0.00000198"},
+            "top_provider": {
+                "context_length": 1024000,
+                "max_completion_tokens": 384000,
+            },
+            "supported_parameters": ["reasoning"],
+            "reasoning": {"default_enabled": True},
+        }
+    )
+    assert info is not None
+    assert info.context_window == 1048576, info
+    assert info.max_output_tokens == 384000, info
+
+
+
 def main() -> int:
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     assert len(tests) >= 12, f"expected >=10 tests, found {len(tests)}"

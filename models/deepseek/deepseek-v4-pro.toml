@@ -6,13 +6,16 @@ id = "deepseek-v4-pro"
 name = "DeepSeek V4 Pro"
 provider_id = "deepseek"
 
-context_window = 1000000
-max_output_tokens = 384000
+# Direct-provider facts: 1M context and 384K (393216 token) output.
+# OpenRouter's served wrapper advertises 384000; models.dev reports 393216.
+
+context_window = 1048576
+max_output_tokens = 393216
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true
 supports_reasoning = true
-tags = ["vision"]
+tags = ["flagship", "reasoning"]
 
 [model.pricing]
 input_per_million = 0.435

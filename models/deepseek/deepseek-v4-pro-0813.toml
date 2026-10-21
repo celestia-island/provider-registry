@@ -6,13 +6,15 @@ id = "deepseek-v4-pro-0813"
 name = "DeepSeek V4 Pro 0813"
 provider_id = "deepseek"
 
+# Direct-provider facts: 1M context and 384K (393216 token) output.
+
 context_window = 1048576
-max_output_tokens = 16384
+max_output_tokens = 393216
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true
-supports_reasoning = false
-tags = ["vision"]
+supports_reasoning = true
+tags = ["flagship", "reasoning"]
 
 [model.pricing]
 input_per_million = 0.66
