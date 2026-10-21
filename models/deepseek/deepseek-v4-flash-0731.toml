@@ -6,13 +6,15 @@ id = "deepseek-v4-flash-0731"
 name = "DeepSeek V4 Flash 0731"
 provider_id = "deepseek"
 
+# OpenRouter served endpoint limit for this snapshot: 131072 output tokens.
+
 context_window = 1048576
-max_output_tokens = 16384
+max_output_tokens = 131072
 supports_vision = false
 supports_function_calling = true
 supports_streaming = true
-supports_reasoning = false
-tags = ["vision", "cost_effective"]
+supports_reasoning = true
+tags = ["cost_effective", "reasoning"]
 
 [model.pricing]
 input_per_million = 0.02

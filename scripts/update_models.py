@@ -224,7 +224,11 @@ TAG_PATTERNS = {
     ],
     'reasoning': ['o1', 'o2', 'o3', 'o4', 'reasoner', 'thinking', 'glm-z1'],
     'coding': ['codex', 'coder', 'code'],
-    'vision': ['vision', 'v-', '-v', '4o', 'multimodal'],
+    # 'v-'/' -v' were too broad: '-v' matched deepseek-v4-* and stamped every
+    # V4 card as vision even when the model is text-only. Capability tags are
+    # now reconciled with the feed's modalities/reasoning metadata below; keep
+    # only specific VL/vision markers here.
+    'vision': ['vision', '-vl', '4o', 'multimodal'],
     # '-mini' not 'mini' (audit R2): 'mini' is a substring of 'gemini',
     # so every gemini id — flagship flash lines included — live-tagged
     # as cost_effective and the normal tier barred them (google normal
@@ -400,6 +404,33 @@ def parse_openrouter_model(model_data: Dict) -> Optional[ModelInfo]:
         return None
 
 
+def _positive_int(value: Any) -> Optional[int]:
+    """Return a positive integer from a feed value, or None."""
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed > 0 else None
+
+
+def _apply_capability_tags(
+    tags: List[str], supports_vision: bool, supports_reasoning: bool
+) -> List[str]:
+    """Keep capability tags consistent with the feed's typed metadata.
+
+    Name-pattern tags are useful for discovery, but a stale/loose pattern
+    (for example '-v' matching 'deepseek-v4-pro') must never override the
+    actual modalities/reasoning fields. This drops false capability tags and
+    adds the tag when the feed explicitly advertises the capability.
+    """
+    cleaned = [tag for tag in tags if tag not in ('vision', 'reasoning')]
+    if supports_vision:
+        cleaned.append('vision')
+    if supports_reasoning:
+        cleaned.append('reasoning')
+    return cleaned
+
+
 def _parse_openrouter_model_inner(
     model_data: Dict, model_id: str, model_name: str
 ) -> Optional[ModelInfo]:
@@ -420,17 +451,41 @@ def _parse_openrouter_model_inner(
                 "refusing to ingest this record"
             )
 
-    # Get context length
-    context_length = model_data.get('context_length', 128000)
+    # Get context length. The model-level field is the model's advertised
+    # context; top_provider is the served endpoint wrapper and is only a
+    # fallback when the model-level field is absent.
+    top_provider = model_data.get('top_provider') or {}
+    context_length = (
+        _positive_int(model_data.get('context_length'))
+        or _positive_int(top_provider.get('context_length'))
+        or 128000
+    )
 
     # Get architecture info
     arch = model_data.get('architecture', {})
     input_modalities = arch.get('input_modalities', ['text'])
     output_modalities = arch.get('output_modalities', ['text'])
 
-    # Determine capabilities
-    supports_vision = 'image' in input_modalities or 'vision' in model_name.lower()
-    supports_reasoning = any(p in model_name.lower() for p in ['o1', 'o2', 'o3', 'o4', 'reasoner', 'thinking'])
+    # Determine capabilities from typed feed metadata first. Name matching is
+    # only a fallback for older feeds that omit the reasoning field.
+    supports_vision = 'image' in input_modalities
+    supported_parameters = model_data.get('supported_parameters') or []
+    supports_reasoning = bool(model_data.get('reasoning')) or any(
+        p in supported_parameters
+        for p in ('reasoning', 'include_reasoning', 'reasoning_effort')
+    ) or any(
+        p in model_name.lower() for p in ['o1', 'o2', 'o3', 'o4', 'reasoner', 'thinking']
+    )
+
+    # The old estimate capped every model at 16K and ignored OpenRouter's
+    # authoritative completion limit. Keep a conservative fallback only for
+    # feeds that do not publish one.
+    max_output_tokens = _positive_int(top_provider.get('max_completion_tokens'))
+    if max_output_tokens is None:
+        max_output_tokens = _positive_int(model_data.get('max_completion_tokens'))
+    if max_output_tokens is None:
+        max_output_tokens = min(max(context_length // 4, 1), 16384)
+    max_output_tokens = min(max_output_tokens, context_length)
 
     # Generate tags based on patterns
     tags = []
@@ -442,9 +497,10 @@ def _parse_openrouter_model_inner(
                     tags.append(tag)
                 break
 
-    # Remove conflicting tags
+    # Remove conflicting tags, then reconcile capability tags with metadata.
     if 'flagship' in tags and 'legacy' in tags:
         tags.remove('legacy')
+    tags = _apply_capability_tags(tags, supports_vision, supports_reasoning)
 
     # Clean model name: remove provider prefix from API name if present
     api_name = model_data.get('name', model_name)
@@ -463,7 +519,7 @@ def _parse_openrouter_model_inner(
         id=model_name,  # Use just the model name without provider prefix
         name=api_name,  # Use cleaned name without provider prefix
         context_window=context_length,
-        max_output_tokens=min(context_length // 4, 16384),  # Estimate
+        max_output_tokens=max_output_tokens,
         supports_vision=supports_vision,
         supports_function_calling=True,
         supports_streaming=True,
@@ -595,6 +651,7 @@ def _parse_modelsdev_model_inner(model_data: Dict, model_id: str) -> Optional[Mo
                 break
     if 'flagship' in tags and 'legacy' in tags:
         tags.remove('legacy')
+    tags = _apply_capability_tags(tags, supports_vision, supports_reasoning)
 
     status = model_data.get('status')
     if status == 'deprecated' and 'deprecated' not in tags:
