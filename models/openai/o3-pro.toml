@@ -17,3 +17,7 @@ tags = ["flagship", "reasoning"]
 [model.pricing]
 input_per_million = 20.0
 output_per_million = 80.0
+
+[model.score]
+value = 21.9
+source = "artificial_analysis"

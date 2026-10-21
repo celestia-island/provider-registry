@@ -28,13 +28,21 @@ ru = "Together AI"
 
 [entrypoint.defaults]
 deep = "zai-org/GLM-5.3"
-normal = "zai-org/GLM-5.2"
-basic = "zai-org/GLM-5.3-Flash"
+normal = "zai-org/GLM-5.3-Flash"
+basic = "deepseek-ai/DeepSeek-V4-Flash-0731"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
 normal = 1
 basic = 2
+
+[[entrypoint.models]]
+id = "moonshotai/Kimi-K3"
+
+[entrypoint.models.pricing]
+input_per_million = 3.0
+output_per_million = 15.0
+cached_per_million = 0.3
 
 [[entrypoint.models]]
 id = "zai-org/GLM-5.1"
@@ -86,14 +94,6 @@ input_per_million = 3.0
 output_per_million = 7.0
 
 [[entrypoint.models]]
-id = "moonshotai/Kimi-K3"
-
-[entrypoint.models.pricing]
-input_per_million = 3.0
-output_per_million = 15.0
-cached_per_million = 0.3
-
-[[entrypoint.models]]
 id = "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8"
 supports_vision = false
 
@@ -133,6 +133,14 @@ supports_vision = false
 [entrypoint.models.pricing]
 input_per_million = 1.25
 output_per_million = 1.25
+
+[[entrypoint.models]]
+id = "meta-models/Muse-Spark-Open-816B-A42B"
+
+[entrypoint.models.pricing]
+input_per_million = 1.25
+output_per_million = 4.25
+cached_per_million = 0.15
 
 [[entrypoint.models]]
 id = "Qwen/Qwen3.7-Max"
@@ -226,6 +234,14 @@ input_per_million = 0.5
 output_per_million = 3.0
 
 [[entrypoint.models]]
+id = "reflection/Beam-1.0-501B-A23B"
+
+[entrypoint.models.pricing]
+input_per_million = 0.4
+output_per_million = 1.2
+cached_per_million = 0.04
+
+[[entrypoint.models]]
 id = "google/gemma-4-31B-it"
 supports_vision = true
 
@@ -307,6 +323,14 @@ supports_vision = false
 [entrypoint.models.pricing]
 input_per_million = 0.15
 output_per_million = 0.6
+
+[[entrypoint.models]]
+id = "nvidia/NVIDIA-Nemotron-3.5-Super-VL"
+
+[entrypoint.models.pricing]
+input_per_million = 0.15
+output_per_million = 0.5
+cached_per_million = 0.02
 
 [[entrypoint.models]]
 id = "essentialai/Rnj-1-Instruct"

@@ -18,3 +18,7 @@ tags = ["flagship"]
 input_per_million = 1.23
 output_per_million = 4.31
 cached_per_million = 0.31
+
+[model.score]
+value = 61.38
+source = "design_arena"

@@ -27,14 +27,22 @@ es = "DeepSeek (Oficial)"
 ru = "DeepSeek (Официальный)"
 
 [entrypoint.defaults]
-deep = "deepseek-reasoner"
-normal = "deepseek-v4-flash"
-basic = "deepseek-v4-flash-vision-exp"
+deep = "deepseek-v4.1-flash-1017"
+normal = "deepseek-v4-pro-0813"
+basic = "deepseek-v4-flash-0731"
 
 [entrypoint.defaults.max_concurrent]
 deep = 1
 normal = 1
 basic = 2
+
+[[entrypoint.models]]
+id = "deepseek-v4.1-flash-1017"
+
+[entrypoint.models.pricing]
+input_per_million = 0.15
+output_per_million = 0.6
+cached_per_million = 0.003
 
 [[entrypoint.models]]
 id = "deepseek-r1-distill-llama-70b"

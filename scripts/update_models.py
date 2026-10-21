@@ -206,16 +206,80 @@ EXCLUDE_PATTERNS = [
                  # pollute both the card catalog and tier-default selection
 ]
 
-# Tags to add based on model name patterns
+# Tags to add based on model name patterns.
+#
+# 2026-10 generation refresh: the previous list still named the 2026-07
+# generation as flagship, so fresh flagships (gemini-4, gpt-6, deepseek-v4,
+# kimi-k3, mistral-large-4, grok-4.7) entered the catalog untagged and the
+# tier selector ranked them below stale picks (e.g. xai deep stayed on
+# grok-4.20-0309-reasoning while grok-4.7 sat unused).
 TAG_PATTERNS = {
-    'flagship': ['gpt-5.4', 'gpt-5-pro', 'o3-pro', 'glm-5', 'claude-4'],
+    'flagship': [
+        # 2026-10 generation
+        'claude-opus-5', 'claude-sonnet-5', 'claude-fable-5',
+        'gpt-6', 'gpt-5.4', 'gpt-5-pro', 'o3-pro',
+        'gemini-4', 'gemini-3.7', 'glm-5', 'deepseek-v4', 'kimi-k3',
+        'grok-4.7', 'grok-4.6', 'mistral-large-4', 'qwen3.8-max',
+        'minimax-m3', 'qwen3p8',
+    ],
     'reasoning': ['o1', 'o2', 'o3', 'o4', 'reasoner', 'thinking', 'glm-z1'],
-    'coding': ['codex', 'coder'],
+    'coding': ['codex', 'coder', 'code'],
     'vision': ['vision', 'v-', '-v', '4o', 'multimodal'],
-    'cost_effective': ['mini', 'flash', 'air', 'turbo', 'lite'],
+    # '-mini' not 'mini' (audit R2): 'mini' is a substring of 'gemini',
+    # so every gemini id — flagship flash lines included — live-tagged
+    # as cost_effective and the normal tier barred them (google normal
+    # sat on gemma while every gemini flash was "budget"). '-mini'
+    # keeps gpt-4o-mini etc.; 'ministral' keeps Mistral's small line.
+    'cost_effective': ['-mini', 'ministral', 'air', 'turbo', 'lite'],
+    # 'flash' removed 2026-10-21: at Google/Qwen/DeepSeek "flash" is the
+    # current-gen MAINLINE mid tier, not a budget line — keeping it here
+    # barred gemini-3.8-flash etc. from the normal tier and left google
+    # normal on gemma-2-27b (a 2024 open model).
     'free': ['free', ':free'],
-    'legacy': ['gpt-3', 'gpt-4-', 'glm-4-', 'claude-3-'],
+    # legacy = superseded generations that must not haunt tier defaults.
+    # Audit R2 additions: 'grok-3', 'gpt-4o' (note: the old 'gpt-4-'
+    # pattern never matched "gpt-4o" — no dash after the 4), and
+    # 'minimax-01' were still being picked as stale basic defaults.
+    'legacy': ['gpt-3', 'gpt-4-', 'gpt-4o', 'glm-4-', 'claude-3-',
+               'grok-3', 'minimax-01'],
 }
+
+# Non-chat modalities never belong in conversational tier defaults
+# (gpt-5.4-image-2 was being selected as OpenAI's *normal* tier).
+# 'voxtral' (audit R2): Mistral's speech/audio brand slipped past the
+# keyword list — voxtral-mini-latest became mistral's *basic* tier even
+# though it is an ASR model with a 0-price placeholder card.
+NON_CHAT_ID_PATTERNS = (
+    'image', 'tts', 'audio', 'realtime', 'embed', 'video', 'sora',
+    'dall-e', 'imagine', 'banana', 'asr', 'ocr', 'guard', 'moderation',
+    'transcribe', 'whisper', 'translate', 'voxtral',
+)
+
+# First-party developer entrypoints: tier defaults must stay inside the
+# provider's own model family. Aggregator pages (models.dev alibaba-cn,
+# mistral) also list third-party hosted models (kimi/glm/MiniMax on Model
+# Studio, z.ai GLM on la Plateforme); those stay in the catalog as servable
+# cards but must not hijack e.g. the Qwen entrypoint's deep/normal/basic
+# (the 2026-10-03 sync stamped qwen deep=glm-5.3, basic=MiniMax-M2.7).
+PROVIDER_FAMILY_PREFIXES = {
+    'anthropic': ('claude-',),
+    'openai': ('gpt-', 'o1', 'o2', 'o3', 'o4', 'chatgpt-', 'dall-e', 'sora', 'tts-'),
+    'google': ('gemini-', 'gemma-', 'imagen', 'veo', 'nano-banana'),
+    'deepseek': ('deepseek-',),
+    'qwen': ('qwen', 'qwq', 'qvq', 'tongyi'),
+    'zhipu_glm': ('glm', 'chatglm'),
+    'moonshot': ('kimi', 'moonshot'),
+    'minimax': ('minimax', 'abab'),
+    'xai': ('grok',),
+    'mistral': ('mistral', 'codestral', 'magistral', 'ministral', 'pixtral',
+                'voxtral', 'devstral', 'solar', 'leanstral', 'bilbao'),
+    'cohere': ('command', 'c4ai', 'embed', 'rerank', 'north', 'aya'),
+    'stepfun': ('step',),
+    'meta': ('llama',),
+}
+
+# Platform entrypoints legitimately host every family — no prefix filter.
+PLATFORM_PROVIDERS = {'openrouter', 'fireworks', 'together', 'silicon'}
 
 
 # ============================================================
@@ -386,7 +450,7 @@ def _parse_openrouter_model_inner(
     api_name = model_data.get('name', model_name)
     # Remove common provider prefixes like "Anthropic: ", "OpenAI: ", "Z.ai: ", etc.
     for prefix in ['Anthropic: ', 'OpenAI: ', 'Google: ', 'Z.ai: ', 'Zhipu: ', 'MoonshotAI: ',
-                    'MiniMax: ', 'Qwen: ', 'Mistral AI: ', 'Meta: ', 'DeepSeek: ',
+                    'MiniMax: ', 'Qwen: ', 'Mistral AI: ', 'Mistral: ', 'Meta: ', 'DeepSeek: ',
                     'Cohere: ', 'AI21: ', 'Perplexity: ', 'xAI: ']:
         if api_name.startswith(prefix):
             api_name = api_name[len(prefix):]
@@ -470,7 +534,13 @@ def fetch_modelsdev_models() -> Dict[str, Dict]:
 
 
 def parse_modelsdev_model(model_data: Dict, provider_id: str) -> Optional[ModelInfo]:
-    """Parse models.dev model data"""
+    """Parse models.dev model data.
+
+    Audit 2026-10-21: this parser never got the #19 malformed-record
+    tolerance (nor the pricing sanity gate) that the OpenRouter parser
+    received — a single bad record in the models.dev feed would abort the
+    whole 6h sync. Same degradation contract: warn + skip.
+    """
     model_id = model_data.get('id', '')
     if not model_id:
         return None
@@ -479,10 +549,28 @@ def parse_modelsdev_model(model_data: Dict, provider_id: str) -> Optional[ModelI
         if pattern in model_id:
             return None
 
+    try:
+        return _parse_modelsdev_model_inner(model_data, model_id)
+    except (ValueError, KeyError, TypeError) as e:
+        print(f"   ⚠️  Skipping malformed models.dev record {model_id!r}: {e}")
+        return None
+
+
+def _parse_modelsdev_model_inner(model_data: Dict, model_id: str) -> Optional[ModelInfo]:
     cost = model_data.get('cost', {})
     pricing_input = float(cost.get('input', 0))
     pricing_output = float(cost.get('output', 0))
     pricing_cached = float(cost.get('cache_read', 0))
+
+    # Same sanity gate as the OpenRouter path (audit preg-R1-3): an
+    # unauthenticated feed must not ship negative/absurd/NaN prices into
+    # the billing chain. The range form also rejects NaN.
+    for label, price in (("input", pricing_input), ("output", pricing_output)):
+        if not (0 <= price <= 100_000):
+            raise ValueError(
+                f"pricing out of sane range ({label}={price} per million); "
+                "refusing to ingest this record"
+            )
 
     limit = model_data.get('limit', {})
     context_window = int(limit.get('context', 128000))
@@ -557,6 +645,129 @@ def group_modelsdev_by_provider(raw_data: Dict) -> Dict[str, List[ModelInfo]]:
 # Merge precedence switch (set from --aggregator-priority in main();
 # tests may also pass the kwarg directly).
 AGGREGATOR_PRIORITY = False
+
+
+# ------------------------------------------------------------
+# Canonical id folding (audit 2026-10-21)
+#
+# The two feeds disagree on id spelling for the SAME model:
+#   OpenRouter  anthropic/claude-haiku-5.5   (dot form)
+#   models.dev  claude-haiku-5-5             (dash form, official API id)
+#   OpenRouter  mistralai/mistral-large-4-0  vs models.dev mistral-large-4
+#   models.dev  siliconflow listings: "deepseek-ai/DeepSeek-V4-Flash" and
+#               "deepseek-ai_DeepSeek-V4-Flash" as separate ids
+# Because the merge keys on the exact string and never deletes, every
+# spelling disagreement minted a twin card + twin entrypoint block
+# (24 normalized-twin groups were on disk by 2026-10-21). Folding keys on
+# a separator/case-insensitive canonical form stops NEW twins from being
+# minted; pre-existing twin files stay on disk (additive-only sync) until
+# a curator consolidates them.
+SEPARATOR_CHARS = "-._/"
+
+# OpenRouter pins the first snapshot of a new major as "<id>-0" while the
+# official API id (and models.dev) has no suffix: mistral-large-4-0 vs
+# mistral-large-4, claude-opus-4-0 vs claude-opus-4, gpt-future-0 vs
+# gpt-future. Fold exactly a word-char-anchored trailing "-0"; a real
+# version like mistral-large-40 or a date like -0309 does not match.
+import re as _re
+_TRAILING_SNAPSHOT_ZERO = _re.compile(r'(\w)[-_.]0$')
+
+# Trailing date/snapshot suffixes (qwen3.8-max-0902, deepseek-v4.1-flash-
+# 1017, mistral-medium-2505): same base model, different pin. Used by the
+# tier selector so the normal tier never just repeats the deep pick under
+# a date alias.
+_SNAPSHOT_SUFFIX = _re.compile(r'[-_.]\d{4,8}([-_.]\d{2}){0,2}$')
+
+
+def _is_snapshot_alias(a: str, b: str) -> bool:
+    """True when two ids denote the same model pinned at different
+    snapshots (or one pinned, one floating)."""
+    if a == b:
+        return False
+    return canonical_id(_SNAPSHOT_SUFFIX.sub('', a.lower())) == canonical_id(
+        _SNAPSHOT_SUFFIX.sub('', b.lower())
+    )
+
+
+def canonical_id(mid: str) -> str:
+    """Case/separator-insensitive identity of a model id."""
+    s = _TRAILING_SNAPSHOT_ZERO.sub(r'\1', mid.lower())
+    return "".join(ch for ch in s if ch not in SEPARATOR_CHARS)
+
+
+def fold_by_canonical(models: Dict[str, ModelInfo]) -> Dict[str, ModelInfo]:
+    """Fold id spellings that differ only by case/separators into one card.
+
+    The first spelling wins; a later twin only fills blanks on the kept
+    card (curation-style), it never overwrites a meaningful value.
+    """
+    out: Dict[str, ModelInfo] = {}
+    for mid, m in models.items():
+        c = canonical_id(mid)
+        for kept_id, kept in out.items():
+            if canonical_id(kept_id) != c:
+                continue
+            if kept.pricing_input <= 0 and m.pricing_input > 0:
+                kept.pricing_input = m.pricing_input
+            if kept.pricing_output <= 0 and m.pricing_output > 0:
+                kept.pricing_output = m.pricing_output
+            if kept.pricing_cached <= 0 and m.pricing_cached > 0:
+                kept.pricing_cached = m.pricing_cached
+            if kept.context_window <= 0 and m.context_window > 0:
+                kept.context_window = m.context_window
+            if kept.max_output_tokens <= 0 and m.max_output_tokens > 0:
+                kept.max_output_tokens = m.max_output_tokens
+            if not kept.tags and m.tags:
+                kept.tags = list(m.tags)
+            if kept.score is None and m.score is not None:
+                kept.score, kept.score_source = m.score, m.score_source
+            if m.supports_reasoning and not kept.supports_reasoning:
+                kept.supports_reasoning = True
+            if m.supports_vision and not kept.supports_vision:
+                kept.supports_vision = True
+            break
+        else:
+            out[mid] = m
+    return out
+
+
+def rekey_onto_existing(
+    feed: Dict[str, ModelInfo], existing: Dict[str, ModelInfo]
+) -> Dict[str, ModelInfo]:
+    """Rename feed ids to the spelling already on disk when they denote the
+    same model, so curation-first matching sees one identity per model."""
+    alias = {canonical_id(k): k for k in existing}
+    out: Dict[str, ModelInfo] = {}
+    for mid, m in feed.items():
+        out[alias.get(canonical_id(mid), mid)] = m
+    return out
+
+
+def resolve_shared_new_ids(
+    or_feed: Dict[str, ModelInfo],
+    md_feed: Dict[str, ModelInfo],
+    prefer_openrouter: bool,
+) -> None:
+    """For models NEW to the tree that both feeds carry under different
+    spellings, rekey the non-preferred source onto the preferred spelling
+    so the merge cannot mint a twin card.
+
+    Call this after ``rekey_onto_existing``: by then, any divergence still
+    left between the two feeds denotes a brand-new model. Spelling
+    preference: the openrouter provider dir keeps OpenRouter ids (those are
+    the routable ones there); every other provider prefers the models.dev
+    spelling, which mirrors the provider's official API ids.
+    """
+    or_canon = {canonical_id(k): k for k in or_feed}
+    for mid in list(md_feed):
+        c = canonical_id(mid)
+        or_key = or_canon.get(c)
+        if or_key is None or or_key == mid:
+            continue  # not shared, or already the same spelling
+        if prefer_openrouter:
+            md_feed[or_key] = md_feed.pop(mid)
+        else:
+            or_feed[mid] = or_feed.pop(or_key)
 
 
 def merge_model_dicts(
@@ -991,8 +1202,16 @@ def save_individual_model_files(
     models_dir.mkdir(parents=True, exist_ok=True)
 
     saved_count = 0
+    written_canon = set()
 
     for model in models:
+        # Canonical guard: two spellings of one model (e.g. MiniMax-M3 vs
+        # minimax-m3) must not produce twin card files.
+        c = canonical_id(model.id)
+        if c in written_canon:
+            continue
+        written_canon.add(c)
+
         # Sanitize model ID for filename (replace / and other special chars)
         filename = model.id.replace('/', '_').replace(':', '-') + '.toml'
         model_path = models_dir / filename
@@ -1061,21 +1280,40 @@ def curate_entrypoint_blocks(
     price), so a scheduled sync must never rewrite it. New ids are appended
     in the incoming order; ids present on disk but absent from the new list
     are retained (never dropped by a cap or a feed gap).
+
+    Canonical-id dedup (audit 2026-10-21): a block whose id differs from an
+    already-placed block only by case/separators (claude-opus-5.5 vs
+    claude-opus-5-5) denotes the SAME model and is folded onto the existing
+    block instead of being added as a twin. Dropping such a duplicate block
+    is deduplication, not delisting — every distinct model is retained.
     """
     by_id = {b.get("id"): b for b in existing_blocks or [] if b.get("id")}
+    by_canon = {}
+    for bid, b in by_id.items():
+        by_canon.setdefault(canonical_id(bid), b)
     out: List[Dict[str, Any]] = []
     seen = set()
+    seen_canon = set()
     for b in new_blocks or []:
         mid = b.get("id")
         if not mid or mid in seen:
             continue
+        c = canonical_id(mid)
+        if c in seen_canon:
+            continue  # twin spelling of a model already placed
         seen.add(mid)
-        out.append(by_id.get(mid, b))
+        seen_canon.add(c)
+        out.append(by_canon.get(c, b))
     for b in existing_blocks or []:
         mid = b.get("id")
-        if mid and mid not in seen:
-            seen.add(mid)
-            out.append(b)
+        if not mid or mid in seen:
+            continue
+        c = canonical_id(mid)
+        if c in seen_canon:
+            continue  # twin spelling of the same model — fold, don't duplicate
+        seen.add(mid)
+        seen_canon.add(c)
+        out.append(b)
     return out
 
 
@@ -1098,123 +1336,230 @@ def preserve_coding_plan_tiers(
     return selected
 
 
+def _extract_version(model_id: str) -> float:
+    """First *version-like* number in the id: 3.8, 5.3, 4.7 ...
+
+    Normalizes the two id conventions that fooled the naive regex:
+    - Fireworks encodes the dot as "p" (qwen3p8-max, glm-5p3);
+    - trailing date/snapshot suffixes are not versions (mistral-medium-2604
+      = 2026-04, gpt-4o-2024-11-20, deepseek-v4.1-flash-1017) — a bare
+      "11" from a date previously inflated the generational floor to 110.
+    Parameter counts (816B, 235b, a95b) are rejected by the lookahead.
+    """
+    import re
+    s = model_id.lower()
+    s = re.sub(r'(\d)p(\d)', r'\1.\2', s)          # qwen3p8 -> qwen3.8
+    s = re.sub(r'[-_.]\d{4,8}([-_.]\d{2}){0,2}$', '', s)  # strip -1017 / -2024-11-20 / -20241022
+    s = re.sub(r'([-_.]\d{2}){1,3}$', '', s)       # strip MM leftovers: command-r7b-12-2024 -> command-r7b
+    for match in re.finditer(r'(\d+)(?:\.(\d+))?(?![a-zA-Z0-9.])', s):
+        major = int(match.group(1))
+        if major > 20:
+            continue  # year fragment (26.9 = 2026-09) or parameter count
+        minor_s = match.group(2)
+        # single-digit minor -> /10 (3.8 = 3+0.8); two-digit minor means a
+        # dotted point release (4.20 = 4.2, 3.10 = 3.1), never +2.0
+        minor = (int(minor_s) / (10 if len(minor_s) == 1 else 100)) if minor_s else 0.0
+        return major + minor
+    return 0.0
+
+
+def _quality_rank(m: ModelInfo) -> float:
+    """Single quality axis for tier ranking.
+
+    The design_arena / artificial_analysis score stamped on cards is the
+    factual capability measurement. Two guards keep feed gaps from
+    inverting the order:
+
+    - Generational floor: an unscored (or pathetically scored) model never
+      ranks below its generation's proxy (major.minor * 10, +35 when it is
+      a flagship of the current generation). Without this, a scored relic
+      (gemma-2 at DA~20, or 2025-07 qwen-plus at ~55) outranked the
+      unscored 2026-10 flagships (qwen3.8-max, gpt-6 family).
+    - The floor uses the flagship TAG, which the sync itself stamps from
+      the refreshed TAG_PATTERNS — no hand-maintained score table.
+    """
+    floor = _extract_version(m.id) * 10.0
+    if 'flagship' in m.tags and 'legacy' not in m.tags:
+        # 35 puts an unbenchmarked current-gen flagship above scored 2025
+        # mid-tiers (e.g. qwen-plus-2025-07-28 at DA~64 vs qwen3.8-max) —
+        # the whole point of the floor.
+        floor += 35.0
+    if m.score is not None:
+        return max(float(m.score), floor)
+    return floor
+
+
+def _is_chat_model(m: ModelInfo) -> bool:
+    mid = m.id.lower()
+    if any(p in mid for p in NON_CHAT_ID_PATTERNS):
+        return False
+    # Cards registered from MDD descriptors carry their task kind (e.g.
+    # MiniMax-H3 = video_generation): those never enter chat tiers either.
+    return not any(t in ('video_generation', 'audio_generation', 'image_generation',
+                         'audio_video', 'embedding') for t in (m.tags or []))
+
+
+def _live_tags(model_id: str) -> List[str]:
+    """Tags today's TAG_PATTERNS would stamp on this id.
+
+    Applies the same flagship-beats-legacy conflict rule as the feed
+    parsers, so a card whose id live-derives BOTH (none today, but the
+    parse path resolves it) behaves identically here.
+    """
+    mid = model_id.lower()
+    out: List[str] = []
+    for tag, patterns in TAG_PATTERNS.items():
+        for pattern in patterns:
+            if pattern in mid:
+                if tag not in out:
+                    out.append(tag)
+                break
+    if 'flagship' in out and 'legacy' in out:
+        out.remove('legacy')
+    return out
+
+
+def _matches_family(m: ModelInfo, prefixes) -> bool:
+    if not prefixes:
+        return True
+    mid = m.id.lower()
+    return any(mid.startswith(p) for p in prefixes)
+
+
 def select_tier_models_from_list(
-    models: List[ModelInfo], limit: int = 3, is_coding_plan: bool = False
+    models: List[ModelInfo], limit: int = 3, is_coding_plan: bool = False,
+    family_prefixes: Optional[tuple] = None,
 ) -> Dict[str, Optional[str]]:
     """Select N curated models from the list for each request tier.
 
+    Audit 2026-10-21 rewrite — the old name-pattern sort produced tiers that
+    contradicted the factual capability order (xai deep stayed on
+    grok-4.20-0309-reasoning while grok-4.7 sat unused; deepseek deep was
+    the old deepseek-reasoner alias; OpenAI normal was an *image* model;
+    the Qwen entrypoint's tiers were all GLM/MiniMax). Ranking is now
+    score-first (see _quality_rank) and candidates are restricted to the
+    provider's own family (developer entrypoints), to chat-capable models,
+    and to non-legacy/non-deprecated entries. A reasoning model still wins
+    the deep tier unless a non-reasoning model outranks it by >=10 points
+    (clearly the stronger model overall).
+
     For coding plans the per-model ``pricing`` field doubles as the plan's
-    charge multiplier (1x = baseline). Only premium (≥1x) models belong in a
-    plan; the basic tier requires a sub-1x model, which no premium plan model
-    satisfies — so ``basic`` is left ``None`` and the runtime falls back to
-    the normal-tier model for that provider. This also guarantees every model
-    in a coding plan shares the plan's single request-entry URL.
+    charge multiplier (1x = baseline). Only premium (>=1x) models belong in
+    a plan; the basic tier requires a sub-1x model, which no premium plan
+    model satisfies — so ``basic`` is left ``None`` and the runtime falls
+    back to the normal-tier model for that provider.
     """
-    import re
+    pool = [
+        m for m in models
+        if 'legacy' not in m.tags and 'deprecated' not in m.tags
+        # Stale auto-tag compat (audit R2): additive-only sync leaves the
+        # tag list a model was FIRST stamped with; grok-3 / gpt-4o-mini /
+        # minimax-01 sat in pools with pre-legacy tags and kept winning
+        # basic. The id is re-derived against the CURRENT legacy list.
+        and 'legacy' not in _live_tags(m.id)
+        and _is_chat_model(m) and _matches_family(m, family_prefixes)
+    ]
 
-    # Sort models by capability and price
-    def extract_version(model_id: str) -> float:
-        match = re.search(r'(\d+)(?:\.(\d+))?', model_id.lower())
-        if match:
-            major = float(match.group(1))
-            minor = float(match.group(2)) if match.group(2) else 0.0
-            return major + minor / 10.0
-        return 0.0
-
-    def sort_key(m: ModelInfo):
-        has_reasoning = m.supports_reasoning and 'legacy' not in m.tags
-        has_flagship = 'flagship' in m.tags and 'legacy' not in m.tags
-        version = extract_version(m.id)
-        price = m.pricing_input
-        is_vision = 'vision' in m.tags or m.supports_vision
-        # Sort: reasoning first, then flagship, then by version DESC, then by price DESC.
-        # Prefer non-vision models (plain text) over vision variants at the same rank,
-        # so e.g. glm-5 wins the normal tier over glm-5v-turbo.
-        return (not has_reasoning, not has_flagship, is_vision, -version, -price)
-
-    sorted_models = sorted(models, key=sort_key)
-
-    # For coding plans, only premium models (charge multiplier ≥1x) belong in
-    # the plan. Sub-1x models (e.g. glm-4.7-flash at 0.06x) are excluded so
-    # that every model in the plan shares the plan's single entry URL and the
-    # basic tier correctly ends up unset.
     if is_coding_plan:
-        sorted_models = [m for m in sorted_models if m.pricing_input >= 1.0]
+        pool = [m for m in pool if m.pricing_input >= 1.0]
 
-    # Select models for each tier
-    reasoning_models = [m for m in sorted_models if m.supports_reasoning and 'legacy' not in m.tags]
-    flagship_models = [m for m in sorted_models if 'flagship' in m.tags and not m.supports_reasoning and 'legacy' not in m.tags]
-    cost_effective_models = [m for m in sorted_models if 'cost_effective' in m.tags or 'free' in m.tags]
+    if not pool:
+        # The family filter wiped everything (e.g. a provider whose whole
+        # feed is third-party) — degrade to the unfiltered non-legacy list
+        # instead of emitting empty tiers. The coding-plan >=1x charge
+        # threshold survives the degrade (audit R2: the fallback used to
+        # lose it, letting sub-1x models into a premium plan's tiers).
+        pool = [
+            m for m in models
+            if 'legacy' not in m.tags and 'legacy' not in _live_tags(m.id)
+            and _is_chat_model(m)
+        ]
+        if is_coding_plan:
+            pool = [m for m in pool if m.pricing_input >= 1.0]
 
-    # Deep tier: best reasoning or flagship
-    if reasoning_models:
-        deep = reasoning_models[0].id
-    elif flagship_models:
-        deep = flagship_models[0].id
-    else:
-        deep = sorted_models[0].id if sorted_models else None
+    pool.sort(key=lambda m: (-_quality_rank(m), m.id))
 
-    # Normal tier: flagship or high-end model (not cheapest)
-    if flagship_models and len(flagship_models) > 1:
-        normal = flagship_models[1].id
-    elif flagship_models:
-        normal = flagship_models[0].id
-    else:
-        # No non-reasoning flagships (e.g. all GLM-5.x flagships support
-        # reasoning, so flagship_models is empty). Pick a general-purpose
-        # model for the normal tier: prefer a plain-text flagship/reasoning
-        # model that is neither the deep pick nor a vision/cost-effective
-        # variant. Falls back to cost_effective[1] / sorted_models[1].
-        def is_normal_candidate(m: ModelInfo) -> bool:
-            if m.id == deep:
-                return False
-            if 'legacy' in m.tags:
-                return False
-            is_vision = 'vision' in m.tags or m.supports_vision
-            is_budget = 'cost_effective' in m.tags or 'free' in m.tags
-            # Prefer flagship text models; exclude vision variants and the
-            # cheapest budget models from the normal slot.
-            return 'flagship' in m.tags and not is_vision and not is_budget
+    # Deep tier: best reasoning model, unless a non-reasoning model is
+    # clearly stronger overall (>=10 rank points).
+    deep = None
+    for m in pool:
+        if m.supports_reasoning:
+            deep = m
+            break
+    if pool:
+        if deep is None or _quality_rank(pool[0]) - _quality_rank(deep) >= 10:
+            deep = pool[0]
 
-        normal_candidates = [m for m in sorted_models if is_normal_candidate(m)]
-        if normal_candidates:
-            # Prefer the plain major-version base model (e.g. "glm-5") over
-            # point releases (e.g. "glm-5.1") for the normal tier — the deep
-            # tier already takes the newest point release. This matches the
-            # intent of "newest for deep, stable base for the rest".
-            import re as _re
-            def is_plain_base(mid: str) -> bool:
-                return bool(_re.fullmatch(r'[a-z]+-\d+', mid.lower()))
-            plain_bases = [m for m in normal_candidates if is_plain_base(m.id)]
-            normal = (plain_bases[0] if plain_bases else normal_candidates[0]).id
-        elif cost_effective_models and len(cost_effective_models) > 1:
-            # Pick second best cost_effective for normal tier
-            normal = cost_effective_models[1].id
-        else:
-            normal = sorted_models[1].id if len(sorted_models) > 1 else deep
-
-    # Basic tier: only models priced below the 1x baseline qualify.
-    # Models at or above 1x are premium and belong in normal/deep — never basic.
-    # If no sub-1x model remains (e.g. a coding plan whose models are all ≥1x),
-    # basic is left unset (None) and the runtime falls back to the normal model.
-    def is_basic_eligible(m: ModelInfo) -> bool:
-        if m.id in (deep, normal):
+    # Normal tier: next-best everyday model — not the deep pick, not a
+    # free/budget line; prefer the plain major-version base model (e.g.
+    # "glm-5") over point releases (e.g. "glm-5.1"). Vision capability is
+    # NOT an exclusion anymore: every 2026 frontier model is multimodal,
+    # and the old rule dropped google/openai normals down to 2024 relics.
+    def is_normal_candidate(m: ModelInfo) -> bool:
+        if deep is not None and m.id == deep.id:
             return False
-        if 'legacy' in m.tags:
+        # A date-snapshot pin of the deep model (qwen3.8-max-0902 next to
+        # deep=qwen3.8-max) is the SAME model — the normal tier must be a
+        # different model, not the deep pick repeated under an alias.
+        if deep is not None and _is_snapshot_alias(m.id, deep.id):
             return False
-        return m.pricing_input < 1.0
+        if 'free' in m.tags:
+            return False
+        # Stale auto-tag compat (audit R2): TAG_PATTERNS dropped 'flash'
+        # from cost_effective on 2026-10-21 (flash is the current-gen
+        # MAINLINE mid tier at Google/Qwen/DeepSeek), but additive-only
+        # sync leaves the old tag stamped on existing cards — which kept
+        # every gemini flash out of the normal tier and left google
+        # normal on gemma. Disk tags carry no provenance marker, so the
+        # exclusion only bites when the id still matches a CURRENT
+        # cost_effective pattern; genuine budget lines (mini/air/turbo/
+        # lite) keep excluding as before.
+        if 'cost_effective' in m.tags and 'cost_effective' in _live_tags(m.id):
+            return False
+        return True
 
-    basic_pool = [m for m in sorted_models if is_basic_eligible(m)]
-    tagged = [m for m in basic_pool if 'cost_effective' in m.tags or 'free' in m.tags]
-    if tagged:
-        basic = tagged[0].id
-    elif basic_pool:
-        basic = basic_pool[-1].id
+    normal_candidates = [m for m in pool if is_normal_candidate(m)]
+    if normal_candidates:
+        import re as _re
+
+        def is_plain_base(mid: str) -> bool:
+            return bool(_re.fullmatch(r'[a-z]+-\d+', mid.lower()))
+
+        # Equal-rank tiebreak: a model still carrying a cost_effective
+        # tag (live OR stale) reads as its family's budget line; at
+        # equal rank the untagged sibling wins normal (qwen3.8-plus
+        # over qwen3.8-flash when deep is qwen3.8-max).
+        normal_candidates.sort(
+            key=lambda m: (-_quality_rank(m), 'cost_effective' in m.tags, m.id)
+        )
+        plain_bases = [m for m in normal_candidates if is_plain_base(m.id)]
+        normal = (plain_bases[0] if plain_bases else normal_candidates[0]).id
     else:
+        others = [m for m in pool if deep is None or m.id != deep.id]
+        normal = others[0].id if others else (deep.id if deep else None)
+
+    # Basic tier: cheapest cost-effective line (price ASC, id as tiebreak).
+    # A 0 input price here is a placeholder (feed gap or aggregator
+    # stub like voxtral-mini-latest), not a real budget line — sorting
+    # ASC would crown it — so only priced cards compete.
+    if is_coding_plan:
         basic = None
+    else:
+        deep_id = deep.id if deep else None
+        basic_pool = [
+            m for m in pool
+            if m.id not in (deep_id, normal) and m.pricing_input > 0
+        ]
+        tagged = [m for m in basic_pool if 'cost_effective' in m.tags or 'free' in m.tags]
+        if tagged:
+            basic = min(tagged, key=lambda m: (m.pricing_input, m.id)).id
+        elif basic_pool:
+            basic = min(basic_pool, key=lambda m: (m.pricing_input, m.id)).id
+        else:
+            basic = None
 
     return {
-        'deep': deep,
+        'deep': deep.id if deep else None,
         'normal': normal,
         'basic': basic,
     }
@@ -1235,6 +1580,12 @@ def update_entrypoint_config(
     if is_coding_plan_entrypoint:
         cf.info("Coding plan - selecting 3 models")
 
+    # Developer entrypoints keep their tier defaults inside the provider's
+    # own model family; platform entrypoints host everything (no filter).
+    family_prefixes = None
+    if provider_id not in PLATFORM_PROVIDERS:
+        family_prefixes = PROVIDER_FAMILY_PREFIXES.get(provider_id)
+
     # Load existing config
     existing_config = load_entrypoint_config(provider_id, entrypoint_file, config_dir)
     if not existing_config:
@@ -1247,7 +1598,9 @@ def update_entrypoint_config(
     # For coding plans, limit models to a curated selection
     if is_coding_plan_entrypoint:
         # Select top models for each tier (coding plans restrict to ≥1x pool)
-        selected = select_tier_models_from_list(models, limit=3, is_coding_plan=True)
+        selected = select_tier_models_from_list(
+            models, limit=3, is_coding_plan=True, family_prefixes=family_prefixes
+        )
         # Curation-first: a coding plan's tiers and charge multipliers are
         # hand-curated billing data — only re-select tiers that are missing
         # or whose model vanished from the merged catalog.
@@ -1311,19 +1664,46 @@ def update_entrypoint_config(
                 seen_ids.add(model.id)
                 unique_models.append(model)
 
+        # Tier selection runs on the FULL merged catalog (quality must
+        # not be warped by the emission cap), but the picks must land in
+        # the emitted block set — a default pointing at a block that is
+        # not there is a dangling tier (audit R2: 6 providers had basic
+        # defaults for models sorted beyond the cap, because the price
+        # ASC order that picks "cheapest" also sorts cheapest LAST).
+        selected = None
+        if update_defaults:
+            selected = select_tier_models_from_list(
+                unique_models, limit=3, family_prefixes=family_prefixes
+            )
+
         # Use simplified entrypoint format (only id + pricing). The cap
         # bounds NEW additions only — existing blocks are always retained
-        # (curation-first; see curate_entrypoint_blocks).
-        new_blocks = [m.to_entrypoint_dict() for m in unique_models[:50]]
+        # (curation-first; see curate_entrypoint_blocks) — and the tier
+        # picks are always emitted alongside the capped list.
+        tier_ids = {mid for mid in (selected or {}).values() if mid}
+        emitted = list(unique_models[:50])
+        emitted.extend(m for m in unique_models[50:] if m.id in tier_ids)
+        new_blocks = [m.to_entrypoint_dict() for m in emitted]
         old_blocks = (existing_config.get('entrypoint', {}) or {}).get('models') or []
-        config['entrypoint']['models'] = curate_entrypoint_blocks(new_blocks, old_blocks)
+        final_blocks = curate_entrypoint_blocks(new_blocks, old_blocks)
+        config['entrypoint']['models'] = final_blocks
 
-        print(f"   Updated {len(unique_models[:50])} models")
+        print(f"   Updated {len(emitted)} models")
 
         # Update defaults
         if update_defaults:
-            selected = select_tier_models_from_list(unique_models, limit=3)
             if 'defaults' in config['entrypoint']:
+                # Reconcile each pick onto the spelling ACTUALLY emitted:
+                # curate folds canonical twins onto the existing block, so
+                # the emitted id is the anchor a default must reference.
+                emitted_by_canon = {
+                    canonical_id(b.get("id", "")): b.get("id")
+                    for b in final_blocks if b.get("id")
+                }
+                selected = {
+                    tier: (emitted_by_canon.get(canonical_id(mid), mid) if mid else mid)
+                    for tier, mid in selected.items()
+                }
                 old_defaults = config['entrypoint']['defaults']
                 preserved_keys = {
                     k: v for k, v in old_defaults.items()
@@ -1498,6 +1878,32 @@ def update_provider_config(
     return True
 
 
+def load_existing_catalog(
+    provider_id: str, config_dir: Path, include_entrypoint: bool = True
+) -> Dict[str, ModelInfo]:
+    """Existing cards for a provider in ONE canonical insertion order:
+    entrypoint blocks first, then models/ dir cards.
+
+    The order IS the spelling contract (audit R2): fold_by_canonical
+    keeps the FIRST spelling it meets, and curate_entrypoint_blocks
+    keeps the existing entrypoint block's spelling — building the
+    existing dict entrypoint-first makes the fold winner and the
+    emitted block id the SAME string, so tier defaults cannot dangle
+    on a case variant of an emitted block (minimax normal flipped
+    between "MiniMax-M3" and "minimax-m3" across runs before this).
+    """
+    existing: Dict[str, ModelInfo] = {}
+    if include_entrypoint:
+        for ep_provider, _ep_file, _desc in ENTRYPOINT_FILES:
+            if ep_provider == provider_id:
+                existing.update(
+                    load_existing_models_from_entrypoint(provider_id, _ep_file, config_dir)
+                )
+                break
+    existing.update(load_existing_models_from_dir(provider_id, config_dir))
+    return existing
+
+
 # ============================================================
 # Main
 # ============================================================
@@ -1627,39 +2033,52 @@ Examples:
             sys.exit(1)
 
     # === Determine merged models per provider ===
+    def fold_provider_sources(
+        provider_id: str, or_models: Dict[str, ModelInfo], md_models: Dict[str, ModelInfo],
+        existing: Dict[str, ModelInfo],
+    ) -> List[ModelInfo]:
+        """Fold id spellings (canonical form) and merge curation-first.
+
+        Folding order: the on-disk spelling always wins; feed ids that
+        denote an on-disk model are rekeyed onto the disk spelling; for
+        models new to the tree the models.dev spelling wins (it mirrors
+        the provider's official API ids), except in the openrouter provider
+        dir where OpenRouter ids are the routable ones.
+        """
+        existing = fold_by_canonical(existing)
+        or_models = rekey_onto_existing(fold_by_canonical(or_models), existing)
+        md_models = rekey_onto_existing(fold_by_canonical(md_models), existing)
+        resolve_shared_new_ids(or_models, md_models, prefer_openrouter=(provider_id == 'openrouter'))
+        merged = merge_model_dicts(existing, or_models, md_models)
+        return list(merged.values())
+
     def get_merged_models(provider_id: str) -> List[ModelInfo]:
         or_models = or_models_by_provider.get(provider_id, {})
         md_models = md_models_by_provider.get(provider_id, {})
 
         if source == 'all' and use_entrypoint_mode:
-            existing_ep = {}
-            for _, ep_file, _ in ENTRYPOINT_FILES:
-                if _ == provider_id:
-                    existing_ep = load_existing_models_from_entrypoint(
-                        provider_id, ep_file, config_dir
-                    )
-                    break
-            existing_models_dir = load_existing_models_from_dir(provider_id, config_dir)
-            existing = {**existing_ep, **existing_models_dir}
+            # Audit R2: the old loop `for _, ep_file, _ in ENTRYPOINT_FILES:
+            # if _ == provider_id` shadowed the provider with the
+            # DESCRIPTION tuple slot, so existing_ep was ALWAYS empty and
+            # the fold fell back to dir-sorted spellings — which then
+            # mismatched the entrypoint block spellings that
+            # curate_entrypoint_blocks keeps (minimax normal dangled).
+            existing = load_existing_catalog(provider_id, config_dir)
 
-            merged = merge_model_dicts(existing, or_models, md_models)
-            return list(merged.values())
+            return fold_provider_sources(provider_id, or_models, md_models, existing)
         elif source == 'all':
             existing = load_existing_models_from_dir(provider_id, config_dir)
-            merged = merge_model_dicts(existing, or_models, md_models)
-            return list(merged.values())
+            return fold_provider_sources(provider_id, or_models, md_models, existing)
         elif source == 'modelsdev':
             if not md_models:
                 return []
             existing_models_dir = load_existing_models_from_dir(provider_id, config_dir)
-            merged = merge_model_dicts(existing_models_dir, {}, md_models)
-            return list(merged.values())
+            return fold_provider_sources(provider_id, {}, md_models, existing_models_dir)
         else:
             if not or_models:
                 return []
             existing_models_dir = load_existing_models_from_dir(provider_id, config_dir)
-            merged = merge_model_dicts(existing_models_dir, or_models, {})
-            return list(merged.values())
+            return fold_provider_sources(provider_id, or_models, {}, existing_models_dir)
 
     def get_merged_models_dict(provider_id: str) -> Dict[str, ModelInfo]:
         return {m.id: m for m in get_merged_models(provider_id)}
@@ -1686,6 +2105,17 @@ Examples:
             ]
 
         for provider_id, entrypoint_file, description in entrypoints_to_update:
+            # Feed-less providers (doubao, baidu — domestic APIs absent
+            # from both aggregators) keep their hand-curated files
+            # untouched: the entrypoint's own blocks are the ONLY data
+            # the sync would see, and re-selecting tiers from id-only
+            # pseudo cards degrades curated defaults and rewrites the
+            # file layout for no information gain.
+            if (provider_id not in or_models_by_provider
+                    and provider_id not in md_models_by_provider):
+                cf.warn(f"Skipping {provider_id}/{entrypoint_file} (no feed data for provider)")
+                continue
+
             models = get_merged_models(provider_id)
             if not models:
                 cf.warn(f"Skipping {provider_id}/{entrypoint_file} (no model data found)")
@@ -1742,9 +2172,22 @@ Examples:
             if not models_dict:
                 continue
 
-            existing = load_existing_models_from_dir(provider_id, config_dir)
+            # Same spelling universe as the entrypoint pass: fold the
+            # entrypoint-first existing catalog so the individual cards
+            # keep the entrypoint block spelling (fold winner) instead
+            # of re-keying twin spellings from the dir sort order.
+            existing = fold_by_canonical(
+                load_existing_catalog(provider_id, config_dir)
+            )
 
-            merged = merge_model_dicts(existing, {}, models_dict)
+            # Pass the merged dict in the OPENROUTER slot: curation-first
+            # score backfill only reads that slot, and the merged dict is
+            # the only place a freshly-fetched benchmark score lives for a
+            # pre-existing card. Passing it in the models.dev slot (the old
+            # behavior) silently dropped the score backfill on every run —
+            # cards like gpt-6-astra (AA coding=76.9 in the live feed) sat
+            # score-less on disk while the feed carried benchmarks.
+            merged = merge_model_dicts(existing, models_dict, {})
             models_list = list(merged.values())
 
             count = save_individual_model_files(provider_id, models_list, config_dir)

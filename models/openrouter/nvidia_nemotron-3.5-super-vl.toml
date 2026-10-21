@@ -1,0 +1,20 @@
+# Nemotron 3.5 Super VL
+# Provider: openrouter
+
+[model]
+id = "nvidia/nemotron-3.5-super-vl"
+name = "Nemotron 3.5 Super VL"
+provider_id = "openrouter"
+
+context_window = 1048576
+max_output_tokens = 235929
+supports_vision = true
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["vision"]
+
+[model.pricing]
+input_per_million = 0.15
+output_per_million = 0.5
+cached_per_million = 0.02
