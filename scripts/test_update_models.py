@@ -722,7 +722,10 @@ def test_generated_twin_defers_to_canonical_disk_card():
         saved = um.save_individual_model_files(
             "minimax", [M(id="minimax-h3", name="MiniMax H3")], cfg)
         assert saved == 0
-        assert not (card.parent / "minimax-h3.toml").exists()
+        # case-insensitive FS: exists() cannot tell spellings apart, judge by
+        # the real directory-entry listing instead
+        names = {p.name for p in card.parent.iterdir()}
+        assert names == {"MiniMax-H3.toml"}, names
         assert card.read_text(encoding="utf-8") == "# curated\n"
 
 
