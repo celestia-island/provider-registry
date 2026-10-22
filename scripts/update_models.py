@@ -1258,10 +1258,11 @@ def save_individual_model_files(
     models_dir = config_dir / "models" / provider_id
     models_dir.mkdir(parents=True, exist_ok=True)
 
-    # Existing card names by lower-case for case-collision detection.
-    existing_names: Dict[str, str] = {}
+    # Canonical identity of every card already on disk; the existing
+    # (curated) spelling is authoritative for its model.
+    disk_by_canon: Dict[str, str] = {}
     for p in models_dir.glob('*.toml'):
-        existing_names.setdefault(p.name.lower(), p.name)
+        disk_by_canon.setdefault(canonical_id(p.stem), p.name)
 
     saved_count = 0
     written_canon = set()
@@ -1276,13 +1277,12 @@ def save_individual_model_files(
 
         # Sanitize model ID for filename (replace / and other special chars)
         filename = model.id.replace('/', '_').replace(':', '-') + '.toml'
-        lower_name = filename.lower()
-        if lower_name in existing_names and existing_names[lower_name] != filename:
-            # Case-colliding twin (e.g. curated MiniMax-H3.toml vs generated
-            # minimax-h3.toml): on case-insensitive filesystems both names
-            # are one file, so keep the curated card canonical and skip.
-            print(f"[ SKIP ] {provider_id}/{filename}: case-insensitive collision "
-                  f"with {existing_names[lower_name]}")
+        owner = disk_by_canon.get(c)
+        if owner is not None and owner != filename:
+            # Canonical authority: the existing card owns this model no
+            # matter how the id is spelled; never mint a case/separator
+            # twin next to it (case-insensitive filesystem hazard).
+            print(f"[ SKIP ] {provider_id}/{filename}: canonical twin of {owner}")
             continue
         model_path = models_dir / filename
 

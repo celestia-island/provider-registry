@@ -709,5 +709,22 @@ def main() -> int:
     return 1 if failed else 0
 
 
+
+def test_generated_twin_defers_to_canonical_disk_card():
+    # A curated card (any spelling) owns its model: the generator must not
+    # mint a case/separator-colliding twin beside it (NTFS/macOS hazard).
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        cfg = Path(td)
+        card = cfg / "models" / "minimax" / "MiniMax-H3.toml"
+        card.parent.mkdir(parents=True, exist_ok=True)
+        card.write_text("# curated\n", encoding="utf-8")
+        saved = um.save_individual_model_files(
+            "minimax", [M(id="minimax-h3", name="MiniMax H3")], cfg)
+        assert saved == 0
+        assert not (card.parent / "minimax-h3.toml").exists()
+        assert card.read_text(encoding="utf-8") == "# curated\n"
+
+
 if __name__ == "__main__":
     sys.exit(main())
