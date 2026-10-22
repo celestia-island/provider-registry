@@ -1258,6 +1258,12 @@ def save_individual_model_files(
     models_dir = config_dir / "models" / provider_id
     models_dir.mkdir(parents=True, exist_ok=True)
 
+    # Canonical identity of every card already on disk; the existing
+    # (curated) spelling is authoritative for its model.
+    disk_by_canon: Dict[str, str] = {}
+    for p in models_dir.glob('*.toml'):
+        disk_by_canon.setdefault(canonical_id(p.stem), p.name)
+
     saved_count = 0
     written_canon = set()
 
@@ -1271,6 +1277,13 @@ def save_individual_model_files(
 
         # Sanitize model ID for filename (replace / and other special chars)
         filename = model.id.replace('/', '_').replace(':', '-') + '.toml'
+        owner = disk_by_canon.get(c)
+        if owner is not None and owner != filename:
+            # Canonical authority: the existing card owns this model no
+            # matter how the id is spelled; never mint a case/separator
+            # twin next to it (case-insensitive filesystem hazard).
+            print(f"[ SKIP ] {provider_id}/{filename}: canonical twin of {owner}")
+            continue
         model_path = models_dir / filename
 
         try:
