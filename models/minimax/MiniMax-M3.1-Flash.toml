@@ -18,3 +18,7 @@ tags = ["flagship", "cost_effective"]
 input_per_million = 0.1494
 output_per_million = 0.5976
 cached_per_million = 0.0149
+
+[model.score]
+value = 42.7
+source = "artificial_analysis"
