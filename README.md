@@ -6,7 +6,10 @@
 
 <p align="center">
   Shared LLM provider and model configuration registry.<br>
-  Used by <a href="https://github.com/celestia-island/entelecheia">Entelecheia</a> and <a href="https://github.com/celestia-island/shittim-chest">Shittim Chest</a>.
+  Consumed by <a href="https://github.com/celestia-island/entelecheia">Entelecheia</a>,
+  <a href="https://github.com/celestia-island/shittim-chest">Shittim Chest</a> and
+  <a href="https://github.com/celestia-island/plana">plana</a> — each one vendors a snapshot
+  of this data into its own build (see <a href="#consumers">Consumers</a>).
 </p>
 
 <p align="center">
@@ -44,11 +47,12 @@ provider-registry/
 ├── registry.toml        # Provider catalog (grouped by category)
 ├── scripts/
 │   ├── update_models.py # Sync model lists from external APIs
+│   ├── validate_catalog.py      # Structural validator for entrypoint/ + models/
 │   ├── validate_descriptors.py  # Structural validator for descriptors/
 │   └── utils/
 │       └── cli_format.py
-├── justfile             # Task runner for common operations
-└── .github/workflows/   # CI: daily model list sync
+├── justfile             # Task runner for common operations (shared devtools recipes via .just/)
+└── .github/workflows/   # CI: daily model sync + catalog validation
 ```
 
 ## Entrypoint TOML Format
@@ -112,6 +116,43 @@ just sync
 # Sync specific providers
 just sync all openai,anthropic
 ```
+
+### Validate before pushing
+
+```bash
+just validate             # entrypoint/ + models/ (+ descriptors parse)
+just validate-descriptors # full MDD schema check for descriptors/
+```
+
+The same two commands are what `.github/workflows/catalog-validate.yml` runs on
+every PR and on master, so a malformed TOML (or a model whose `provider_id` does
+not match its directory) fails CI instead of quietly shrinking a consumer's
+catalog.
+
+## Consumers
+
+<a id="consumers"></a>
+
+| Consumer | How it reads this registry |
+| --- | --- |
+| [entelecheia](https://github.com/celestia-island/entelecheia) | `scripts/fetch_provider_registry.py` downloads the tree into its build output; scepter/chest read the parsed data (see `packages/scepter/src/app/setup.rs`) |
+| [shittim-chest](https://github.com/celestia-island/shittim-chest) | `scripts/fetch_provider_registry.py` (mock-server cache) + `scripts/export_vendors_snapshot.py`; the webui types live in `packages/webui/src/types/provider.ts` |
+| [plana](https://github.com/celestia-island/plana) | `scripts/fetch_provider_registry.py` at build time; `packages/celestia-types` mirrors the shapes (`src/http.rs`, `packages/res/build.rs`) |
+
+The consumer-side fetch scripts are build glue and are copies at the moment —
+keeping them byte-identical is a follow-up; this registry only guarantees the
+data contract below:
+
+- `entrypoint/<provider>/<name>.toml` — one `[entrypoint]` per provider endpoint
+  (`id`, `provider_id`, `api.protocol`, `api.base_url`; custom/operator endpoints
+  ship `base_url = ""` and are filled at runtime);
+- `models/<provider>/<model>.toml` — one `[model]` per model row, where
+  `provider_id` must equal the directory name (a model id may repeat across
+  providers: the same model is served by several with different limits);
+- `descriptors/<provider>/<mdd>.toml` — Model Deployment Descriptors, schema v1,
+  validated against the shapes plana's `MddDescriptor` defines.
+
+`arona` does **not** read this registry.
 
 ### As a git submodule
 

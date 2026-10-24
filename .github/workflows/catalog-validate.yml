@@ -1,0 +1,45 @@
+name: Catalog Validate
+
+# The registry is data, not code: ~1100 model rows and 60+ entrypoint configs that
+# consumers read directly. Nothing else checks them, so a typo'd key or a missing
+# provider_id ships silently and a consumer just sees a smaller catalog. This is
+# the gate (scripts/validate_catalog.py).
+#
+# Self-hosted on purpose: this is a private repository and the org policy keeps new
+# CI jobs off GitHub-hosted minutes (AGENTS [[ci]], ci-ops 8.2). The job is a
+# stdlib-only Python pass, so it is cheap on the farm.
+#
+# One in-flight run per ref (ci-ops 8.3.3) so a superseded push cancels itself.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+    types: [opened, reopened, ready_for_review, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  catalog:
+    runs-on: [self-hosted, linux, x64, local]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+        env:
+          # The runner rewrites github.com/celestia-island/* to a local bare
+          # mirror; keep this checkout on the real remote (ci-ops 8.2).
+          GIT_CONFIG_COUNT: "0"
+
+      - name: Validate the catalog data files
+        run: python3 scripts/validate_catalog.py
+
+      - name: Validate the MDD descriptors
+        run: python3 scripts/validate_descriptors.py
