@@ -7,8 +7,18 @@ set unstable
 set lists
 set dotenv-load
 
+# Shared celestia-devtools recipes — staged into .just/ (gitignored) by
+# `celestia-devtools init`. `import?` keeps this justfile parseable before
+# staging, so a fresh clone works without the shared file.
+import? "./.just/celestia-devtools.just"
+
 default:
     @just --list
+
+# Stage/refresh the shared celestia-devtools recipes into .just/ (gitignored).
+fetch URL='':
+    {{ if os_family() == "windows" { "python" } else { "python3" } }} -c "import os; os.makedirs('.just', exist_ok=True)"
+    {{ if URL != "" { "curl -fsSL " + URL + " -o .just/celestia-devtools.just" } else if which("celestia-devtools") != "" { "celestia-devtools fetch-just" } else { "curl -fsSL https://raw.githubusercontent.com/celestia-island/celestia-devtools/master/src/celestia_devtools/common.just -o .just/celestia-devtools.just" } }}
 
 fmt:
     {{ if which("ruff") != "" { "ruff check --fix ." } else { "black ." } }}
@@ -23,7 +33,11 @@ sync-individual source='all' providers='all':
 sync-vision:
     python3 scripts/sync_supports_vision.py
 
-# Merge master (config-table source of truth) into dev. Fast, no model fetches.
-# Structural validation of MDD descriptor TOML files.
+# Structural validation of the whole catalog (entrypoint/ + models/ + parse of
+# descriptors/). This is exactly what the Catalog Validate CI job runs.
+validate:
+    python3 scripts/validate_catalog.py
+
+# Structural validation of MDD descriptor TOML files (schema v1, plana types).
 validate-descriptors:
     python3 scripts/validate_descriptors.py
