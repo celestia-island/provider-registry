@@ -5,9 +5,10 @@ name: Catalog Validate
 # provider_id ships silently and a consumer just sees a smaller catalog. This is
 # the gate (scripts/validate_catalog.py).
 #
-# Self-hosted on purpose: this is a private repository and the org policy keeps new
-# CI jobs off GitHub-hosted minutes (AGENTS [[ci]], ci-ops 8.2). The job is a
-# stdlib-only Python pass, so it is cheap on the farm.
+# Self-hosted on purpose: the org's GitHub-hosted tier has been unavailable since
+# 2026-09-24 (AGENTS [[ci]], ci-ops 8.2); this repository is public, so a hosted
+# variant would be policy-allowed once that tier returns. The job is a stdlib-only
+# Python pass, so it is cheap on the farm.
 #
 # One in-flight run per ref (ci-ops 8.3.3) so a superseded push cancels itself.
 concurrency:
@@ -27,6 +28,11 @@ permissions:
 
 jobs:
   catalog:
+    # Fork pull requests pay for their own CI: this job runs on the org's
+    # self-hosted farm, so an outside tree must not execute there (AGENTS §8;
+    # the reusable lint/fork-guard policy). The repository is public, which makes
+    # this guard load-bearing rather than theoretical.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, linux, x64, local]
     timeout-minutes: 10
     steps:
