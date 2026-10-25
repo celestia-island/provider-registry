@@ -15,11 +15,6 @@ import? "./.just/celestia-devtools.just"
 default:
     @just --list
 
-# Stage/refresh the shared celestia-devtools recipes into .just/ (gitignored).
-fetch URL='':
-    {{ if os_family() == "windows" { "python" } else { "python3" } }} -c "import os; os.makedirs('.just', exist_ok=True)"
-    {{ if URL != "" { "curl -fsSL " + URL + " -o .just/celestia-devtools.just" } else if which("celestia-devtools") != "" { "celestia-devtools fetch-just" } else { "curl -fsSL https://raw.githubusercontent.com/celestia-island/celestia-devtools/master/src/celestia_devtools/common.just -o .just/celestia-devtools.just" } }}
-
 fmt:
     {{ if which("ruff") != "" { "ruff check --fix ." } else { "black ." } }}
 
