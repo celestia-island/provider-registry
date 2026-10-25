@@ -5,9 +5,10 @@ name: Catalog Validate
 # provider_id ships silently and a consumer just sees a smaller catalog. This is
 # the gate (scripts/validate_catalog.py).
 #
-# Self-hosted on purpose: this is a private repository and the org policy keeps new
-# CI jobs off GitHub-hosted minutes (AGENTS [[ci]], ci-ops 8.2). The job is a
-# stdlib-only Python pass, so it is cheap on the farm.
+# Self-hosted because the org keeps CI compute on the farm (AGENTS [[ci]], ci-ops
+# 8.2); hosted runs are reserved for the two lint exceptions documented in
+# _ledger/ci-state.md (re-check 2026-11-01). The job is a stdlib-only Python pass,
+# so it is cheap on the farm.
 #
 # One in-flight run per ref (ci-ops 8.3.3) so a superseded push cancels itself.
 concurrency:
@@ -27,6 +28,12 @@ permissions:
 
 jobs:
   catalog:
+    # Fork pull requests must not execute on the org's self-hosted farm
+    # (AGENTS [[ci]]; celestia-devtools workflow_audit's fork-guard rule). This is
+    # defense in depth, not an absolute boundary: GitHub's fork-PR approval gate
+    # is the outer control, and a fork can propose edits to this file. Keeping the
+    # canonical guard here still stops every fork run that reaches the job.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, linux, x64, local]
     timeout-minutes: 10
     steps:
