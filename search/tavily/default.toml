@@ -1,0 +1,39 @@
+# Tavily Search — AI-optimized web search API.
+#
+# Auth is the documented `Authorization: Bearer <key>` header. Tavily also still
+# accepts the legacy `api_key` field in the JSON body; consumers that use that
+# form are outside this contract but keep working.
+#
+# Capabilities map to published parameters: `include_raw_content` (content),
+# `time_range` / `days` (freshness), `include_domains` / `exclude_domains`
+# (site_filter).
+
+[entrypoint]
+id = "tavily_search_default"
+provider_id = "tavily"
+website_domain = "tavily.com"
+
+[entrypoint.api]
+protocol = "tavily_search_v1"
+base_url = "https://api.tavily.com"
+endpoint = "/search"
+method = "POST"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "TAVILY_API_KEY"
+
+[entrypoint.name]
+en = "Tavily Search"
+zhs = "Tavily 搜索"
+zht = "Tavily 搜尋"
+ja = "Tavily 検索"
+ko = "Tavily 검색"
+fr = "Tavily Search"
+es = "Tavily Search"
+ru = "Tavily Search"
+
+[entrypoint.capabilities]
+content = true
+snippets = true
+freshness = true
+site_filter = true

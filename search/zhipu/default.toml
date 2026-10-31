@@ -1,0 +1,40 @@
+# Zhipu Web Search — 智谱 BigModel (official).
+#
+# Bearer auth, POST /api/paas/v4/web_search. The body selects a backing engine
+# (`search_std` / `search_pro` / `search_pro_sogou` / `search_pro_quark`) and
+# carries `search_query`, `count`, `content_size`. Capabilities map to published
+# parameters: `search_recency_filter` (freshness) and `search_domain_filter`
+# (site_filter); results carry page content (`content`).
+#
+# This is the search API only — the chat models live in
+# `entrypoint/zhipu_glm/`.
+
+[entrypoint]
+id = "zhipu_search_default"
+provider_id = "zhipu"
+website_domain = "bigmodel.cn"
+
+[entrypoint.api]
+protocol = "zhipu_search_v1"
+base_url = "https://open.bigmodel.cn"
+endpoint = "/api/paas/v4/web_search"
+method = "POST"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "ZHIPU_API_KEY"
+
+[entrypoint.name]
+en = "Zhipu Web Search"
+zhs = "智谱 Web 搜索"
+zht = "智譜 Web 搜尋"
+ja = "Zhipu Web 検索"
+ko = "Zhipu 웹 검색"
+fr = "Zhipu Web Search"
+es = "Zhipu Web Search"
+ru = "Zhipu Web Search"
+
+[entrypoint.capabilities]
+content = true
+snippets = true
+freshness = true
+site_filter = true

@@ -1,0 +1,49 @@
+# Seia — self-hosted multi-engine search gateway (search aggregator).
+#
+# Seia puts one normalized wire protocol in front of a chain of provider
+# engines: a caller posts {query, count, need_content, chain[]} and receives the
+# first provider that answered plus a per-provider `attempts` trail. The chain
+# is supplied by the caller (the LLM gateway builds it from its own search
+# provider catalog), so this entry doubles as the aggregator's transport
+# description and as the single hop every LLM-facing search path goes through.
+#
+# `base_url` is the gateway's default loopback bind. Consumers always override
+# it with the instance they deploy — the registry only records the default.
+# `SEIA_TOKEN` is optional at the gateway: when the operator sets it, callers
+# must present it as a Bearer token.
+
+[entrypoint]
+id = "seia_search_default"
+provider_id = "seia"
+# Self-hosted software: it has no vendor site of its own, so no domain.
+website_domain = ""
+
+[entrypoint.api]
+protocol = "seia_search_v1"
+base_url = "http://127.0.0.1:3011"
+endpoint = "/v1/search"
+method = "POST"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "SEIA_TOKEN"
+# Same service, introspection endpoint: engines, their capabilities and the
+# gateway's default chain.
+engines_endpoint = "/v1/engines"
+
+[entrypoint.name]
+en = "Seia Search (Self-hosted)"
+zhs = "Seia 搜索（自托管）"
+zht = "Seia 搜尋（自架）"
+ja = "Seia 検索（セルフホスト）"
+ko = "Seia 검색 (자체 호스팅)"
+fr = "Seia Search (Auto-hébergé)"
+es = "Seia Search (Autoalojado)"
+ru = "Seia Search (Самостоятельный хостинг)"
+
+[entrypoint.capabilities]
+# `content` is forwarded to whichever backend the chain selects, so it is only
+# as strong as that backend's support. The gateway has no freshness or
+# site-filter parameter yet, so those keys are omitted (= not asserted) instead
+# of being declared false.
+content = true
+snippets = true

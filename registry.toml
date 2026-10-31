@@ -193,3 +193,131 @@ name = "Xiaomi MiMo"
 website_domain = "xiaomi.com"
 description = "Xiaomi MiMo models"
 is_official = false
+
+# ---- Search providers -------------------------------------------------------
+#
+# Search is a separate capability class from LLM chat: a search provider takes a
+# query and returns ranked web results, it is not a model you talk to. The wire
+# contracts live in `search/<provider>/<variant>.toml`; the groups below only
+# categorize those providers for setup UIs, exactly like the LLM groups above.
+#
+# Rules the validator enforces (scripts/validate_catalog.py):
+#   * every `search.*` id must have a `search/<id>/` directory, and every
+#     `search/<id>/` directory must appear here exactly once;
+#   * rows carry `id`, `name`, `description` and, when known, `website_domain`.
+#
+# Metadata semantics:
+#   * `requires_key = false` — the endpoint is callable without a credential;
+#   * `verified = true` — the endpoint has actually been exercised against the
+#     live vendor API from this workspace. `false` means only "not exercised
+#     yet", never "broken" or "unavailable";
+#   * `is_official` — the vendor documents and supports the endpoint. DuckDuckGo
+#     has no official search API, so its HTML entry is `false`.
+
+[[search.aggregators]]
+id = "seia"
+name = "Seia"
+website_domain = ""
+description = "Self-hosted search gateway that fans one query out to a provider chain"
+is_official = false
+requires_key = false
+verified = false
+
+[[search.international.developers]]
+id = "deepseek"
+name = "DeepSeek Search"
+website_domain = "deepseek.com"
+description = "Search & Fetch tools API from DeepSeek"
+is_official = true
+requires_key = true
+verified = true
+
+[[search.international.developers]]
+id = "tavily"
+name = "Tavily"
+website_domain = "tavily.com"
+description = "AI-oriented web search API with per-result content"
+is_official = true
+requires_key = true
+verified = false
+
+[[search.international.developers]]
+id = "brave"
+name = "Brave Search"
+website_domain = "brave.com"
+description = "Independent web index from Brave"
+is_official = true
+requires_key = true
+verified = false
+
+[[search.international.developers]]
+id = "bing"
+name = "Bing Web Search"
+website_domain = "microsoft.com"
+description = "Web Search v7 from Microsoft Azure Cognitive Services"
+is_official = true
+requires_key = true
+verified = false
+
+[[search.chinese.developers]]
+id = "baidu"
+name = "Baidu AI Search"
+website_domain = "baidu.com"
+description = "AI Search API from Baidu Qianfan"
+is_official = true
+requires_key = true
+verified = false
+
+[[search.chinese.developers]]
+id = "bocha"
+name = "Bocha AI Search"
+website_domain = "bochaai.com"
+description = "Web search API with per-page LLM summaries from Bocha"
+is_official = true
+requires_key = true
+verified = false
+
+[[search.chinese.developers]]
+id = "metaso"
+name = "Metaso"
+website_domain = "metaso.cn"
+description = "Open search API from Metaso (秘塔)"
+is_official = true
+requires_key = true
+verified = false
+
+[[search.chinese.developers]]
+id = "zhipu"
+name = "Zhipu Web Search"
+website_domain = "bigmodel.cn"
+description = "Web search API from Zhipu BigModel"
+is_official = true
+requires_key = true
+verified = false
+
+[[search.operators]]
+id = "searxng"
+name = "SearXNG"
+website_domain = "searxng.org"
+description = "Self-hosted meta-search engine (operator supplies the instance URL)"
+is_official = true
+requires_key = false
+verified = false
+
+[[search.open]]
+id = "duckduckgo"
+name = "DuckDuckGo"
+website_domain = "duckduckgo.com"
+description = "Public HTML results page parsed without a key (no official API)"
+is_official = false
+requires_key = false
+verified = false
+
+[[search.open]]
+id = "wikipedia"
+name = "Wikipedia"
+website_domain = "wikipedia.org"
+description = "MediaWiki Action API article search, no key required"
+is_official = true
+requires_key = false
+verified = false

@@ -1,0 +1,36 @@
+# Bocha AI Search — 博查 (official web search API).
+#
+# Bearer auth, POST /v1/web-search. Published parameters used by the
+# capabilities below: `freshness` (noLimit / oneDay / oneWeek / oneMonth /
+# oneYear), `include` / `exclude` (comma- or pipe-separated domains, at most
+# 100), `summary` (per-page LLM summary), `count`. No raw page body is
+# published, so `content` is omitted rather than asserted.
+
+[entrypoint]
+id = "bocha_search_default"
+provider_id = "bocha"
+website_domain = "bochaai.com"
+
+[entrypoint.api]
+protocol = "bocha_search_v1"
+base_url = "https://api.bochaai.com"
+endpoint = "/v1/web-search"
+method = "POST"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "BOCHA_API_KEY"
+
+[entrypoint.name]
+en = "Bocha AI Search"
+zhs = "博查 AI 搜索"
+zht = "博查 AI 搜尋"
+ja = "Bocha AI 検索"
+ko = "Bocha AI 검색"
+fr = "Bocha AI Search"
+es = "Bocha AI Search"
+ru = "Bocha AI Search"
+
+[entrypoint.capabilities]
+snippets = true
+freshness = true
+site_filter = true
