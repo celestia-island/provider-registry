@@ -20,7 +20,7 @@ website_domain = ""
 
 [entrypoint.api]
 protocol = "seia_search_v1"
-base_url = "http://127.0.0.1:3011"
+base_url = "http://127.0.0.1:3013"
 endpoint = "/v1/search"
 method = "POST"
 auth_type = "bearer"
