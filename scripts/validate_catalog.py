@@ -25,10 +25,12 @@ Checks (stdlib only, `tomllib`):
    e.g. `glm-5` under `qwen/` and `zhipu_glm/`.)
 6. every search entrypoint additionally declares the full search transport —
    `protocol`, `base_url`, `endpoint`, `method`, `auth_type`, `auth_header`,
-   `env_var` — with `protocol` ending in `_search_v1` (an LLM chat protocol such
-   as `openai_chat_v1` is a defect here), `endpoint` an absolute path, `method`
-   `GET`/`POST`, and an auth contract that matches the credential requirement
-   (`bearer`/`header` need a header and an env var, `none` needs neither);
+   `env_var` — with `protocol` being one of the shared search vocabulary
+   (`SEARCH_PROTOCOLS`, the verbatim seia/arona contract; a near-miss such as
+   `baidu_search_v1` or an LLM chat protocol like `openai_chat_v1` is a defect
+   here), `endpoint` an absolute path, `method` `GET`/`POST`, and an auth
+   contract that matches the credential requirement (`bearer`/`header` need a
+   header and an env var, `none` needs neither);
 7. `[entrypoint.capabilities]`, when present, only carries the four known
    capability flags (`content`, `snippets`, `freshness`, `site_filter`) as
    booleans — an unknown key would be silently ignored by consumers;
@@ -56,6 +58,30 @@ REQUIRED_ENTRYPOINT_KEYS = ("id", "provider_id", "api", "name")
 
 SEARCH_TOP = "search"
 SEARCH_PROTOCOL_SUFFIX = "_search_v1"
+# The closed protocol vocabulary, pinned to arona's `SEARCH_PROTOCOLS`
+# whitelist (scripts/test_validate_search.py keeps this set and the test's
+# EXPECTED_PROTOCOLS in lockstep, so the two in-repo copies cannot drift;
+# cross-repo parity with seia/arona is a review-time check, not CI — seia
+# additionally serves academic engines that are deliberately out of this
+# catalog's scope). A suffix-only check let a misspelling such as
+# `baidu_search_v1` pass the catalog gate and explode only at arona runtime;
+# membership is a data-contract fact, so the validator owns it here too.
+SEARCH_PROTOCOLS = frozenset(
+    (
+        "seia_search_v1",
+        "deepseek_search_v1",
+        "baidu_ai_search_v1",
+        "tavily_search_v1",
+        "brave_search_v1",
+        "bing_search_v1",
+        "bocha_search_v1",
+        "metaso_search_v1",
+        "zhipu_search_v1",
+        "searxng_search_v1",
+        "duckduckgo_search_v1",
+        "wikipedia_search_v1",
+    )
+)
 SEARCH_API_KEYS = (
     "protocol",
     "base_url",
@@ -120,12 +146,13 @@ def _check_search_api(path: Path, entry: dict, provider: str | None, problems: l
         protocol = api["protocol"]
         if not isinstance(protocol, str) or not protocol.strip():
             problems.append(f"{path}: [entrypoint.api].protocol is blank")
-        elif not protocol.endswith(SEARCH_PROTOCOL_SUFFIX):
+        elif protocol not in SEARCH_PROTOCOLS:
             problems.append(
-                f"{path}: [entrypoint.api].protocol {protocol!r} must end with "
-                f"{SEARCH_PROTOCOL_SUFFIX!r} (search protocols are named "
-                f"<engine>{SEARCH_PROTOCOL_SUFFIX}; the LLM chat protocols used under "
-                "entrypoint/ are not valid here)"
+                f"{path}: [entrypoint.api].protocol {protocol!r} is not in the shared "
+                f"search vocabulary (one of: {', '.join(sorted(SEARCH_PROTOCOLS))}); "
+                "arona's gateway whitelist accepts nothing else (seia serves extra "
+                "academic engines outside this catalog's scope), so a "
+                "near-miss spelling must fail here rather than at runtime"
             )
 
     if "base_url" in api:
@@ -401,6 +428,10 @@ def validate(root: Path) -> list[str]:
         elif api is not None:
             problems.append(f"{path}: [entrypoint.api] must be a table")
         name = entry.get("name")
+        if name is not None and not isinstance(name, dict):
+            # Same silent-skip hole the search tree had: a bare string passed
+            # the required-key loop and the dict guard skipped the `.en` check.
+            problems.append(f"{path}: [entrypoint.name] must be a table with an `en` label")
         if isinstance(name, dict) and not name.get("en"):
             problems.append(f"{path}: [entrypoint.name].en is missing (the un-localized label)")
         declared = entry.get("provider_id")
@@ -409,6 +440,8 @@ def validate(root: Path) -> list[str]:
                 f"{path}: [entrypoint].provider_id {declared!r} does not match directory {provider!r}"
             )
         entry_id = entry.get("id")
+        if isinstance(entry_id, str) and not entry_id.strip():
+            problems.append(f"{path}: [entrypoint].id is blank")
         if isinstance(entry_id, str) and entry_id:
             if entry_id in entrypoint_ids:
                 problems.append(f"{path}: duplicate entrypoint id {entry_id!r} (also {entrypoint_ids[entry_id]})")
@@ -437,6 +470,11 @@ def validate(root: Path) -> list[str]:
             if key not in entry:
                 problems.append(f"{path}: [entrypoint].{key} is missing")
         name = entry.get("name")
+        if name is not None and not isinstance(name, dict):
+            # A bare string used to slip past: the required-key loop only saw
+            # the key, and the dict guard below silently skipped the `.en`
+            # check, so an unlocalized entry shipped green.
+            problems.append(f"{path}: [entrypoint.name] must be a table with an `en` label")
         if isinstance(name, dict) and not name.get("en"):
             problems.append(f"{path}: [entrypoint.name].en is missing (the un-localized label)")
         declared = entry.get("provider_id")
@@ -445,6 +483,8 @@ def validate(root: Path) -> list[str]:
                 f"{path}: [entrypoint].provider_id {declared!r} does not match directory {provider!r}"
             )
         entry_id = entry.get("id")
+        if isinstance(entry_id, str) and not entry_id.strip():
+            problems.append(f"{path}: [entrypoint].id is blank")
         if isinstance(entry_id, str) and entry_id:
             if entry_id in search_ids:
                 problems.append(f"{path}: duplicate search entrypoint id {entry_id!r} (also {search_ids[entry_id]})")

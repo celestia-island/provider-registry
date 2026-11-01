@@ -166,7 +166,43 @@ def test_llm_chat_protocol_is_rejected():
     # The most likely copy-paste defect: an entrypoint/ protocol dropped into
     # search/. It must fail loudly, not be accepted as some chat endpoint.
     files = {"search/tavily/default.toml": search_entry(protocol="openai_chat_v1")}
-    ok, out = has(problems(files=files), "must end with '_search_v1'")
+    ok, out = has(problems(files=files), "not in the shared search vocabulary")
+    assert ok, out
+
+
+def test_near_miss_protocol_is_rejected():
+    # Suffix-valid but misspelled: `baidu_search_v1` ends with `_search_v1`
+    # yet is not the real protocol (`baidu_ai_search_v1`). The suffix check
+    # alone let this ship; only membership catches it (R2 finding, 2026-11-01).
+    files = {"search/tavily/default.toml": search_entry(protocol="baidu_search_v1")}
+    ok, out = has(problems(files=files), "not in the shared search vocabulary")
+    assert ok, out
+
+
+def test_validator_vocabulary_matches_the_pinned_contract():
+    # The validator's membership set must BE the cross-repo contract, not a
+    # second list that can drift: any entry of EXPECTED_PROTOCOLS the validator
+    # forgot to admit would fail the real catalog with a confusing message.
+    assert set(vc.SEARCH_PROTOCOLS) == set(EXPECTED_PROTOCOLS.values())
+
+
+def test_blank_entrypoint_id_is_reported():
+    files = {"search/tavily/default.toml": search_entry(entry_id="   ")}
+    ok, out = has(problems(files=files), "[entrypoint].id is blank")
+    assert ok, out
+
+
+def test_name_must_be_a_table():
+    # `name = "Tavily Search"` used to slip past the required-key loop (the key
+    # exists) and the isinstance(name, dict) guard skipped the `.en` check.
+    # The string key must sit inside the [entrypoint] table, not a sub-table.
+    broken = (
+        search_entry()
+        .replace('provider_id = "tavily"', 'provider_id = "tavily"\nname = "Test Search"')
+        .replace('[entrypoint.name]\nen = "Test Search"\n\n', "")
+    )
+    files = {"search/tavily/default.toml": broken}
+    ok, out = has(problems(files=files), "[entrypoint.name] must be a table")
     assert ok, out
 
 
