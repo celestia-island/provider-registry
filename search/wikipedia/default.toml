@@ -1,0 +1,40 @@
+# Wikipedia — MediaWiki Action API (no credential).
+#
+# `base_url` is the English wiki; the same protocol works against any language
+# subdomain (`{lang}.wikipedia.org`), so consumers override the host for a
+# non-English locale. The call is
+# `GET {base}/w/api.php?action=query&list=search&srsearch=<query>&format=json`.
+#
+# `list=search` returns article titles plus highlighted snippet markup; a full
+# article body needs the separate extracts call, so `content` is omitted. The
+# Action API has no time-range or domain parameter — neither capability is
+# asserted.
+
+[entrypoint]
+id = "wikipedia_search_default"
+provider_id = "wikipedia"
+website_domain = "wikipedia.org"
+
+[entrypoint.api]
+protocol = "wikipedia_search_v1"
+base_url = "https://en.wikipedia.org"
+endpoint = "/w/api.php"
+method = "GET"
+query_param = "srsearch"
+fixed_params = "action=query&list=search&format=json"
+auth_type = "none"
+auth_header = ""
+env_var = ""
+
+[entrypoint.name]
+en = "Wikipedia (MediaWiki API)"
+zhs = "维基百科（MediaWiki API）"
+zht = "維基百科（MediaWiki API）"
+ja = "Wikipedia（MediaWiki API）"
+ko = "위키백과 (MediaWiki API)"
+fr = "Wikipédia (API MediaWiki)"
+es = "Wikipedia (API MediaWiki)"
+ru = "Википедия (API MediaWiki)"
+
+[entrypoint.capabilities]
+snippets = true

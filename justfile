@@ -28,11 +28,16 @@ sync-individual source='all' providers='all':
 sync-vision:
     python3 scripts/sync_supports_vision.py
 
-# Structural validation of the whole catalog (entrypoint/ + models/ + parse of
-# descriptors/). This is exactly what the Catalog Validate CI job runs.
+# Structural validation of the whole catalog (entrypoint/ + search/ + models/,
+# parse of descriptors/). This is exactly what the Catalog Validate CI job runs.
 validate:
     python3 scripts/validate_catalog.py
 
 # Structural validation of MDD descriptor TOML files (schema v1, plana types).
 validate-descriptors:
     python3 scripts/validate_descriptors.py
+
+# Regression tests for the validator rules (stdlib only, no dependencies).
+test:
+    python3 scripts/test_update_models.py
+    python3 scripts/test_validate_search.py

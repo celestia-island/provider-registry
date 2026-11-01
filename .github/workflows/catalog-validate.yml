@@ -50,3 +50,13 @@ jobs:
 
       - name: Validate the MDD descriptors
         run: python3 scripts/validate_descriptors.py
+
+      # The validators only prove the shipped tree is clean; the test suites
+      # pin the contract itself (the verbatim search protocol vocabulary, the
+      # registry<->directory invariants). Without this step a PR that loosens
+      # validate_catalog.py would pass its own relaxed output — the tests are
+      # where "fails here instead of shipping" actually lives.
+      - name: Run the catalog test suites
+        run: |
+          python3 scripts/test_validate_search.py
+          python3 scripts/test_update_models.py

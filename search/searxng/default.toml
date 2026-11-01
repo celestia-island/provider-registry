@@ -1,0 +1,41 @@
+# SearXNG — self-hosted meta-search engine (no credential).
+#
+# `base_url` is deliberately empty: there is no canonical host, every operator
+# runs their own instance and points `SEARXNG_URL` at it at runtime. This is the
+# one search protocol in the registry whose host is operator-supplied, which is
+# why the validator allows a blank base_url for this provider only.
+#
+# The JSON API is `GET {base}/search?q=<query>&format=json`; `time_range`
+# (day / month / year) is the documented freshness control. Result text is the
+# engine-level snippet, not a fetched page body.
+
+[entrypoint]
+id = "searxng_search_default"
+provider_id = "searxng"
+website_domain = "searxng.org"
+
+[entrypoint.api]
+protocol = "searxng_search_v1"
+base_url = ""
+base_url_env_var = "SEARXNG_URL"
+endpoint = "/search"
+method = "GET"
+query_param = "q"
+fixed_params = "format=json"
+auth_type = "none"
+auth_header = ""
+env_var = ""
+
+[entrypoint.name]
+en = "SearXNG (Self-hosted)"
+zhs = "SearXNG（自托管）"
+zht = "SearXNG（自架）"
+ja = "SearXNG（セルフホスト）"
+ko = "SearXNG (자체 호스팅)"
+fr = "SearXNG (Auto-hébergé)"
+es = "SearXNG (Autoalojado)"
+ru = "SearXNG (Самостоятельный хостинг)"
+
+[entrypoint.capabilities]
+snippets = true
+freshness = true

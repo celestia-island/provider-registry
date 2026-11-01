@@ -1,0 +1,37 @@
+# DuckDuckGo — public HTML endpoint (no credential).
+#
+# DuckDuckGo publishes no search API. This entry describes the HTML results page
+# (`https://html.duckduckgo.com/html/?q=<query>`) that scrapers parse, so
+# `is_official = false` in registry.toml: it is a public page, not a contract,
+# and may change or start blocking without notice.
+#
+# Nothing beyond snippet text is asserted: no time-range parameter is
+# documented for this endpoint, and no domain restriction is promised.
+
+[entrypoint]
+id = "duckduckgo_search_default"
+provider_id = "duckduckgo"
+website_domain = "duckduckgo.com"
+
+[entrypoint.api]
+protocol = "duckduckgo_search_v1"
+base_url = "https://html.duckduckgo.com"
+endpoint = "/html/"
+method = "GET"
+query_param = "q"
+auth_type = "none"
+auth_header = ""
+env_var = ""
+
+[entrypoint.name]
+en = "DuckDuckGo (HTML, unofficial)"
+zhs = "DuckDuckGo（HTML，非官方）"
+zht = "DuckDuckGo（HTML，非官方）"
+ja = "DuckDuckGo（HTML、非公式）"
+ko = "DuckDuckGo (HTML, 비공식)"
+fr = "DuckDuckGo (HTML, non officiel)"
+es = "DuckDuckGo (HTML, no oficial)"
+ru = "DuckDuckGo (HTML, неофициальный)"
+
+[entrypoint.capabilities]
+snippets = true

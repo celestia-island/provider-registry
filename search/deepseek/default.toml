@@ -1,0 +1,42 @@
+# DeepSeek Search — the official "Search & Fetch" tools API.
+#
+# This entry describes the *search* protocol only. DeepSeek's chat endpoints
+# live in `entrypoint/deepseek/` (protocol `openai_chat_v1`) and the two are
+# independent surfaces: a consumer may hold a chat key and use it here, but the
+# wire shapes have nothing in common.
+#
+# `q` supports the documented search operators (`site:`, `-site:`, `lang:`,
+# `after:`, `before:`), which is what the site_filter / freshness capabilities
+# below refer to.
+
+[entrypoint]
+id = "deepseek_search_default"
+provider_id = "deepseek"
+website_domain = "deepseek.com"
+
+[entrypoint.api]
+protocol = "deepseek_search_v1"
+base_url = "https://api.deepseek.com"
+endpoint = "/v1/tools/search"
+method = "POST"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "DEEPSEEK_API_KEY"
+# Companion endpoint published by the same tools API: page fetch → markdown.
+fetch_endpoint = "/v1/tools/fetch"
+
+[entrypoint.name]
+en = "DeepSeek Search (Official)"
+zhs = "DeepSeek 搜索（官方）"
+zht = "DeepSeek 搜尋（官方）"
+ja = "DeepSeek 検索（公式）"
+ko = "DeepSeek 검색 (공식)"
+fr = "DeepSeek Search (Officiel)"
+es = "DeepSeek Search (Oficial)"
+ru = "DeepSeek Search (Официальный)"
+
+[entrypoint.capabilities]
+content = true
+snippets = true
+freshness = true
+site_filter = true

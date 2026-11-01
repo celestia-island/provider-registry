@@ -1,0 +1,41 @@
+# Bing Web Search API v7 (Microsoft Azure Cognitive Services, official).
+#
+# The credential travels in `Ocp-Apim-Subscription-Key` — hence auth_type =
+# "header". `endpoint` is the `/v7.0/search` resource under the regional
+# `api.bing.microsoft.com` host; sovereign clouds and self-hosted proxies
+# override `base_url` at runtime.
+#
+# Capabilities map to published query parameters: `freshness`
+# (Day / Week / Month), `mkt` for market, and the documented `site:` operator
+# for domain restriction. Bing returns `snippet` text only, so `content` is
+# omitted.
+
+[entrypoint]
+id = "bing_search_default"
+provider_id = "bing"
+website_domain = "microsoft.com"
+
+[entrypoint.api]
+protocol = "bing_search_v1"
+base_url = "https://api.bing.microsoft.com"
+endpoint = "/v7.0/search"
+method = "GET"
+query_param = "q"
+auth_type = "header"
+auth_header = "Ocp-Apim-Subscription-Key"
+env_var = "BING_SEARCH_API_KEY"
+
+[entrypoint.name]
+en = "Bing Web Search v7"
+zhs = "必应网页搜索 v7"
+zht = "Bing 網頁搜尋 v7"
+ja = "Bing Web 検索 v7"
+ko = "Bing 웹 검색 v7"
+fr = "Bing Web Search v7"
+es = "Bing Web Search v7"
+ru = "Bing Web Search v7"
+
+[entrypoint.capabilities]
+snippets = true
+freshness = true
+site_filter = true

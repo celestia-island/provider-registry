@@ -1,0 +1,39 @@
+# Brave Search API (official).
+#
+# The credential travels in a dedicated header, `X-Subscription-Token`, not in
+# `Authorization` — hence auth_type = "header". The query is a GET parameter,
+# `freshness` (pd / pw / pm / py) is the documented freshness control.
+#
+# Brave returns a `description` per result and no page body, so `content` is
+# omitted rather than asserted. Domain restriction is not asserted either: only
+# the query syntax of the underlying index offers it, which this entry does not
+# promise.
+
+[entrypoint]
+id = "brave_search_default"
+provider_id = "brave"
+website_domain = "brave.com"
+
+[entrypoint.api]
+protocol = "brave_search_v1"
+base_url = "https://api.search.brave.com"
+endpoint = "/res/v1/web/search"
+method = "GET"
+query_param = "q"
+auth_type = "header"
+auth_header = "X-Subscription-Token"
+env_var = "BRAVE_SEARCH_API_KEY"
+
+[entrypoint.name]
+en = "Brave Search"
+zhs = "Brave 搜索"
+zht = "Brave 搜尋"
+ja = "Brave 検索"
+ko = "Brave 검색"
+fr = "Brave Search"
+es = "Brave Search"
+ru = "Brave Search"
+
+[entrypoint.capabilities]
+snippets = true
+freshness = true

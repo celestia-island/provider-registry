@@ -1,0 +1,38 @@
+# Metaso Search — 秘塔 (official open search API).
+#
+# Bearer auth, POST /api/v1/search with `{mode, q, scope, size,
+# includeSummary, conciseSnippet}`. `scope` selects the corpus (webpage /
+# academic / document / image); it is not a freshness or domain filter, which
+# is why neither capability is asserted.
+#
+# The vendor does not formally document the response envelope, so only
+# `snippets` is asserted here: consumers must parse defensively (the search
+# results carry a link plus snippet/summary text; full page bodies are not
+# guaranteed).
+
+[entrypoint]
+id = "metaso_search_default"
+provider_id = "metaso"
+website_domain = "metaso.cn"
+
+[entrypoint.api]
+protocol = "metaso_search_v1"
+base_url = "https://metaso.cn"
+endpoint = "/api/v1/search"
+method = "POST"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "METASO_API_KEY"
+
+[entrypoint.name]
+en = "Metaso Search"
+zhs = "秘塔搜索"
+zht = "秘塔搜尋"
+ja = "Metaso 検索"
+ko = "Metaso 검색"
+fr = "Metaso Search"
+es = "Metaso Search"
+ru = "Metaso Search"
+
+[entrypoint.capabilities]
+snippets = true

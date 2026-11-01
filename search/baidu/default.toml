@@ -1,0 +1,44 @@
+# Baidu AI Search — 百度智能云千帆 AI 搜索 (official).
+#
+# This is the Qianfan AI Search API, not the ERNIE chat API in
+# `entrypoint/baidu/` (those are `openai_chat_v1`). The request carries a
+# `messages[]` array and a `search_source` selector; the response returns
+# `references[]` which a consumer normalizes into result items.
+#
+# No key for this API exists in this workspace yet, so the entry ships with
+# `verified = false` in registry.toml: it is built from the public API
+# documentation, exercised nowhere.
+#
+# Capabilities assert what the EXECUTION path honours end to end, not what the
+# vendor documents: seia's `baidu` adapter sends only
+# {messages, search_source, resource_type_filter} — it does not expose Qianfan's
+# recency/site filters — so `freshness`/`site_filter` stay unset (unknown)
+# until the adapter grows those parameters.
+
+[entrypoint]
+id = "baidu_search_default"
+provider_id = "baidu"
+website_domain = "baidu.com"
+
+[entrypoint.api]
+protocol = "baidu_ai_search_v1"
+base_url = "https://qianfan.baidubce.com"
+endpoint = "/v2/ai_search/web_search"
+method = "POST"
+auth_type = "bearer"
+auth_header = "Authorization"
+env_var = "BAIDU_API_KEY"
+
+[entrypoint.name]
+en = "Baidu AI Search (Qianfan)"
+zhs = "百度 AI 搜索（千帆）"
+zht = "百度 AI 搜尋（千帆）"
+ja = "Baidu AI 検索（千帆）"
+ko = "Baidu AI 검색 (Qianfan)"
+fr = "Baidu AI Search (Qianfan)"
+es = "Baidu AI Search (Qianfan)"
+ru = "Baidu AI Search (Qianfan)"
+
+[entrypoint.capabilities]
+content = true
+snippets = true
