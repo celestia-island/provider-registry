@@ -12,8 +12,9 @@ supports_vision = false
 supports_function_calling = false
 supports_streaming = true
 supports_reasoning = true
-tags = []
+tags = ["reasoning"]
 
 [model.pricing]
 input_per_million = 1.0
 output_per_million = 3.0
+cached_per_million = 0.2
