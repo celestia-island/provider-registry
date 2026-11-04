@@ -303,16 +303,21 @@ of the TOML tree:
   directory is published with `category = "unregistered"` and reported as a
   warning, never dropped.
 - `supports_vision` and `supports_reasoning` are always present as booleans (a
-  card without the key reads `false`); multimodal capability is carried by
-  `supports_vision`, there is no `multimodal` kind. Values are strict JSON: a
-  `nan`/`inf` price fails the build instead of shipping an unparseable artifact.
-- `kind` is derived from the card, `category.generation` first and `tags`
-  second; a card that carries neither is published (and displayed) as `llm`.
-  Media models should carry one of the two — `category` is the primary signal, so
-  a missing one is a data follow-up on the card, deliberately not an id-substring
-  heuristic (a chat model that can also send/receive audio, e.g.
-  `gpt-4o-audio-preview`, is token-priced `llm` and would be mislabelled by an
-  `-audio` rule).
+  card without the key reads `false`). Multimodal capability is carried by
+  `supports_vision`: the generator never emits a `multimodal` kind, while a
+  consumer's vocabulary may accept a superset (`arona` accepts `multimodal`) —
+  producers write within the set above, consumers read a superset. Values are
+  strict JSON, non-negative, and inside the range every serializer spells the
+  same way: `nan`/`inf`, negative prices/limits, and values below `1e-4` all fail
+  the build instead of shipping an unparseable or cross-language-unstable
+  artifact.
+- `kind` is derived in three steps: `[model].category.generation` first, `tags`
+  second, then the one documented id convention — an id containing `embed` is an
+  `embedding` (6 cards rely on it); anything left is `llm`. Media models should
+  carry `category`/`tags` — a missing one is a data follow-up on the card.
+  Wider id heuristics (`-image`, `-audio`, `-video`, `-tts`) are deliberately not
+  used: a chat model that can also send/receive audio (e.g.
+  `gpt-4o-audio-preview`) is token-priced `llm` and would be mislabelled.
 - [arona](https://github.com/celestia-island/arona) syncs the URL above at
   runtime (`system_config.pricing.registry.url` can point it elsewhere) and
   falls back to a copy compiled into its build when the network or the gateway is

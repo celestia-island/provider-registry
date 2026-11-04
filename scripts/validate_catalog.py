@@ -456,6 +456,8 @@ def validate(root: Path) -> list[str]:
         for key in REQUIRED_MODEL_INTS:
             if not isinstance(model.get(key), int) or isinstance(model.get(key), bool):
                 problems.append(f"{path}: [model].{key} must be an integer")
+            elif model[key] < 0:
+                problems.append(f"{path}: [model].{key} is {model[key]!r} — a limit cannot be negative")
         pricing = model.get("pricing")
         if pricing is not None:
             if not isinstance(pricing, dict):
@@ -469,7 +471,14 @@ def validate(root: Path) -> list[str]:
                 # digest every consumer recomputes, so one such price rejects the
                 # whole document. Check 9 refuses them too — two independent layers.
                 for key, value in pricing.items():
-                    if isinstance(value, float):
+                    if isinstance(value, bool) or not isinstance(value, (int, float)):
+                        continue
+                    if value < 0:
+                        problems.append(
+                            f"{path}: [model.pricing].{key} is {value!r} — a price cannot be negative "
+                            "(the artifact would publish the sign verbatim)"
+                        )
+                    elif isinstance(value, float):
                         reason = float_json_problem(value)
                         if reason is not None:
                             problems.append(f"{path}: [model.pricing].{key} {value!r} {reason}")
@@ -516,6 +525,20 @@ def validate(root: Path) -> list[str]:
                 # Custom/operator endpoints are declared blank on purpose; a
                 # concrete provider with no base_url is a defect.
                 problems.append(f"{path}: [entrypoint.api].base_url is blank for a concrete provider")
+            elif base_url.strip() and not (provider or "").endswith("_compatible"):
+                # A string that is not a URL (e.g. `api.example.com/v1`) parses to
+                # no hostname, so the published providers[].base_hosts would lose
+                # the provider's only lookup key while this validator stayed green.
+                try:
+                    host = catalog_index.base_host(base_url)
+                except catalog_index.CatalogIndexError:
+                    host = None
+                if host is None:
+                    problems.append(
+                        f"{path}: [entrypoint.api].base_url {base_url!r} has no parseable host — "
+                        "write a full URL such as \"https://api.example.com/v1\"; a scheme-less "
+                        "string silently empties providers[].base_hosts in the published catalog"
+                    )
         elif api is not None:
             problems.append(f"{path}: [entrypoint.api] must be a table")
         name = entry.get("name")
@@ -626,8 +649,16 @@ def _entrypoint_census(root: Path) -> dict[str, dict[str, int]]:
         base_url = api.get("base_url") if isinstance(api, dict) else None
         row = census.setdefault(parts[0], {"files": 0, "fixed_host_files": 0})
         row["files"] += 1
-        if isinstance(base_url, str) and base_url.strip():
-            row["fixed_host_files"] += 1
+        # A base_url that does not parse to a hostname contributes no `base_hosts`
+        # entry to the artifact, so it must not count towards the fixed-host floor
+        # either — that was a hole: rewriting `https://api.x/v1` to `api.x/v1`
+        # emptied the provider's hosts while the floor stayed satisfied.
+        try:
+            if catalog_index.base_host(base_url) is not None:
+                row["fixed_host_files"] += 1
+        except catalog_index.CatalogIndexError:
+            # Reported by the structural pass; counting it here would hide the loss.
+            pass
     return census
 
 

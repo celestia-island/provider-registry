@@ -25,7 +25,10 @@ real catalog:
   (`1e-05` vs `0.00001` — the digest is recomputed by consumers, so a mismatch
   rejects the whole document);
 * the endpoint side (`entrypoint/`, i.e. the artifact's `base_hosts`) has its own
-  floors, because it is the consumer's first lookup key;
+  floors, because it is the consumer's first lookup key — and a non-blank
+  `base_url` that carries no hostname counts as a defect, not as a host;
+* negative prices and limits are refused on both layers (a sign would be
+  published verbatim and read as a credit);
 * the publish workflow may only touch the release from `refs/heads/master`;
 * a duplicate `(provider, model id)` must fail the build rather than let file
   order decide which row wins.
@@ -493,6 +496,87 @@ class FixtureArtifactTest(unittest.TestCase):
         card.write_text(template.format(value="0.0"), encoding="utf-8")
         self.assertEqual(rows_by_id(self.build()[0], "openai", "tiny-price")["input_per_million"], 0.0)
 
+    def test_negative_prices_and_limits_are_refused(self):
+        # A negative price is not a "small" price: the artifact would publish the
+        # sign verbatim and a consumer would read it as a credit.
+        card = self.root / "models" / "openai" / "negative.toml"
+        for field, literal, where in (
+            ("input_per_million", "-0.2", "[model.pricing].input_per_million"),
+            ("input_per_million", "-1", "[model.pricing].input_per_million"),
+        ):
+            card.write_text(
+                "[model]\n"
+                'id = "negative"\n'
+                'name = "Negative"\n'
+                'provider_id = "openai"\n'
+                "context_window = 100\n"
+                "max_output_tokens = 10\n"
+                "\n[model.pricing]\n"
+                f"{field} = {literal}\n",
+                encoding="utf-8",
+            )
+            with self.assertRaises(bci.CatalogIndexError, msg=literal) as caught:
+                self.build()
+            self.assertIn(where, str(caught.exception))
+            self.assertIn("negative", str(caught.exception))
+        # … and a negative limit takes the same path.
+        card.write_text(
+            "[model]\n"
+            'id = "negative-window"\n'
+            'name = "Negative Window"\n'
+            'provider_id = "openai"\n'
+            "context_window = -5\n"
+            "max_output_tokens = 10\n",
+            encoding="utf-8",
+        )
+        with self.assertRaises(bci.CatalogIndexError) as caught:
+            self.build()
+        self.assertIn("[model].context_window", str(caught.exception))
+
+    def test_negative_prices_are_reported_by_the_structural_pass(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_tree(root, GATE_FIXTURE)
+            (root / "search").mkdir()
+            card = root / "models" / "openai" / "gpt-5.4-nano.toml"
+            card.write_text(
+                card.read_text(encoding="utf-8").replace("input_per_million = 0.2", "input_per_million = -0.2"),
+                encoding="utf-8",
+            )
+            problems = vc.validate(root)
+            self.assertTrue(any("cannot be negative" in line for line in problems), problems)
+            # A negative limit is caught by the structural pass as well.
+            card.write_text(
+                card.read_text(encoding="utf-8")
+                .replace("input_per_million = -0.2", "input_per_million = 0.2")
+                .replace("context_window = 400000", "context_window = -5"),
+                encoding="utf-8",
+            )
+            problems = vc.validate(root)
+            self.assertTrue(any("a limit cannot be negative" in line for line in problems), problems)
+
+    def test_base_url_without_a_host_is_refused(self):
+        # Non-blank but not a URL: it parses to no hostname, so the provider's
+        # only lookup key would vanish from the artifact while the tree validated.
+        broken = self.root / "entrypoint" / "openai" / "scheme-less.toml"
+        broken.write_text(
+            "[entrypoint]\n"
+            'id = "openai_scheme_less"\n'
+            'provider_id = "openai"\n'
+            "\n[entrypoint.api]\n"
+            'protocol = "openai_chat_v1"\n'
+            'base_url = "api.openai.example/v1"\n'
+            "\n[entrypoint.name]\n"
+            'en = "OpenAI (scheme-less)"\n',
+            encoding="utf-8",
+        )
+        with self.assertRaises(bci.CatalogIndexError) as caught:
+            self.build()
+        self.assertIn("has no parseable host", str(caught.exception))
+        # A blank base_url stays the legitimate operator-supplied form.
+        self.assertIsNone(bci.base_host(""))
+        self.assertEqual(bci.base_host("https://api.openai.com/v1"), "api.openai.com")
+
     def test_malformed_base_url_is_reported(self):
         # `urlsplit` raises on some malformed authorities; that is a data defect in
         # the entrypoint, not a crash.
@@ -704,6 +788,25 @@ class EntrypointGateTest(unittest.TestCase):
         shutil.rmtree(self.root / "entrypoint" / "openai_compatible")
         self.assertEqual(vc.entrypoint_problems(self.root, floor=1), [])
 
+    def test_a_scheme_less_base_url_does_not_count_as_a_fixed_host(self):
+        # The floor counts hosts the artifact would actually carry; a URL that
+        # parses to no hostname contributes none, so it must not satisfy the floor.
+        entry = self.root / "entrypoint" / "openai" / "default.toml"
+        entry.write_text(
+            entry.read_text(encoding="utf-8").replace("https://api.openai.com/v1", "api.openai.com/v1"),
+            encoding="utf-8",
+        )
+        problems = vc.entrypoint_problems(self.root, floor=1)
+        self.assertTrue(any("fixed api.base_url" in line for line in problems), problems)
+        # … the structural pass names the file itself (pinned on `validate()`, not on
+        # the CLI: the CLI would still say "has no parseable host" through the
+        # generator's own refusal, and this layer must have its own pin) …
+        structural = vc.validate(self.root)
+        self.assertTrue(any("has no parseable host" in line for line in structural), structural)
+        # … and the CLI as a whole is red.
+        code, _, err = run_validator(self.root)
+        self.assertEqual(code, 1, err)
+
     def test_whole_entrypoint_tree_loss_is_caught(self):
         shutil.rmtree(self.root / "entrypoint")
         problems = vc.entrypoint_problems(self.root, floor=1)
@@ -781,11 +884,17 @@ class CatalogValidateWorkflowTest(unittest.TestCase):
     """
 
     def test_the_toml_dependency_is_provisioned_bounded(self):
+        # Scoped to the step block on purpose: a file-wide `assertIn` would still
+        # pass after the step was renamed, emptied or moved to another job.
         text = VALIDATE_WORKFLOW_PATH.read_text(encoding="utf-8")
-        self.assertIn("python3 -c 'import toml'", text)
-        self.assertIn("python3 -m venv .venv", text)
-        self.assertIn('pip install --quiet --disable-pip-version-check "toml>=0.10,<1.0"', text)
-        self.assertIn("::error::", text)
+        block = workflow_step_block(text, "Ensure the `toml` wheel for the model-sync suite")
+        self.assertIn("python3 -c 'import toml'", block)
+        self.assertIn("python3 -m venv .venv", block)
+        self.assertIn('pip install --quiet --disable-pip-version-check "toml>=0.10,<1.0"', block)
+        self.assertIn("::error::", block)
+        self.assertIn("exit 1", block)
+        # The suites must not run before the dependency is there.
+        self.assertLess(text.index("Ensure the `toml` wheel"), text.index("Run the catalog test suites"))
 
     def test_the_suites_run_the_interpreter_that_has_toml(self):
         text = VALIDATE_WORKFLOW_PATH.read_text(encoding="utf-8")
@@ -931,6 +1040,7 @@ class RealCatalogTest(unittest.TestCase):
                 if field in row:
                     self.assertIsInstance(row[field], (int, float), row)
                     self.assertNotIsInstance(row[field], bool, row)
+                    self.assertGreaterEqual(row[field], 0, row)
 
 
 if __name__ == "__main__":

@@ -45,6 +45,9 @@ Rules that are load-bearing for the consumer side:
 * `NaN` / `Infinity` are REFUSED (TOML accepts them, JSON does not): one such
   price would make the whole published artifact unparseable for every consumer
   while the tree still validates, so the build fails and names the field.
+* Negative numbers are REFUSED (a price or a limit cannot be negative; the
+  artifact would publish the sign verbatim and the consumer would treat it as a
+  credit).
 * Floats outside `[1e-4, 1e15)` (and non-zero below it) are REFUSED too. The
   digest is recomputed by consumers, and the two spellings have to agree byte for
   byte: Python writes `1e-05` where `ryu`/`serde_json` writes `0.00001`, so any
@@ -164,11 +167,16 @@ def _number(value, where: str = ""):
     """
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
+    if isinstance(value, float) and not math.isfinite(value):
+        raise CatalogIndexError(
+            f"{where or 'value'}: {value!r} is not a finite number (TOML accepts nan/inf, JSON does not)"
+        )
+    if value < 0:
+        raise CatalogIndexError(
+            f"{where or 'value'}: {value!r} is negative — prices and limits cannot be negative, "
+            "and the artifact would publish the sign verbatim"
+        )
     if isinstance(value, float):
-        if not math.isfinite(value):
-            raise CatalogIndexError(
-                f"{where or 'value'}: {value!r} is not a finite number (TOML accepts nan/inf, JSON does not)"
-            )
         magnitude = abs(value)
         if 0 < magnitude < MIN_PLAIN_FLOAT or magnitude >= MAX_PLAIN_FLOAT:
             raise CatalogIndexError(
@@ -218,11 +226,21 @@ def base_host(base_url, where: str = "") -> str | None:
     if text is None:
         return None
     try:
-        return urlsplit(text).hostname or None
+        host = urlsplit(text).hostname
     except ValueError as exc:
         # `urlsplit` raises on some malformed authorities (e.g. `http://[::1/v1`);
         # that is a data defect in the entrypoint, so name it instead of crashing.
         raise CatalogIndexError(f"{where or 'base_url'}: {text!r} is not a parseable URL ({exc})") from exc
+    if host is None:
+        # A scheme-less string (``api.example.com/v1``) parses to no hostname. Blank
+        # is the legitimate "operator supplies the host" state; a non-blank value
+        # without a host can only be a typo, and silently shipping an empty
+        # ``base_hosts`` would remove the consumer's first lookup key.
+        raise CatalogIndexError(
+            f"{where or 'base_url'}: {text!r} has no parseable host — write a full URL such as "
+            '"https://api.example.com/v1" (a blank base_url is the operator-supplied form)'
+        )
+    return host
 
 
 # ---------------------------------------------------------------------------
