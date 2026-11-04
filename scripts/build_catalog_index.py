@@ -34,13 +34,20 @@ Rules that are load-bearing for the consumer side:
 * `digest` covers `providers` + `models` only (not `generated_at`), so two builds
   of the same tree produce the same digest. It is the sha256 of the canonical
   UTF-8 JSON (`sort_keys`, no spaces).
-* A numeric/boolean field the data does not carry is OMITTED, never null: the
-  consumer reads "absent" as "no upstream value, follow the fallback". An
-  explicit `0.0` in the TOML is a value the data declares (e.g. a $0 output
-  price) and is emitted as `0.0`.
+* A numeric field the data does not carry is OMITTED, never null: the consumer
+  reads "absent" as "no upstream value, follow the fallback". An explicit `0.0`
+  in the TOML is a value the data declares (e.g. a $0 output price) and is
+  emitted as `0.0`.
+* `supports_vision` / `supports_reasoning` are ALWAYS emitted as booleans (a card
+  without the key reads as `false`): the consumer merges these flags against its
+  own defaults, so "absent" and "false" must never be distinguishable. There is
+  no `multimodal` kind — multimodal capability lives in `supports_vision`.
+* `NaN` / `Infinity` are REFUSED (TOML accepts them, JSON does not): one such
+  price would make the whole published artifact unparseable for every consumer
+  while the tree still validates, so the build fails and names the field.
 * `kind` ∈ llm | embedding | image | video | audio | 3d | other, derived in this
-  order: `[model].category.generation`, then `tags`, then the id (`embed`),
-  then `llm`.
+  order: `[model].category.generation` (case-insensitive), then `tags`, then the
+  id (`embed`), then `llm`.
 * `providers[].base_hosts` are the hostnames of `entrypoint/<provider>/*.toml`
   `api.base_url` values, so the consumer can match a configured endpoint URL to
   a registry provider. An operator/custom endpoint ships `base_url = ""` and
@@ -73,6 +80,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import sys
 import tomllib
@@ -133,10 +141,19 @@ def _table(value) -> dict:
     return value if isinstance(value, dict) else {}
 
 
-def _number(value):
-    """A JSON-able number, or None when the field is absent/unusable (bool is not a number)."""
+def _number(value, where: str = ""):
+    """A finite JSON number, or None when the field is absent (bool is not a number).
+
+    `nan` / `inf` are legal TOML scalars and illegal JSON, so they are refused
+    here instead of being serialised: emitting one makes the published artifact
+    unparseable for every strict JSON consumer.
+    """
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
+    if isinstance(value, float) and not math.isfinite(value):
+        raise CatalogIndexError(
+            f"{where or 'value'}: {value!r} is not a finite number (TOML accepts nan/inf, JSON does not)"
+        )
     return value
 
 
@@ -168,7 +185,7 @@ def _provider_of(path: Path, top: Path) -> str | None:
     return parts[0] if len(parts) > 1 else None
 
 
-def base_host(base_url) -> str | None:
+def base_host(base_url, where: str = "") -> str | None:
     """`https://api.openai.com/v1` -> `api.openai.com`; blank/relative -> None.
 
     Operator-supplied endpoints declare `base_url = ""` (their host is chosen at
@@ -177,7 +194,12 @@ def base_host(base_url) -> str | None:
     text = _text(base_url)
     if text is None:
         return None
-    return urlsplit(text).hostname or None
+    try:
+        return urlsplit(text).hostname or None
+    except ValueError as exc:
+        # `urlsplit` raises on some malformed authorities (e.g. `http://[::1/v1`);
+        # that is a data defect in the entrypoint, so name it instead of crashing.
+        raise CatalogIndexError(f"{where or 'base_url'}: {text!r} is not a parseable URL ({exc})") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -193,7 +215,7 @@ def kind_for(model: dict) -> str:
         generation = category.get("generation")
     elif isinstance(category, str):
         generation = category
-    kind = GENERATION_KINDS.get(_text(generation) or "")
+    kind = GENERATION_KINDS.get((_text(generation) or "").lower())
     if kind is not None:
         return kind
 
@@ -278,7 +300,7 @@ def entrypoint_hosts(source: Path) -> tuple[dict[str, set[str]], list[str]]:
         if provider is None:
             warnings.append(f"{path}: not inside an entrypoint/<provider>/ directory, skipped")
             continue
-        host = base_host(_table(entry.get("api")).get("base_url"))
+        host = base_host(_table(entry.get("api")).get("base_url"), where=f"{path}: [entrypoint.api].base_url")
         if host is not None:
             hosts.setdefault(provider, set()).add(host)
         else:
@@ -327,15 +349,15 @@ def collect_models(source: Path) -> tuple[list[dict], dict[str, int], list[str]]
 
         pricing = _table(model.get("pricing"))
         for field in ("input_per_million", "output_per_million", "cached_per_million"):
-            value = _number(pricing.get(field))
+            value = _number(pricing.get(field), where=f"{path}: [model.pricing].{field}")
             if value is not None:
                 row[field] = value
-        for field in ("supports_vision", "supports_reasoning"):
-            value = _boolean(model.get(field))
-            if value is not None:
-                row[field] = value
+        # Always emitted, never omitted: a consumer merging these flags against
+        # its own defaults must not be able to tell "absent" from "false".
+        row["supports_vision"] = _boolean(model.get("supports_vision")) is True
+        row["supports_reasoning"] = _boolean(model.get("supports_reasoning")) is True
         for field in ("context_window", "max_output_tokens"):
-            value = _number(model.get(field))
+            value = _number(model.get(field), where=f"{path}: [model].{field}")
             if value is not None:
                 row[field] = value
         rows.append(row)
@@ -352,8 +374,26 @@ def collect_models(source: Path) -> tuple[list[dict], dict[str, int], list[str]]
 
 
 def index_digest(providers: list[dict], models: list[dict]) -> str:
-    """Contract §2: sha256 over the canonical `{providers, models}` JSON."""
-    canonical = json.dumps({"providers": providers, "models": models}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    """Contract §2: sha256 over the canonical `{providers, models}` JSON.
+
+    `allow_nan=False` is the last line of defence behind `_number`: a document
+    that cannot be spelled as strict JSON must not get a digest either.
+
+    Cross-repo note: this digest is recomputed by consumers, so the numbers must
+    keep their TOML type (integers stay integers; do not widen them to f64) and
+    prices must stay in plain decimal range — Python renders values below 1e-4 in
+    exponent form (`1e-05`), which other serializers may spell differently.
+    """
+    try:
+        canonical = json.dumps(
+            {"providers": providers, "models": models},
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+    except ValueError as exc:
+        raise CatalogIndexError(f"the catalog cannot be spelled as strict JSON ({exc})") from exc
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
@@ -471,7 +511,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     out = Path(args.out) if args.out else source / DEFAULT_OUT
-    payload = json.dumps(document, ensure_ascii=False, indent=2) + "\n"
+    try:
+        payload = json.dumps(document, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+    except ValueError as exc:
+        print(f"catalog-index: cannot serialise the index: {exc}", file=sys.stderr)
+        return 1
     try:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(payload, encoding="utf-8")

@@ -46,7 +46,10 @@ Checks (stdlib only, `tomllib`):
    provider id listed twice), and a tree that silently lost a whole
    `models/<provider>/` directory would still validate clean while shipping a
    catalog with several hundred models missing. So the gate also asserts the
-   row counts stay in the documented range and the digest is stable.
+   row counts stay in the documented range — globally *and per provider*, which
+   is the granularity that actually catches a lost directory (a 106-row subtree
+   dropping out still clears a 1000-row global floor) — and that the digest is
+   stable and the pricing values are JSON-legal.
 
 `descriptors/` gets the full MDD schema check from `scripts/validate_descriptors.py`;
 here it only has to parse, so one missing validator cannot hide a broken file.
@@ -57,6 +60,7 @@ Exit codes: 0 clean / 1 violations (each printed as `path: reason`).
 
 from __future__ import annotations
 
+import math
 import re
 import sys
 import tomllib
@@ -134,6 +138,38 @@ SEARCH_REGISTRY_ROW_BOOLS = ("is_official", "requires_key", "verified")
 MIN_INDEX_MODELS = 1000
 MIN_INDEX_PROVIDERS = 20
 DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+
+# (9) Per-provider row floors. This is the granularity that catches real data
+# loss: dropping a whole `models/<provider>/` directory leaves every remaining
+# file valid, so the structural checks stay clean and the global floor above only
+# notices when the lost subtree is large (deleting `models/silicon/` = 106 rows
+# still cleared a 1000-row floor). Rows are only ever ADDED by the sync, so these
+# numbers do not need maintenance for growth; when a provider legitimately
+# shrinks, lower its number in the same PR — that deliberate edit is the point.
+MIN_ROWS_PER_PROVIDER = {
+    "anthropic": 52,
+    "cohere": 19,
+    "deepseek": 20,
+    "fireworks": 38,
+    "google": 32,
+    "meshy": 1,
+    "meta": 12,
+    "mimo": 1,
+    "minimax": 12,
+    "mistral": 60,
+    "moonshot": 9,
+    "openai": 91,
+    "openrouter": 425,
+    "qwen": 131,
+    "runway": 1,
+    "silicon": 106,
+    "stability": 2,
+    "stepfun": 8,
+    "together": 42,
+    "tripo": 1,
+    "xai": 25,
+    "zhipu_glm": 21,
+}
 
 
 def _load(path: Path, problems: list[str]) -> dict | None:
@@ -410,6 +446,15 @@ def validate(root: Path) -> list[str]:
                 for key in REQUIRED_PRICING_KEYS:
                     if pricing.get(key) is not None and not isinstance(pricing[key], (int, float)):
                         problems.append(f"{path}: [model.pricing].{key} must be a number")
+                # TOML accepts `nan` / `inf`; the published catalog is strict JSON
+                # and every consumer would fail to parse the whole document, so a
+                # single non-finite price has to fail here (check 9 also refuses it).
+                for key, value in pricing.items():
+                    if isinstance(value, float) and not math.isfinite(value):
+                        problems.append(
+                            f"{path}: [model.pricing].{key} is {value!r} — not a finite number "
+                            "(TOML accepts nan/inf, the published catalog is strict JSON)"
+                        )
         provider = _provider_dir(path, root, "models")
         declared = model.get("provider_id")
         if provider is not None and declared is not None and declared != provider:
@@ -526,6 +571,25 @@ def validate(root: Path) -> list[str]:
     return problems
 
 
+def provider_floor_problems(row_counts: dict[str, int]) -> list[str]:
+    """(9): per-provider row floors, applied to the rows the artifact carries.
+
+    Extracted from `check_index()` so the floor logic can be pinned with a dict
+    instead of a 1000-file tree (see `scripts/test_build_catalog_index.py`).
+    """
+    problems: list[str] = []
+    for provider, floor in sorted(MIN_ROWS_PER_PROVIDER.items()):
+        rows = row_counts.get(provider, 0)
+        if rows >= floor:
+            continue
+        hint = f"models/{provider}/ is gone" if rows == 0 else "rows went missing"
+        problems.append(
+            f"catalog index: provider {provider!r} carries {rows} model row(s) < {floor} ({hint}); "
+            "rows may be added freely — a deliberate shrink lowers the floor in scripts/validate_catalog.py"
+        )
+    return problems
+
+
 def check_index(root: Path) -> tuple[list[str], dict]:
     """(9): the publishable catalog index still builds, stays whole, stays stable.
 
@@ -552,6 +616,10 @@ def check_index(root: Path) -> tuple[list[str], dict]:
             f"catalog index: {stats['providers']} provider row(s) < {MIN_INDEX_PROVIDERS} — the published "
             "artifact would drop providers that consumers resolve models and endpoint hosts against"
         )
+    row_counts: dict[str, int] = {}
+    for row in document["models"]:
+        row_counts[row["provider"]] = row_counts.get(row["provider"], 0) + 1
+    problems.extend(provider_floor_problems(row_counts))
     if not DIGEST_PATTERN.match(document["digest"]):
         problems.append(f"catalog index: digest {document['digest']!r} is not sha256:<64 hex>")
     else:

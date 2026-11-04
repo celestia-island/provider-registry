@@ -294,11 +294,24 @@ of the TOML tree:
   of the canonical `{"providers", "models"}` JSON (two builds of the same tree
   agree), an absent numeric field means "no upstream value" rather than `0`, and
   `kind` is one of `llm | embedding | image | video | audio | 3d | other`.
+- Ordering is part of the contract, so an artifact diff is meaningful and a
+  recomputed digest can match: `providers` by `id`, `models` by `provider` then
+  `id`, `base_hosts` lexicographic. Every `models[].provider` resolves to a
+  `providers[]` entry — a provider that only has a `models/` or `entrypoint/`
+  directory is published with `category = "unregistered"` and reported as a
+  warning, never dropped.
+- `supports_vision` and `supports_reasoning` are always present as booleans (a
+  card without the key reads `false`); multimodal capability is carried by
+  `supports_vision`, there is no `multimodal` kind. Values are strict JSON: a
+  `nan`/`inf` price fails the build instead of shipping an unparseable artifact.
 - [arona](https://github.com/celestia-island/arona) syncs the URL above at
   runtime (`system_config.pricing.registry.url` can point it elsewhere) and
-  falls back to the copy of the same bytes compiled into its build when the
-  network or the gateway is unavailable. Offline / inner-network deployments
-  copy either the artifact or the release asset by hand.
+  falls back to a copy compiled into its build when the network or the gateway is
+  unavailable. That copy is not a hand-maintained snapshot: arona's
+  `scripts/gen_registry_catalog.py` imports `scripts/build_catalog_index.py` from
+  this repository and calls `build()`, so the offline copy and the published asset
+  come from the same generator and carry the same `digest`. Offline /
+  inner-network deployments copy either the artifact or the release asset by hand.
 - Never delete or rename the `catalog-latest` release or its asset: the gateway
   URL resolves through it, and a missing asset silently pushes every deployment
   back to its bundled snapshot.

@@ -17,8 +17,11 @@ name: Publish Catalog
 #      `latest` — an ops action, not a code change in this repository);
 #   4. the arona server GETs that URL (overridable via
 #      `system_config.pricing.registry.url`), validates `schema`/`digest`, stores
-#      it as its pricing snapshot, and falls back to the copy of the same JSON
-#      compiled into its build when the network or the gateway is gone.
+#      it as its pricing snapshot, and falls back to the copy compiled into its
+#      build when the network or the gateway is gone. That copy is produced by
+#      arona's `scripts/gen_registry_catalog.py`, which imports this repository's
+#      `scripts/build_catalog_index.py` and calls `build()` — same generator, same
+#      digest, so the offline fallback cannot drift from the published asset.
 #
 # Two things here are therefore public contract, not implementation detail: the
 # asset name `provider-registry-catalog.json` and the JSON `schema` field. Never
@@ -56,6 +59,14 @@ on:
   push:
     branches: [master]
   workflow_dispatch:
+    inputs:
+      dry_run:
+        # The first real run of this workflow happens on master, where a mistake
+        # is already published. This lets an operator build and check the whole
+        # artifact on a branch first, stopping before anything touches the release.
+        description: "Build and verify the artifact, but leave the catalog-latest release untouched"
+        type: boolean
+        default: false
 
 permissions:
   # `contents: write` is what creating/updating the rolling release and its asset
@@ -80,6 +91,8 @@ jobs:
           GIT_CONFIG_COUNT: "0"
 
       - name: Preflight the runner
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           python3 --version
@@ -91,6 +104,9 @@ jobs:
             exit 1
           fi
           gh --version
+          # `contents: write` failures surface as a 403 on the first release call;
+          # proving the token works here names the problem instead.
+          gh auth status
 
       # Data gate first: never publish an artifact built from a tree that fails
       # its own contract. `validate_catalog.py` ends with the index check
@@ -150,6 +166,8 @@ jobs:
           echo "artifact: schema ${SCHEMA}, ${MODELS} model row(s), ${PROVIDERS} provider(s), digest ${DIGEST}"
 
       - name: Create or update the rolling catalog-latest release
+        # Skipped only for a dispatched dry run (a push to master always publishes).
+        if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -189,27 +207,47 @@ jobs:
           else
             gh release create "$TAG" --title "$TITLE" --notes-file "$NOTES" --target "$GITHUB_SHA"
           fi
+          # `--clobber` replaces the asset in place. For the moment between the
+          # delete and the re-upload the asset URL 404s; that window is accepted
+          # (a consumer that syncs inside it falls back to its bundled snapshot,
+          # which is the documented behaviour for any sync failure) and cannot be
+          # closed from this side: GitHub offers no atomic asset replace.
           gh release upload "$TAG" "$FILE" --clobber
 
       # An upload that silently replaced nothing leaves the old asset in place and
-      # would look identical to a success. Compare what the release now serves
-      # against what this build produced.
+      # would look identical to a success. Compare the *content* the release now
+      # serves against what this build produced: the release API exposes a
+      # server-computed sha256 digest for uploaded assets, which is a true
+      # replacement check (a byte count would accept a same-size old asset).
       - name: Verify the release serves this build
+        if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          ASSET_SIZE="$(gh release view catalog-latest --json assets \
-            --jq '.assets[] | select(.name == "provider-registry-catalog.json") | .size')"
-          if [ -z "$ASSET_SIZE" ]; then
+          read -r ASSET_SIZE ASSET_DIGEST <<< "$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/catalog-latest" \
+            --jq '.assets[] | select(.name == "provider-registry-catalog.json") | "\(.size) \(.digest // "")"')"
+          if [ -z "${ASSET_SIZE:-}" ]; then
             echo "::error::catalog-latest has no provider-registry-catalog.json asset after the upload"
             exit 1
           fi
-          if [ "$ASSET_SIZE" != "${{ steps.facts.outputs.file_size }}" ]; then
-            echo "::error::catalog-latest serves ${ASSET_SIZE} bytes but this build produced ${{ steps.facts.outputs.file_size }} bytes — the asset was not replaced"
-            exit 1
+          EXPECTED_SHA="${{ steps.facts.outputs.file_sha256 }}"
+          if [ -n "${ASSET_DIGEST:-}" ]; then
+            if [ "$ASSET_DIGEST" != "sha256:${EXPECTED_SHA}" ]; then
+              echo "::error::catalog-latest serves ${ASSET_DIGEST} but this build produced sha256:${EXPECTED_SHA} — the asset was not replaced"
+              exit 1
+            fi
+            echo "catalog-latest serves this build (sha256:${EXPECTED_SHA})"
+          else
+            # Older assets carry no server-side digest; a size check is weaker but
+            # still catches an untouched asset. Say so instead of implying parity.
+            echo "::warning::the release API exposes no digest for this asset; falling back to a byte-count check"
+            if [ "$ASSET_SIZE" != "${{ steps.facts.outputs.file_size }}" ]; then
+              echo "::error::catalog-latest serves ${ASSET_SIZE} bytes but this build produced ${{ steps.facts.outputs.file_size }} bytes — the asset was not replaced"
+              exit 1
+            fi
+            echo "catalog-latest size matches this build (${ASSET_SIZE} bytes)"
           fi
-          echo "catalog-latest serves the artifact built from $GITHUB_SHA (${ASSET_SIZE} bytes)"
 
       - name: Summary
         if: always()
@@ -222,5 +260,5 @@ jobs:
             echo "- schema 1, ${MODELS:-?} model row(s), ${PROVIDERS:-?} provider(s)"
             echo "- digest \`${{ steps.facts.outputs.digest }}\`"
             echo "- generated_at \`${{ steps.facts.outputs.generated_at }}\`"
-            echo "- release: tag \`catalog-latest\`, asset \`provider-registry-catalog.json\`"
+            echo "- release: tag \`catalog-latest\`, asset \`provider-registry-catalog.json\` (untouched on a dispatched dry run)"
           } >> "$GITHUB_STEP_SUMMARY"
