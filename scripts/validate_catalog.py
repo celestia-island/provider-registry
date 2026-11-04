@@ -36,7 +36,17 @@ Checks (stdlib only, `tomllib`):
    booleans — an unknown key would be silently ignored by consumers;
 8. `registry.toml`'s search groups and the `search/` tree agree in both
    directions: every listed id has a `search/<id>/` directory, every directory
-   is listed exactly once, and group spellings are from the known set.
+   is listed exactly once, and group spellings are from the known set;
+9. the published catalog index still builds: `scripts/build_catalog_index.py`
+   flattens the tree into `dist/provider-registry-catalog.json` — the artifact
+   the publish workflow attaches to the rolling `catalog-latest` release, which
+   arona syncs and vendors as its offline fallback. "The tree parses" is not the
+   same claim as "the artifact is publishable": the flattening has its own
+   failure modes (a missing `[model]` table, a duplicate `(provider, id)`, a
+   provider id listed twice), and a tree that silently lost a whole
+   `models/<provider>/` directory would still validate clean while shipping a
+   catalog with several hundred models missing. So the gate also asserts the
+   row counts stay in the documented range and the digest is stable.
 
 `descriptors/` gets the full MDD schema check from `scripts/validate_descriptors.py`;
 here it only has to parse, so one missing validator cannot hide a broken file.
@@ -47,9 +57,18 @@ Exit codes: 0 clean / 1 violations (each printed as `path: reason`).
 
 from __future__ import annotations
 
+import re
 import sys
 import tomllib
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+# The index gate reuses the generator itself rather than shelling out to
+# `build_catalog_index.py --check`: one implementation means this gate cannot
+# drift from the artifact the publish workflow actually ships.
+import build_catalog_index as catalog_index  # noqa: E402
+
 
 REQUIRED_MODEL_KEYS = ("id", "name", "provider_id")
 REQUIRED_MODEL_INTS = ("context_window", "max_output_tokens")
@@ -106,6 +125,15 @@ SEARCH_REGISTRY_GROUPS = (
 )
 SEARCH_REGISTRY_ROW_STRINGS = ("id", "name", "description")
 SEARCH_REGISTRY_ROW_BOOLS = ("is_official", "requires_key", "verified")
+
+# (9) Floor for the published index. The catalog is a data repository: the
+# failure that matters is not a typo but a whole subtree going missing (a bad
+# merge dropping a provider directory), which every other check here would call
+# clean — the artifact would just quietly ship fewer models. The numbers are the
+# documented order of magnitude (1100+ rows, 20+ providers), not a tight bound.
+MIN_INDEX_MODELS = 1000
+MIN_INDEX_PROVIDERS = 20
+DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 def _load(path: Path, problems: list[str]) -> dict | None:
@@ -498,6 +526,45 @@ def validate(root: Path) -> list[str]:
     return problems
 
 
+def check_index(root: Path) -> tuple[list[str], dict]:
+    """(9): the publishable catalog index still builds, stays whole, stays stable.
+
+    Kept out of `validate()` on purpose: `validate()` is also called on tiny
+    fixtures (see `scripts/test_validate_search.py`), where a 1000-row floor is
+    meaningless. Only the real tree is held to the artifact contract.
+
+    Returns the violations plus the summary the clean message prints (empty dict
+    when the index cannot be built at all).
+    """
+    try:
+        document, stats = catalog_index.build(root)
+    except catalog_index.CatalogIndexError as exc:
+        return [f"catalog index: cannot be generated ({exc})"], {}
+
+    problems: list[str] = []
+    if stats["models"] < MIN_INDEX_MODELS:
+        problems.append(
+            f"catalog index: {stats['models']} model row(s) < {MIN_INDEX_MODELS} — the published artifact "
+            "would ship a shrunken catalog (did a models/<provider>/ directory go missing?)"
+        )
+    if stats["providers"] < MIN_INDEX_PROVIDERS:
+        problems.append(
+            f"catalog index: {stats['providers']} provider row(s) < {MIN_INDEX_PROVIDERS} — the published "
+            "artifact would drop providers that consumers resolve models and endpoint hosts against"
+        )
+    if not DIGEST_PATTERN.match(document["digest"]):
+        problems.append(f"catalog index: digest {document['digest']!r} is not sha256:<64 hex>")
+    else:
+        rebuilt, _ = catalog_index.build(root)
+        if rebuilt["digest"] != document["digest"]:
+            # The digest is the consumer's staleness check: it must not depend on
+            # run order, timestamps or dict iteration.
+            problems.append("catalog index: digest is not stable across two builds of the same tree")
+
+    summary = {"models": stats["models"], "providers": stats["providers"], "digest": document["digest"]}
+    return problems, summary
+
+
 def main(argv: list[str]) -> int:
     root = Path(argv[1]).resolve() if len(argv) > 1 else Path(__file__).resolve().parent.parent
     if (
@@ -509,6 +576,12 @@ def main(argv: list[str]) -> int:
         print(f"validate-catalog: {root} does not look like the registry root", file=sys.stderr)
         return 2
     problems = validate(root)
+    index_summary: dict = {}
+    if not problems:
+        # The structural pass owns the data defects; running the index gate on a
+        # tree it already rejects only adds noise (and can abort mid-violation).
+        index_problems, index_summary = check_index(root)
+        problems.extend(index_problems)
     if problems:
         for line in problems:
             print(f"validate-catalog: {line}", file=sys.stderr)
@@ -519,7 +592,8 @@ def main(argv: list[str]) -> int:
     searches = len(list((root / SEARCH_TOP).rglob("*.toml")))
     print(
         f"validate-catalog: clean ({models} model file(s), {entrypoints} entrypoint file(s), "
-        f"{searches} search file(s))"
+        f"{searches} search file(s); index {index_summary['models']} row(s) / "
+        f"{index_summary['providers']} provider(s), digest {index_summary['digest']})"
     )
     return 0
 

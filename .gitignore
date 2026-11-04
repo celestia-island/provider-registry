@@ -6,3 +6,8 @@ __pycache__/
 # celestia-devtools: staged-on-demand shared justfile recipes (celestia-devtools init / just fetch)
 /.just/
 /celestia-devtools.just
+
+# Generated catalog artifact (scripts/build_catalog_index.py). The publish
+# workflow rebuilds it from the TOML tree on every push to master and uploads it
+# to the rolling `catalog-latest` release; it is never committed.
+/dist/

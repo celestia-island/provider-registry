@@ -28,8 +28,13 @@ sync-individual source='all' providers='all':
 sync-vision:
     python3 scripts/sync_supports_vision.py
 
+# Build the publishable catalog index (dist/provider-registry-catalog.json).
+catalog-index:
+    python3 scripts/build_catalog_index.py
+
 # Structural validation of the whole catalog (entrypoint/ + search/ + models/,
-# parse of descriptors/). This is exactly what the Catalog Validate CI job runs.
+# parse of descriptors/) plus the publishable catalog index gate.
+# This is exactly what the Catalog Validate CI job runs.
 validate:
     python3 scripts/validate_catalog.py
 
@@ -37,7 +42,8 @@ validate:
 validate-descriptors:
     python3 scripts/validate_descriptors.py
 
-# Regression tests for the validator rules (stdlib only, no dependencies).
+# Regression tests for the validator rules and the index contract (stdlib only).
 test:
     python3 scripts/test_update_models.py
     python3 scripts/test_validate_search.py
+    python3 scripts/test_build_catalog_index.py
