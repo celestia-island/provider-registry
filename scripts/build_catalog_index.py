@@ -140,6 +140,11 @@ DEFAULT_KIND = "llm"
 MIN_PLAIN_FLOAT = 1e-4
 MAX_PLAIN_FLOAT = 1e15
 
+# Integers above this are refused as well: JSON consumers cannot all represent
+# them (JavaScript loses precision beyond 2**53, `i64` consumers reject the
+# document), so a huge `context_window` would break parsing, not just the digest.
+MAX_PLAIN_INT = 2**53
+
 PROVIDER_REQUIRED = ("id",)
 MODEL_REQUIRED = ("id",)
 
@@ -175,6 +180,11 @@ def _number(value, where: str = ""):
         raise CatalogIndexError(
             f"{where or 'value'}: {value!r} is negative — prices and limits cannot be negative, "
             "and the artifact would publish the sign verbatim"
+        )
+    if isinstance(value, int) and abs(value) >= MAX_PLAIN_INT:
+        raise CatalogIndexError(
+            f"{where or 'value'}: {value!r} is above 2**53 — JSON consumers cannot represent it "
+            "(JavaScript loses precision, i64 readers reject the document)"
         )
     if isinstance(value, float):
         magnitude = abs(value)

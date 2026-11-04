@@ -297,7 +297,18 @@ def workflow_step_block(text: str, name: str) -> str:
     start = text.index(marker)
     rest = text[start + len(marker) :]
     end = rest.find("\n      - ")
-    return rest if end == -1 else rest[:end]
+    block = rest if end == -1 else rest[:end]
+    return uncommented(block)
+
+
+def uncommented(text: str) -> str:
+    """Drop whole-line comments (`# …`) from YAML or shell text.
+
+    A guard must pin the command or the key, not a comment that happens to mention
+    it: an earlier round checked `--clobber` and `contents: write` off the comment
+    text after the real occurrence had been deleted, and stayed green.
+    """
+    return "\n".join(line for line in text.splitlines() if not line.lstrip().startswith("#"))
 
 
 def rows_by_id(document: dict, provider: str, model_id: str) -> dict:
@@ -532,6 +543,73 @@ class FixtureArtifactTest(unittest.TestCase):
         with self.assertRaises(bci.CatalogIndexError) as caught:
             self.build()
         self.assertIn("[model].context_window", str(caught.exception))
+
+    # 10**20: above 2**53, below i64's limit — representable by *some* JSON parsers
+    # and not by others, which is exactly why it must never reach the artifact.
+    HUGE = 10**20
+
+    def test_integers_above_the_json_safe_range_are_refused(self):
+        # JSON consumers cannot represent this safely: JavaScript loses precision
+        # above 2**53 and an i64 consumer rejects the document outright, so the
+        # value must never reach the artifact. Generator layer:
+        card = self.root / "models" / "openai" / "huge-window.toml"
+        card.write_text(
+            "[model]\n"
+            'id = "huge-window"\n'
+            'name = "Huge Window"\n'
+            'provider_id = "openai"\n'
+            f"context_window = {self.HUGE}\n"
+            "max_output_tokens = 10\n",
+            encoding="utf-8",
+        )
+        with self.assertRaises(bci.CatalogIndexError) as caught:
+            self.build()
+        self.assertIn("[model].context_window", str(caught.exception))
+        self.assertIn("2**53", str(caught.exception))
+
+    def test_the_structural_pass_refuses_huge_integers_too(self):
+        # … and the structural layer, at both places (separate messages, so removing
+        # one check cannot be masked by the other).
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_tree(root, GATE_FIXTURE)
+            (root / "search").mkdir()
+            card = root / "models" / "openai" / "gpt-5.4-nano.toml"
+            original = card.read_text(encoding="utf-8")
+            card.write_text(
+                original.replace("context_window = 400000", f"context_window = {self.HUGE}"),
+                encoding="utf-8",
+            )
+            problems = vc.validate(root)
+            self.assertTrue(
+                any("[model].context_window" in line and "2**53" in line for line in problems), problems
+            )
+            card.write_text(
+                original.replace("input_per_million = 0.2", f"input_per_million = {self.HUGE}"),
+                encoding="utf-8",
+            )
+            problems = vc.validate(root)
+            self.assertTrue(
+                any("[model.pricing].input_per_million" in line and "2**53" in line for line in problems),
+                problems,
+            )
+
+    def test_non_boolean_capability_flags_are_reported(self):
+        # `supports_vision = "yes"` would publish as `false` (a string is not a
+        # bool), silently downgrading the card, so the structural pass refuses it.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_tree(root, GATE_FIXTURE)
+            (root / "search").mkdir()
+            card = root / "models" / "openai" / "gpt-5.4-nano.toml"
+            card.write_text(
+                card.read_text(encoding="utf-8").replace(
+                    "max_output_tokens = 16384", 'max_output_tokens = 16384\nsupports_vision = "yes"'
+                ),
+                encoding="utf-8",
+            )
+            problems = vc.validate(root)
+            self.assertTrue(any("supports_vision must be a boolean" in line for line in problems), problems)
 
     def test_negative_prices_are_reported_by_the_structural_pass(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -849,6 +927,9 @@ class PublishWorkflowGuardTest(unittest.TestCase):
     )
 
     def test_release_steps_require_master_and_a_real_run(self):
+        # `workflow_step_block` strips comments; without that the guard line below
+        # would also match the "… * `github.ref == 'refs/heads/master'` …" bullet in
+        # the step's own comment.
         text = WORKFLOW_PATH.read_text(encoding="utf-8")
         for name in self.PROTECTED:
             block = workflow_step_block(text, name)
@@ -862,13 +943,18 @@ class PublishWorkflowGuardTest(unittest.TestCase):
         block = workflow_step_block(text, "Gate the data and build the index")
         self.assertNotIn("refs/heads/master", block)
         self.assertIn("validate_catalog.py", block)
+        # …and the block really is one step, not the whole file.
+        self.assertNotIn("Create or update the rolling catalog-latest release", block)
 
     def test_workflow_publishes_only_from_master_pushes(self):
-        text = WORKFLOW_PATH.read_text(encoding="utf-8")
-        self.assertIn("branches: [master]", text)
-        self.assertIn("contents: write", text)
-        self.assertIn("--clobber", text)
-        self.assertIn("dry_run:", text)
+        text = uncommented(WORKFLOW_PATH.read_text(encoding="utf-8"))
+        # Comments are stripped above, and each assertion names the YAML key line
+        # (leading newline + its own indentation) or the command itself, so a
+        # comment describing the same thing cannot satisfy it.
+        self.assertIn("\n    branches: [master]", text)
+        self.assertIn("\n  contents: write", text)
+        self.assertIn('gh release upload "$TAG" "$FILE" --clobber', text)
+        self.assertIn("\n      dry_run:", text)
         # `gh` must fail the job rather than skip the upload silently.
         self.assertIn("gh is not installed on this runner", text)
 
@@ -886,15 +972,15 @@ class CatalogValidateWorkflowTest(unittest.TestCase):
     def test_the_toml_dependency_is_provisioned_bounded(self):
         # Scoped to the step block on purpose: a file-wide `assertIn` would still
         # pass after the step was renamed, emptied or moved to another job.
-        text = VALIDATE_WORKFLOW_PATH.read_text(encoding="utf-8")
-        block = workflow_step_block(text, "Ensure the `toml` wheel for the model-sync suite")
+        raw = VALIDATE_WORKFLOW_PATH.read_text(encoding="utf-8")
+        block = workflow_step_block(raw, "Ensure the `toml` wheel for the model-sync suite")
         self.assertIn("python3 -c 'import toml'", block)
         self.assertIn("python3 -m venv .venv", block)
         self.assertIn('pip install --quiet --disable-pip-version-check "toml>=0.10,<1.0"', block)
         self.assertIn("::error::", block)
         self.assertIn("exit 1", block)
         # The suites must not run before the dependency is there.
-        self.assertLess(text.index("Ensure the `toml` wheel"), text.index("Run the catalog test suites"))
+        self.assertLess(raw.index("Ensure the `toml` wheel"), raw.index("Run the catalog test suites"))
 
     def test_the_suites_run_the_interpreter_that_has_toml(self):
         text = VALIDATE_WORKFLOW_PATH.read_text(encoding="utf-8")

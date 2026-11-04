@@ -458,6 +458,19 @@ def validate(root: Path) -> list[str]:
                 problems.append(f"{path}: [model].{key} must be an integer")
             elif model[key] < 0:
                 problems.append(f"{path}: [model].{key} is {model[key]!r} — a limit cannot be negative")
+            elif model[key] >= catalog_index.MAX_PLAIN_INT:
+                problems.append(
+                    f"{path}: [model].{key} is {model[key]!r} — above 2**53, which JSON consumers "
+                    "cannot represent (JavaScript loses precision, i64 readers reject the document)"
+                )
+        for key in ("supports_vision", "supports_reasoning"):
+            # The artifact always publishes these as booleans; a string/number would
+            # be silently downgraded to `false`, hiding the capability from consumers.
+            if key in model and not isinstance(model[key], bool):
+                problems.append(
+                    f"{path}: [model].{key} must be a boolean (a non-boolean value would be published "
+                    "as false and silently drop the capability)"
+                )
         pricing = model.get("pricing")
         if pricing is not None:
             if not isinstance(pricing, dict):
@@ -477,6 +490,11 @@ def validate(root: Path) -> list[str]:
                         problems.append(
                             f"{path}: [model.pricing].{key} is {value!r} — a price cannot be negative "
                             "(the artifact would publish the sign verbatim)"
+                        )
+                    elif isinstance(value, int) and value >= catalog_index.MAX_PLAIN_INT:
+                        problems.append(
+                            f"{path}: [model.pricing].{key} is {value!r} — above 2**53, which JSON "
+                            "consumers cannot represent"
                         )
                     elif isinstance(value, float):
                         reason = float_json_problem(value)

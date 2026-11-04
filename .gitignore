@@ -11,3 +11,8 @@ __pycache__/
 # workflow rebuilds it from the TOML tree on every push to master and uploads it
 # to the rolling `catalog-latest` release; it is never committed.
 /dist/
+
+# Local/CI Python environment. `catalog-validate.yml` creates it inside the
+# checkout when the runner's python3 has no `toml` wheel (PEP 668 forbids the
+# system env), so it must never show up as an untracked change.
+/.venv/
