@@ -408,9 +408,20 @@ def collect_models(source: Path) -> tuple[list[dict], dict[str, int], list[str]]
         row["supports_vision"] = _boolean(model.get("supports_vision")) is True
         row["supports_reasoning"] = _boolean(model.get("supports_reasoning")) is True
         for field in ("context_window", "max_output_tokens"):
-            value = _number(model.get(field), where=f"{path}: [model].{field}")
-            if value is not None:
-                row[field] = value
+            value = model.get(field)
+            if value is None:
+                continue
+            # The consumer's field is i64: a float would make it reject the
+            # WHOLE document, and this builder is the cross-repo import path
+            # (the structural validator is not on it).
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise CatalogIndexError(
+                    f"{path}: [model].{field} is {value!r} — a limit must be an integer "
+                    "(a float makes every typed consumer reject the whole document)"
+                )
+            checked = _number(value, where=f"{path}: [model].{field}")
+            if checked is not None:
+                row[field] = checked
         rows.append(row)
 
     if not rows:

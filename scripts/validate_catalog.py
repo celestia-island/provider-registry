@@ -86,6 +86,9 @@ import build_catalog_index as catalog_index  # noqa: E402
 REQUIRED_MODEL_KEYS = ("id", "name", "provider_id")
 REQUIRED_MODEL_INTS = ("context_window", "max_output_tokens")
 REQUIRED_PRICING_KEYS = ("input_per_million", "output_per_million")
+# Present-but-wrong-typed values are silently dropped by the builder, so the
+# validator must see EVERY key the artifact can publish.
+PUBLISHED_PRICING_KEYS = (*REQUIRED_PRICING_KEYS, "cached_per_million")
 REQUIRED_ENTRYPOINT_KEYS = ("id", "provider_id", "api", "name")
 
 SEARCH_TOP = "search"
@@ -463,6 +466,20 @@ def validate(root: Path) -> list[str]:
                     f"{path}: [model].{key} is {model[key]!r} — above 2**53, which JSON consumers "
                     "cannot represent (JavaScript loses precision, i64 readers reject the document)"
                 )
+        tags = model.get("tags")
+        if tags is not None and (
+            not isinstance(tags, list) or any(not isinstance(t, str) for t in tags)
+        ):
+            problems.append(
+                f"{path}: [model].tags must be an array of strings (the artifact derives `kind` from it)"
+            )
+        category = model.get("category")
+        if category is not None and not isinstance(category, dict):
+            problems.append(f"{path}: [model.category] must be a table")
+        elif isinstance(category, dict) and "generation" in category and not isinstance(
+            category["generation"], str
+        ):
+            problems.append(f"{path}: [model.category].generation must be a string")
         for key in ("supports_vision", "supports_reasoning"):
             # The artifact always publishes these as booleans; a string/number would
             # be silently downgraded to `false`, hiding the capability from consumers.
@@ -476,8 +493,10 @@ def validate(root: Path) -> list[str]:
             if not isinstance(pricing, dict):
                 problems.append(f"{path}: [model.pricing] must be a table")
             else:
-                for key in REQUIRED_PRICING_KEYS:
-                    if pricing.get(key) is not None and not isinstance(pricing[key], (int, float)):
+                for key in PUBLISHED_PRICING_KEYS:
+                    if pricing.get(key) is None:
+                        continue
+                    if isinstance(pricing[key], bool) or not isinstance(pricing[key], (int, float)):
                         problems.append(f"{path}: [model.pricing].{key} must be a number")
                 # TOML accepts `nan` / `inf` (and prices small enough that Python
                 # spells them `1e-05`); the published catalog is strict JSON whose

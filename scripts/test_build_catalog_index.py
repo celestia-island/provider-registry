@@ -1052,6 +1052,61 @@ class IndexGateWiringTest(unittest.TestCase):
             problems = vc.validate(root)
             self.assertTrue(any("outside the range" in line for line in problems), problems)
 
+    def test_a_float_limit_fails_the_cross_repo_build(self):
+        # arona imports this build() directly; its `context_window: Option<i64>`
+        # rejects the WHOLE document on a float, so the import path must not
+        # publish one.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_tree(root, GATE_FIXTURE)
+            (root / "search").mkdir()
+            card = root / "models" / "openai" / "gpt-5.4-nano.toml"
+            card.write_text(
+                card.read_text(encoding="utf-8").replace(
+                    "context_window = 400000", "context_window = 400000.0"
+                ),
+                encoding="utf-8",
+            )
+            with self.assertRaises(bci.CatalogIndexError) as caught:
+                bci.build(root)
+            self.assertIn("must be an integer", str(caught.exception))
+
+    def test_the_validator_sees_every_published_price_key(self):
+        # `cached_per_million` is a published price; a string value would be
+        # silently DROPPED by the builder (looks like "no upstream value").
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_tree(root, GATE_FIXTURE)
+            (root / "search").mkdir()
+            card = root / "models" / "openai" / "gpt-5.4-nano.toml"
+            card.write_text(
+                card.read_text(encoding="utf-8").replace(
+                    "input_per_million = 0.2", 'input_per_million = 0.2\ncached_per_million = "0.02"'
+                ),
+                encoding="utf-8",
+            )
+            problems = vc.validate(root)
+            self.assertTrue(
+                any("[model.pricing].cached_per_million must be a number" in line for line in problems),
+                problems,
+            )
+
+    def test_the_validator_checks_the_tags_shape(self):
+        # `tags` drives `kind`; a bare string turns a video card into `llm`.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_tree(root, GATE_FIXTURE)
+            (root / "search").mkdir()
+            card = root / "models" / "openai" / "gpt-5.4-nano.toml"
+            card.write_text(
+                card.read_text(encoding="utf-8").replace(
+                    "[model]", '[model]\ntags = "video_generation"', 1
+                ),
+                encoding="utf-8",
+            )
+            problems = vc.validate(root)
+            self.assertTrue(any("[model].tags must be an array of strings" in line for line in problems), problems)
+
     def test_validate_catalog_passes_the_real_tree(self):
         code, out, _ = run_validator(ROOT)
         self.assertEqual(code, 0, out)
