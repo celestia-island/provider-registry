@@ -273,8 +273,9 @@ data contract below:
   validated against the shapes plana's `MddDescriptor` defines.
 
 `arona` does **not** read this tree directly: its server syncs the published
-catalog index below and vendors a copy of the same bytes, so the TOML layout
-stays free to change without breaking it.
+catalog index below, and its build-time snapshot is produced by calling this
+repository's generator (see [Machine-readable catalog index](#catalog-index)), so
+the TOML layout stays free to change without breaking it.
 
 <a id="catalog-index"></a>
 
@@ -304,6 +305,12 @@ of the TOML tree:
   card without the key reads `false`); multimodal capability is carried by
   `supports_vision`, there is no `multimodal` kind. Values are strict JSON: a
   `nan`/`inf` price fails the build instead of shipping an unparseable artifact.
+- `kind` falls back to `llm`: a card that declares neither
+  `category.generation` nor a type tag is published (and displayed) as `llm`.
+  Media models must declare `category.generation` on the card — that is a data
+  follow-up, deliberately not an id-substring heuristic (a chat model that can
+  also send/receive audio, e.g. `gpt-4o-audio-preview`, is token-priced `llm`
+  and would be mislabelled by a `-audio` rule).
 - [arona](https://github.com/celestia-island/arona) syncs the URL above at
   runtime (`system_config.pricing.registry.url` can point it elsewhere) and
   falls back to a copy compiled into its build when the network or the gateway is
