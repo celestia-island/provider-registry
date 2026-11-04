@@ -166,8 +166,13 @@ jobs:
           echo "artifact: schema ${SCHEMA}, ${MODELS} model row(s), ${PROVIDERS} provider(s), digest ${DIGEST}"
 
       - name: Create or update the rolling catalog-latest release
-        # Skipped only for a dispatched dry run (a push to master always publishes).
-        if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
+        # Two independent gates before anything becomes the published catalog:
+        #   * `github.ref == 'refs/heads/master'` — a `workflow_dispatch` run on a
+        #     feature branch can never publish unmerged data to `catalog-latest`
+        #     (that tag is arona's default sync source). On a branch, a dispatch
+        #     is therefore always an implicit dry run.
+        #   * `inputs.dry_run != true` — the explicit dry run on master.
+        if: github.ref == 'refs/heads/master' && (github.event_name != 'workflow_dispatch' || inputs.dry_run != true)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -220,7 +225,9 @@ jobs:
       # server-computed sha256 digest for uploaded assets, which is a true
       # replacement check (a byte count would accept a same-size old asset).
       - name: Verify the release serves this build
-        if: github.event_name != 'workflow_dispatch' || inputs.dry_run != true
+        # Same gates as the publish step: verifying a release this run did not
+        # (and must not) touch would compare the artifact against someone else's.
+        if: github.ref == 'refs/heads/master' && (github.event_name != 'workflow_dispatch' || inputs.dry_run != true)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

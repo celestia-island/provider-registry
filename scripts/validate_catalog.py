@@ -49,7 +49,16 @@ Checks (stdlib only, `tomllib`):
    row counts stay in the documented range — globally *and per provider*, which
    is the granularity that actually catches a lost directory (a 106-row subtree
    dropping out still clears a 1000-row global floor) — and that the digest is
-   stable and the pricing values are JSON-legal.
+   stable and the numeric values are JSON-legal.
+
+   The gate has a second half aimed at the *endpoint* side, because
+   `providers[].base_hosts` is the consumer's first lookup key (a provider is
+   resolved from the configured endpoint URL before the model id is consulted):
+   every registered provider that ships model cards must keep at least one
+   `entrypoint/<provider>/*.toml`, and the number of entrypoints that declare a
+   fixed `api.base_url` must not drop. Operator-supplied endpoints
+   (`base_url = ""`, the `*_compatible` family) are exempt by design: they ship
+   no host and no model cards.
 
 `descriptors/` gets the full MDD schema check from `scripts/validate_descriptors.py`;
 here it only has to parse, so one missing validator cannot hide a broken file.
@@ -80,6 +89,7 @@ REQUIRED_PRICING_KEYS = ("input_per_million", "output_per_million")
 REQUIRED_ENTRYPOINT_KEYS = ("id", "provider_id", "api", "name")
 
 SEARCH_TOP = "search"
+ENTRYPOINT_TOP = "entrypoint"
 SEARCH_PROTOCOL_SUFFIX = "_search_v1"
 # The closed protocol vocabulary, pinned to arona's `SEARCH_PROTOCOLS`
 # whitelist (scripts/test_validate_search.py keeps this set and the test's
@@ -146,6 +156,14 @@ DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 # still cleared a 1000-row floor). Rows are only ever ADDED by the sync, so these
 # numbers do not need maintenance for growth; when a provider legitimately
 # shrinks, lower its number in the same PR — that deliberate edit is the point.
+# (9) Endpoint-side floors. `base_hosts` is the consumer's first lookup key, so
+# `entrypoint/` losing a subtree damages resolution exactly like `models/` losing
+# one — and no other check in this file looks at that tree's completeness.
+# Counted over entrypoints that declare a fixed `api.base_url`; operator-supplied
+# endpoints (`base_url = ""`, no host by design) are exempt. Entrypoints may be
+# ADDED freely; a deliberate removal lowers this number in the same PR.
+MIN_ENTRYPOINT_FILES = 59
+
 MIN_ROWS_PER_PROVIDER = {
     "anthropic": 52,
     "cohere": 19,
@@ -446,15 +464,15 @@ def validate(root: Path) -> list[str]:
                 for key in REQUIRED_PRICING_KEYS:
                     if pricing.get(key) is not None and not isinstance(pricing[key], (int, float)):
                         problems.append(f"{path}: [model.pricing].{key} must be a number")
-                # TOML accepts `nan` / `inf`; the published catalog is strict JSON
-                # and every consumer would fail to parse the whole document, so a
-                # single non-finite price has to fail here (check 9 also refuses it).
+                # TOML accepts `nan` / `inf` (and prices small enough that Python
+                # spells them `1e-05`); the published catalog is strict JSON whose
+                # digest every consumer recomputes, so one such price rejects the
+                # whole document. Check 9 refuses them too — two independent layers.
                 for key, value in pricing.items():
-                    if isinstance(value, float) and not math.isfinite(value):
-                        problems.append(
-                            f"{path}: [model.pricing].{key} is {value!r} — not a finite number "
-                            "(TOML accepts nan/inf, the published catalog is strict JSON)"
-                        )
+                    if isinstance(value, float):
+                        reason = float_json_problem(value)
+                        if reason is not None:
+                            problems.append(f"{path}: [model.pricing].{key} {value!r} {reason}")
         provider = _provider_dir(path, root, "models")
         declared = model.get("provider_id")
         if provider is not None and declared is not None and declared != provider:
@@ -571,6 +589,103 @@ def validate(root: Path) -> list[str]:
     return problems
 
 
+def float_json_problem(value: float) -> str | None:
+    """Why this float cannot be spelled identically by every JSON serializer."""
+    if not math.isfinite(value):
+        return "is not a finite number (TOML accepts nan/inf, the published catalog is strict JSON)"
+    magnitude = abs(value)
+    if 0 < magnitude < catalog_index.MIN_PLAIN_FLOAT or magnitude >= catalog_index.MAX_PLAIN_FLOAT:
+        return (
+            "is outside the range every JSON serializer spells the same way "
+            f"(a non-zero float must be within [{catalog_index.MIN_PLAIN_FLOAT:g}, "
+            f"{catalog_index.MAX_PLAIN_FLOAT:g}]); Python writes it in exponent form, other "
+            "serializers do not, and a consumer recomputing the digest would reject the document"
+        )
+    return None
+
+
+def _entrypoint_census(root: Path) -> dict[str, dict[str, int]]:
+    """`entrypoint/<provider>/*.toml` -> {provider: {files, fixed_host_files}}."""
+    census: dict[str, dict[str, int]] = {}
+    top = root / ENTRYPOINT_TOP
+    if not top.is_dir():
+        return census
+    for path in sorted(top.rglob("*.toml")):
+        parts = path.relative_to(top).parts
+        if len(parts) < 2:
+            continue
+        entry = None
+        try:
+            parsed = tomllib.loads(path.read_text(encoding="utf-8"))
+        except (tomllib.TOMLDecodeError, UnicodeDecodeError, OSError):
+            # The structural pass already reports an unparseable file.
+            continue
+        if isinstance(parsed.get("entrypoint"), dict):
+            entry = parsed["entrypoint"]
+        api = entry.get("api") if entry else None
+        base_url = api.get("base_url") if isinstance(api, dict) else None
+        row = census.setdefault(parts[0], {"files": 0, "fixed_host_files": 0})
+        row["files"] += 1
+        if isinstance(base_url, str) and base_url.strip():
+            row["fixed_host_files"] += 1
+    return census
+
+
+def entrypoint_coverage_problems(
+    registered_model_providers: set[str], census: dict[str, dict[str, int]]
+) -> list[str]:
+    """A registered provider with model cards must keep an entrypoint directory.
+
+    Models-only providers (media groups that this registry lists only as model
+    cards) are out of scope: `registry.toml` is what makes a provider selectable
+    in a setup UI, and only then does it need an endpoint to talk to.
+    """
+    problems: list[str] = []
+    for provider in sorted(registered_model_providers):
+        if census.get(provider, {}).get("files", 0) < 1:
+            problems.append(
+                f"catalog index: provider {provider!r} is registered and ships model cards but has no "
+                f"{ENTRYPOINT_TOP}/{provider}/*.toml — its base_hosts would be empty, and the consumer "
+                "resolves a provider by endpoint host before it looks at the model id "
+                "(did the directory go missing?)"
+            )
+    return problems
+
+
+def entrypoint_count_problems(
+    census: dict[str, dict[str, int]], floor: int = MIN_ENTRYPOINT_FILES
+) -> list[str]:
+    """Guard partial loss inside a provider (coverage cannot see one file going)."""
+    total = sum(row["fixed_host_files"] for row in census.values())
+    if total >= floor:
+        return []
+    return [
+        f"catalog index: {total} entrypoint file(s) declaring a fixed api.base_url < {floor} — "
+        "endpoint hosts would silently disappear from the artifact (operator endpoints with "
+        'base_url = "" are exempt); entrypoints may be added freely, a deliberate removal lowers '
+        "the floor in scripts/validate_catalog.py"
+    ]
+
+
+def entrypoint_problems(root: Path, floor: int = MIN_ENTRYPOINT_FILES) -> list[str]:
+    """Both endpoint-side rules over one tree (`floor` is injectable for fixtures)."""
+    census = _entrypoint_census(root)
+    try:
+        registry = tomllib.loads((root / "registry.toml").read_text(encoding="utf-8"))
+        registered = set(catalog_index.registered_providers(registry)[0])
+    except (OSError, tomllib.TOMLDecodeError, catalog_index.CatalogIndexError) as exc:
+        return [f"catalog index: cannot read registry.toml for the endpoint check ({exc})"]
+    models_root = root / "models"
+    model_providers = (
+        {path.name for path in models_root.iterdir() if path.is_dir() and not path.name.startswith(".")}
+        if models_root.is_dir()
+        else set()
+    )
+    return entrypoint_coverage_problems(registered & model_providers, census) + entrypoint_count_problems(
+        census, floor
+    )
+
+
 def provider_floor_problems(row_counts: dict[str, int]) -> list[str]:
     """(9): per-provider row floors, applied to the rows the artifact carries.
 
@@ -650,6 +765,7 @@ def main(argv: list[str]) -> int:
         # tree it already rejects only adds noise (and can abort mid-violation).
         index_problems, index_summary = check_index(root)
         problems.extend(index_problems)
+        problems.extend(entrypoint_problems(root))
     if problems:
         for line in problems:
             print(f"validate-catalog: {line}", file=sys.stderr)

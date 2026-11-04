@@ -20,7 +20,13 @@ real catalog:
 * "field absent" vs "field is 0.0" is pinned separately, because the consumer
   reads the first as "no upstream value" and the second as "$0";
 * `supports_vision` / `supports_reasoning` must be present on every row;
-* `nan` / `inf` prices must fail the build instead of shipping invalid JSON;
+* `nan` / `inf` prices must fail the build instead of shipping invalid JSON, and
+  so must floats outside the range every JSON serializer spells the same way
+  (`1e-05` vs `0.00001` — the digest is recomputed by consumers, so a mismatch
+  rejects the whole document);
+* the endpoint side (`entrypoint/`, i.e. the artifact's `base_hosts`) has its own
+  floors, because it is the consumer's first lookup key;
+* the publish workflow may only touch the release from `refs/heads/master`;
 * a duplicate `(provider, model id)` must fail the build rather than let file
   order decide which row wins.
 """
@@ -32,6 +38,7 @@ import json
 import math
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -47,6 +54,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = Path(__file__).resolve().parent / "build_catalog_index.py"
 
 ISO_UTC = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+WORKFLOW_PATH = ROOT / ".github" / "workflows" / "publish-catalog.yml"
 
 FIXTURE = {
     "registry.toml": """\
@@ -279,6 +287,15 @@ def run_validator(root: Path) -> tuple[int, str, str]:
     return code, stdout.getvalue(), stderr.getvalue()
 
 
+def workflow_step_block(text: str, name: str) -> str:
+    """The YAML text of one workflow step, from its `- name:` to the next step."""
+    marker = f"- name: {name}"
+    start = text.index(marker)
+    rest = text[start + len(marker) :]
+    end = rest.find("\n      - ")
+    return rest if end == -1 else rest[:end]
+
+
 def rows_by_id(document: dict, provider: str, model_id: str) -> dict:
     for row in document["models"]:
         if row["provider"] == provider and row["id"] == model_id:
@@ -445,6 +462,36 @@ class FixtureArtifactTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("not a finite number", err)
 
+    def test_prices_outside_the_cross_language_range_are_refused(self):
+        # The digest is recomputed by consumers, so the two serializations must
+        # agree byte for byte: Python writes `1e-05`, `ryu`/`serde_json` writes
+        # `0.00001`. Any value Python renders in exponent form is refused.
+        card = self.root / "models" / "openai" / "tiny-price.toml"
+        template = (
+            "[model]\n"
+            'id = "tiny-price"\n'
+            'name = "Tiny Price"\n'
+            'provider_id = "openai"\n'
+            "context_window = 1000\n"
+            "max_output_tokens = 10\n"
+            "\n[model.pricing]\n"
+            "input_per_million = {value}\n"
+        )
+        for value, allowed in (("1e-05", False), ("5e-05", False), ("1e15", False), ("0.0001", True), ("0.002", True), ("0", True)):
+            card.write_text(template.format(value=value), encoding="utf-8")
+            if allowed:
+                document, _ = self.build()
+                self.assertEqual(rows_by_id(document, "openai", "tiny-price")["input_per_million"], float(value), value)
+                continue
+            with self.assertRaises(bci.CatalogIndexError, msg=value) as caught:
+                self.build()
+            message = str(caught.exception)
+            self.assertIn("[model.pricing].input_per_million", message, value)
+            self.assertIn("outside the range", message, value)
+        # …and zero keeps flowing through as an emitted value, never a rejection.
+        card.write_text(template.format(value="0.0"), encoding="utf-8")
+        self.assertEqual(rows_by_id(self.build()[0], "openai", "tiny-price")["input_per_million"], 0.0)
+
     def test_malformed_base_url_is_reported(self):
         # `urlsplit` raises on some malformed authorities; that is a data defect in
         # the entrypoint, not a crash.
@@ -571,6 +618,157 @@ output_per_million = 1.25
 }
 
 
+# A tree with one endpoint-bearing provider, one operator-supplied provider (no
+# models, blank base_url) and the models/ side both rules look at.
+ENDPOINT_FIXTURE = {
+    "registry.toml": """
+[[compatible]]
+id = "openai_compatible"
+name = "OpenAI Compatible"
+description = "Custom OpenAI compatible API"
+is_operator = true
+
+[[international.developers]]
+id = "openai"
+name = "OpenAI"
+description = "GPT models from OpenAI"
+""",
+    "entrypoint/openai/default.toml": """
+[entrypoint]
+id = "openai_default"
+provider_id = "openai"
+
+[entrypoint.api]
+protocol = "openai_chat_v1"
+base_url = "https://api.openai.com/v1"
+
+[entrypoint.name]
+en = "OpenAI"
+""",
+    "entrypoint/openai_compatible/default.toml": """
+[entrypoint]
+id = "openai_compatible_default"
+provider_id = "openai_compatible"
+
+[entrypoint.api]
+protocol = "openai_chat_v1"
+base_url = ""
+
+[entrypoint.name]
+en = "OpenAI Compatible"
+""",
+    "models/openai/gpt-5.4-nano.toml": """
+[model]
+id = "gpt-5.4-nano"
+name = "GPT-5.4 Nano"
+provider_id = "openai"
+context_window = 400000
+max_output_tokens = 16384
+
+[model.pricing]
+input_per_million = 0.2
+output_per_million = 1.25
+""",
+}
+
+
+class EntrypointGateTest(unittest.TestCase):
+    """The endpoint side of the gate (`base_hosts` is the consumer's first key)."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name)
+        write_tree(self.root, ENDPOINT_FIXTURE)
+        (self.root / "search").mkdir()
+
+    def test_a_registered_provider_losing_its_entrypoint_is_named(self):
+        shutil.rmtree(self.root / "entrypoint" / "openai")
+        problems = vc.entrypoint_problems(self.root, floor=1)
+        # Two independent rules fire here: the named coverage rule and the count
+        # floor (the deleted directory was the only fixed-host entrypoint left).
+        named = [line for line in problems if "no entrypoint/openai/*.toml" in line]
+        self.assertEqual(len(named), 1, problems)
+        self.assertIn("base_hosts", named[0])
+        self.assertTrue(any("fixed api.base_url" in line for line in problems), problems)
+        # …and the validator CLI is actually wired to it.
+        code, _, err = run_validator(self.root)
+        self.assertEqual(code, 1, err)
+        self.assertIn("no entrypoint/openai/*.toml", err)
+
+    def test_operator_provider_may_ship_without_models_or_a_host(self):
+        # `*_compatible` carries no host and no model cards: losing it is not a
+        # model-catalog defect, so the gate must stay green (floor injected so a
+        # three-file fixture is not judged against the real tree's 59).
+        shutil.rmtree(self.root / "entrypoint" / "openai_compatible")
+        self.assertEqual(vc.entrypoint_problems(self.root, floor=1), [])
+
+    def test_whole_entrypoint_tree_loss_is_caught(self):
+        shutil.rmtree(self.root / "entrypoint")
+        problems = vc.entrypoint_problems(self.root, floor=1)
+        self.assertTrue(any("openai" in line for line in problems), problems)
+        self.assertTrue(any("fixed api.base_url" in line for line in problems), problems)
+
+    def test_count_floor_ignores_operator_endpoints(self):
+        census = {
+            "openai": {"files": 3, "fixed_host_files": 3},
+            "openai_compatible": {"files": 2, "fixed_host_files": 0},
+        }
+        self.assertEqual(vc.entrypoint_count_problems(census, floor=3), [])
+        # dropping a fixed-host file is a loss …
+        shrunk = dict(census, openai={"files": 2, "fixed_host_files": 2})
+        self.assertEqual(len(vc.entrypoint_count_problems(shrunk, floor=3)), 1)
+        # … while operator files never counted towards the floor in the first place
+        without_operator = dict(census, openai_compatible={"files": 0, "fixed_host_files": 0})
+        self.assertEqual(vc.entrypoint_count_problems(without_operator, floor=3), [])
+
+    def test_coverage_scope_is_registered_model_providers(self):
+        census = {"openai": {"files": 1, "fixed_host_files": 1}}
+        # models-only providers (meshy/meta/runway/stability/tripo) are out of scope
+        self.assertEqual(vc.entrypoint_coverage_problems(set(), census), [])
+        named = vc.entrypoint_coverage_problems({"openai", "silicon"}, census)
+        self.assertEqual(len(named), 1, named)
+        self.assertIn("silicon", named[0])
+
+
+class PublishWorkflowGuardTest(unittest.TestCase):
+    """The release steps must be unreachable from a non-master dispatch.
+
+    Text assertions rather than YAML parsing: this suite runs on the farm with the
+    standard library only (no PyYAML), and what matters is that the guard line is
+    attached to the two steps that mutate the release.
+    """
+
+    PROTECTED = (
+        "Create or update the rolling catalog-latest release",
+        "Verify the release serves this build",
+    )
+
+    def test_release_steps_require_master_and_a_real_run(self):
+        text = WORKFLOW_PATH.read_text(encoding="utf-8")
+        for name in self.PROTECTED:
+            block = workflow_step_block(text, name)
+            self.assertIn("if: github.ref == 'refs/heads/master'", block, name)
+            self.assertIn("inputs.dry_run != true", block, name)
+
+    def test_step_splitter_is_not_matching_the_whole_file(self):
+        # Negative control for the assertions above: an unprotected step must not
+        # contain the guard, otherwise `assertIn` would pass on any file.
+        text = WORKFLOW_PATH.read_text(encoding="utf-8")
+        block = workflow_step_block(text, "Gate the data and build the index")
+        self.assertNotIn("refs/heads/master", block)
+        self.assertIn("validate_catalog.py", block)
+
+    def test_workflow_publishes_only_from_master_pushes(self):
+        text = WORKFLOW_PATH.read_text(encoding="utf-8")
+        self.assertIn("branches: [master]", text)
+        self.assertIn("contents: write", text)
+        self.assertIn("--clobber", text)
+        self.assertIn("dry_run:", text)
+        # `gh` must fail the job rather than skip the upload silently.
+        self.assertIn("gh is not installed on this runner", text)
+
+
 class IndexGateWiringTest(unittest.TestCase):
     """`validate_catalog.py` must actually fail when the index gate fails.
 
@@ -625,6 +823,13 @@ class IndexGateWiringTest(unittest.TestCase):
             problems = vc.validate(root)
             self.assertTrue(any("not a finite number" in line for line in problems), problems)
             self.assertTrue(any("[model.pricing].input_per_million" in line for line in problems), problems)
+            # …and the same for the range that breaks cross-language digests.
+            card.write_text(
+                card.read_text(encoding="utf-8").replace("input_per_million = nan", "input_per_million = 1e-05"),
+                encoding="utf-8",
+            )
+            problems = vc.validate(root)
+            self.assertTrue(any("outside the range" in line for line in problems), problems)
 
     def test_validate_catalog_passes_the_real_tree(self):
         code, out, _ = run_validator(ROOT)

@@ -294,7 +294,8 @@ of the TOML tree:
 - The JSON is the contract, not an implementation detail: `digest` is the sha256
   of the canonical `{"providers", "models"}` JSON (two builds of the same tree
   agree), an absent numeric field means "no upstream value" rather than `0`, and
-  `kind` is one of `llm | embedding | image | video | audio | 3d | other`.
+  `kind` is one of `llm | embedding | image | video | audio | 3d | other`
+  (`other` is reserved: the generator never produces it today).
 - Ordering is part of the contract, so an artifact diff is meaningful and a
   recomputed digest can match: `providers` by `id`, `models` by `provider` then
   `id`, `base_hosts` lexicographic. Every `models[].provider` resolves to a
@@ -305,12 +306,13 @@ of the TOML tree:
   card without the key reads `false`); multimodal capability is carried by
   `supports_vision`, there is no `multimodal` kind. Values are strict JSON: a
   `nan`/`inf` price fails the build instead of shipping an unparseable artifact.
-- `kind` falls back to `llm`: a card that declares neither
-  `category.generation` nor a type tag is published (and displayed) as `llm`.
-  Media models must declare `category.generation` on the card — that is a data
-  follow-up, deliberately not an id-substring heuristic (a chat model that can
-  also send/receive audio, e.g. `gpt-4o-audio-preview`, is token-priced `llm`
-  and would be mislabelled by a `-audio` rule).
+- `kind` is derived from the card, `category.generation` first and `tags`
+  second; a card that carries neither is published (and displayed) as `llm`.
+  Media models should carry one of the two — `category` is the primary signal, so
+  a missing one is a data follow-up on the card, deliberately not an id-substring
+  heuristic (a chat model that can also send/receive audio, e.g.
+  `gpt-4o-audio-preview`, is token-priced `llm` and would be mislabelled by an
+  `-audio` rule).
 - [arona](https://github.com/celestia-island/arona) syncs the URL above at
   runtime (`system_config.pricing.registry.url` can point it elsewhere) and
   falls back to a copy compiled into its build when the network or the gateway is

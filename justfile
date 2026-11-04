@@ -34,7 +34,7 @@ catalog-index:
 
 # Structural validation of the whole catalog (entrypoint/ + search/ + models/,
 # parse of descriptors/) plus the publishable catalog index gate.
-# This is exactly what the Catalog Validate CI job runs.
+# This is the validator alone; the Catalog Validate job also runs the suites.
 validate:
     python3 scripts/validate_catalog.py
 

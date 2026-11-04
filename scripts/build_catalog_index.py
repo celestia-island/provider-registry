@@ -45,6 +45,13 @@ Rules that are load-bearing for the consumer side:
 * `NaN` / `Infinity` are REFUSED (TOML accepts them, JSON does not): one such
   price would make the whole published artifact unparseable for every consumer
   while the tree still validates, so the build fails and names the field.
+* Floats outside `[1e-4, 1e15)` (and non-zero below it) are REFUSED too. The
+  digest is recomputed by consumers, and the two spellings have to agree byte for
+  byte: Python writes `1e-05` where `ryu`/`serde_json` writes `0.00001`, so any
+  value that Python renders in exponent form is a cross-language digest mismatch
+  waiting to happen — which would reject the *whole* document at sync time. Zero
+  and ordinary prices are unaffected; the smallest non-zero price in the catalog
+  is 0.002.
 * `kind` ∈ llm | embedding | image | video | audio | 3d | other, derived in this
   order: `[model].category.generation` (case-insensitive), then `tags`, then the
   id (`embed`), then `llm`.
@@ -123,6 +130,13 @@ EMBEDDING_TAG_PREFIX = "embedding"
 EMBEDDING_ID_HINT = "embed"
 DEFAULT_KIND = "llm"
 
+# The range in which Python's `json` and other strict serializers (ryu /
+# `serde_json`) spell a float identically. Outside it Python switches to exponent
+# notation (`1e-05`, `1e+15`) and the digest a consumer recomputes no longer
+# matches, so the whole document would be rejected at sync time.
+MIN_PLAIN_FLOAT = 1e-4
+MAX_PLAIN_FLOAT = 1e15
+
 PROVIDER_REQUIRED = ("id",)
 MODEL_REQUIRED = ("id",)
 
@@ -150,10 +164,19 @@ def _number(value, where: str = ""):
     """
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
-    if isinstance(value, float) and not math.isfinite(value):
-        raise CatalogIndexError(
-            f"{where or 'value'}: {value!r} is not a finite number (TOML accepts nan/inf, JSON does not)"
-        )
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise CatalogIndexError(
+                f"{where or 'value'}: {value!r} is not a finite number (TOML accepts nan/inf, JSON does not)"
+            )
+        magnitude = abs(value)
+        if 0 < magnitude < MIN_PLAIN_FLOAT or magnitude >= MAX_PLAIN_FLOAT:
+            raise CatalogIndexError(
+                f"{where or 'value'}: {value!r} is outside the range every JSON serializer spells the same way "
+                f"(a non-zero float must be within [{MIN_PLAIN_FLOAT:g}, {MAX_PLAIN_FLOAT:g})); Python writes it in "
+                "exponent form, other serializers do not, and a consumer recomputing the digest would reject "
+                "the whole document at sync time"
+            )
     return value
 
 
