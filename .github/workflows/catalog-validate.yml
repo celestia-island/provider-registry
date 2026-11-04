@@ -51,6 +51,39 @@ jobs:
       - name: Validate the MDD descriptors
         run: python3 scripts/validate_descriptors.py
 
+      # `scripts/test_update_models.py` imports the `toml` wheel (the writer-side
+      # parser); the validators themselves are stdlib-only. The Debian 12 runners
+      # ship python3.11 without it, and the suites step below only started running
+      # that test in #32, which is why the gate went red on master. Bounded
+      # preflight: use the runner's `toml` when it is importable, otherwise install
+      # it once into a local venv.
+      #
+      # A bare `python3 -m pip install toml` cannot work here: Debian marks the
+      # system interpreter EXTERNALLY-MANAGED (PEP 668), so pip refuses before it
+      # even looks at the network — verified on a Debian 12 / python3.11 image:
+      # `error: externally-managed-environment … pass --break-system-packages`.
+      # The venv form is the org's standard on these runners (celestia-devtools
+      # ci.yml/audit.yml, evernight, official-plugins) and is confirmed green on
+      # the farm. Failure is loud and single-attempt: a green run that skipped the
+      # suite would be worse than a red one.
+      - name: Ensure the `toml` wheel for the model-sync suite
+        run: |
+          set -euo pipefail
+          if python3 -c 'import toml' 2>/dev/null; then
+            python3 -c 'import toml; print(f"toml {toml.__version__} from the runner interpreter")'
+            exit 0
+          fi
+          echo "runner python3 has no 'toml' (PEP 668 forbids installing into the system env); using .venv"
+          if ! python3 -m venv .venv; then
+            echo "::error::cannot create a venv (is python3-venv installed on this runner?) — the model-sync suite needs the 'toml' wheel, so the catalog gate stays red on purpose instead of silently skipping the suite"
+            exit 1
+          fi
+          if ! .venv/bin/pip install --quiet --disable-pip-version-check "toml>=0.10,<1.0"; then
+            echo "::error::installing 'toml' failed: the runner cannot reach a package index (or pip is broken). The model-sync suite cannot run, so the catalog gate stays red on purpose instead of silently skipping it"
+            exit 1
+          fi
+          .venv/bin/python -c 'import toml; print(f"toml {toml.__version__} from .venv")'
+
       # The validators only prove the shipped tree is clean; the test suites
       # pin the contract itself (the verbatim search protocol vocabulary, the
       # registry<->directory invariants, the shape of the published catalog
@@ -59,6 +92,10 @@ jobs:
       # of shipping" actually lives.
       - name: Run the catalog test suites
         run: |
-          python3 scripts/test_validate_search.py
-          python3 scripts/test_update_models.py
-          python3 scripts/test_build_catalog_index.py
+          set -euo pipefail
+          # `.venv` exists only when the runner's python3 lacked `toml`.
+          PY=python3
+          if [ -x .venv/bin/python ]; then PY=.venv/bin/python; fi
+          "$PY" scripts/test_validate_search.py
+          "$PY" scripts/test_update_models.py
+          "$PY" scripts/test_build_catalog_index.py

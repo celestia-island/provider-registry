@@ -55,6 +55,7 @@ SCRIPT = Path(__file__).resolve().parent / "build_catalog_index.py"
 
 ISO_UTC = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "publish-catalog.yml"
+VALIDATE_WORKFLOW_PATH = ROOT / ".github" / "workflows" / "catalog-validate.yml"
 
 FIXTURE = {
     "registry.toml": """\
@@ -767,6 +768,31 @@ class PublishWorkflowGuardTest(unittest.TestCase):
         self.assertIn("dry_run:", text)
         # `gh` must fail the job rather than skip the upload silently.
         self.assertIn("gh is not installed on this runner", text)
+
+
+class CatalogValidateWorkflowTest(unittest.TestCase):
+    """The model-sync suite needs the `toml` wheel; the gate must provision it or fail loudly.
+
+    #32 started running `scripts/test_update_models.py` in this job and the Debian 12
+    runners ship no `toml` (their system interpreter is PEP 668 EXTERNALLY-MANAGED, so a
+    plain `pip install` cannot fix it either), which turned master red. Skipping the
+    suite silently would be worse than red — the pin is that the provision step exists,
+    is bounded, and that the suites run the interpreter which actually has the wheel.
+    """
+
+    def test_the_toml_dependency_is_provisioned_bounded(self):
+        text = VALIDATE_WORKFLOW_PATH.read_text(encoding="utf-8")
+        self.assertIn("python3 -c 'import toml'", text)
+        self.assertIn("python3 -m venv .venv", text)
+        self.assertIn('pip install --quiet --disable-pip-version-check "toml>=0.10,<1.0"', text)
+        self.assertIn("::error::", text)
+
+    def test_the_suites_run_the_interpreter_that_has_toml(self):
+        text = VALIDATE_WORKFLOW_PATH.read_text(encoding="utf-8")
+        block = workflow_step_block(text, "Run the catalog test suites")
+        self.assertIn("if [ -x .venv/bin/python ]; then PY=.venv/bin/python; fi", block)
+        self.assertIn('"$PY" scripts/test_update_models.py', block)
+        self.assertIn('"$PY" scripts/test_build_catalog_index.py', block)
 
 
 class IndexGateWiringTest(unittest.TestCase):
