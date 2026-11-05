@@ -9,7 +9,9 @@
   Consumed by <a href="https://github.com/celestia-island/entelecheia">Entelecheia</a>,
   <a href="https://github.com/celestia-island/shittim-chest">Shittim Chest</a> and
   <a href="https://github.com/celestia-island/plana">plana</a> — each one vendors a snapshot
-  of this data into its own build (see <a href="#consumers">Consumers</a>).
+  of this data into its own build — and synced at runtime by
+  <a href="https://github.com/celestia-island/arona">arona</a> from the published
+  <a href="#catalog-index">catalog index</a> (see <a href="#consumers">Consumers</a>).
 </p>
 
 <p align="center">
@@ -51,16 +53,19 @@ provider-registry/
 │   ├── README.md        #   TOML format reference
 │   └── example.toml     #   annotated example (fake values)
 ├── registry.toml        # Provider catalog (grouped by category)
+├── dist/                # Generated: catalog index for consumers (gitignored, rebuilt by CI)
 ├── scripts/
 │   ├── update_models.py # Sync model lists from external APIs
-│   ├── validate_catalog.py      # Structural validator for entrypoint/ + search/ + models/
+│   ├── build_catalog_index.py   # Flatten the tree into the published catalog index (dist/)
+│   ├── validate_catalog.py      # Structural validator for entrypoint/ + search/ + models/ (+ index gate)
 │   ├── validate_descriptors.py  # Structural validator for descriptors/
 │   ├── test_update_models.py    # Regression pins for the model sync merge rules
 │   ├── test_validate_search.py  # Regression pins for the search/ audit
+│   ├── test_build_catalog_index.py # Contract pins for the published catalog index
 │   └── utils/
 │       └── cli_format.py
 ├── justfile             # Task runner for common operations (shared devtools recipes via .just/)
-└── .github/workflows/   # CI: daily model sync + catalog validation
+└── .github/workflows/   # CI: daily model sync + catalog validation + catalog index publish
 ```
 
 ## Entrypoint TOML Format
@@ -229,6 +234,16 @@ runs on every PR and on master, so a malformed TOML (or a model whose
 in `registry.toml` without a matching `search/` directory) fails CI instead of
 quietly shrinking a consumer's catalog.
 
+### Build the catalog index
+
+```bash
+just catalog-index                            # writes dist/provider-registry-catalog.json
+python3 scripts/build_catalog_index.py --check # build only, no write (CI/test mode)
+```
+
+`just validate` already ends with that check: the index must still build, keep
+`>= 1000` model rows and `>= 20` providers, and keep a stable digest.
+
 ## Consumers
 
 <a id="consumers"></a>
@@ -257,7 +272,63 @@ data contract below:
 - `descriptors/<provider>/<mdd>.toml` — Model Deployment Descriptors, schema v1,
   validated against the shapes plana's `MddDescriptor` defines.
 
-`arona` does **not** read this registry.
+`arona` does **not** read this tree directly: its server syncs the published
+catalog index below, and its build-time snapshot is produced by calling this
+repository's generator (see [Machine-readable catalog index](#catalog-index)), so
+the TOML layout stays free to change without breaking it.
+
+<a id="catalog-index"></a>
+
+### Machine-readable catalog index
+
+Consumers that need the whole catalog at runtime take one generated file instead
+of the TOML tree:
+
+| | |
+| --- | --- |
+| Artifact | `provider-registry-catalog.json`, built by `scripts/build_catalog_index.py` (the `dist/` directory is gitignored) |
+| Rolling release | tag `catalog-latest`; the asset is replaced in place on every push to `master` by `.github/workflows/publish-catalog.yml` (`workflow_dispatch` re-runs it) |
+| Published URL | `https://gateway.celestia.world/downloads/provider-registry/latest` — the gateway 302s to the release asset |
+| Shape | `schema`, `generated_at`, `digest`, `providers[]` (`id`, `name`, `category`, `base_hosts`), `models[]` (`provider`, `id`, `name`, `kind`, prices, capability flags, limits) |
+
+- The JSON is the contract, not an implementation detail: `digest` is the sha256
+  of the canonical `{"providers", "models"}` JSON (two builds of the same tree
+  agree), an absent numeric field means "no upstream value" rather than `0`, and
+  `kind` is one of `llm | embedding | image | video | audio | 3d | other`
+  (`other` is reserved: the generator never produces it today).
+- Ordering is part of the contract, so an artifact diff is meaningful and a
+  recomputed digest can match: `providers` by `id`, `models` by `provider` then
+  `id`, `base_hosts` lexicographic. Every `models[].provider` resolves to a
+  `providers[]` entry — a provider that only has a `models/` or `entrypoint/`
+  directory is published with `category = "unregistered"` and reported as a
+  warning, never dropped.
+- `supports_vision` and `supports_reasoning` are always present as booleans (a
+  card without the key reads `false`). Multimodal capability is carried by
+  `supports_vision`: the generator never emits a `multimodal` kind, while a
+  consumer's vocabulary may accept a superset (`arona` accepts `multimodal`) —
+  producers write within the set above, consumers read a superset. Values are
+  strict JSON, non-negative, and inside the range every serializer spells the
+  same way: `nan`/`inf`, negative prices/limits, and values below `1e-4` all fail
+  the build instead of shipping an unparseable or cross-language-unstable
+  artifact.
+- `kind` is derived in three steps: `[model].category.generation` first, `tags`
+  second, then the one documented id convention — an id containing `embed` is an
+  `embedding` (6 cards rely on it); anything left is `llm`. Media models should
+  carry `category`/`tags` — a missing one is a data follow-up on the card.
+  Wider id heuristics (`-image`, `-audio`, `-video`, `-tts`) are deliberately not
+  used: a chat model that can also send/receive audio (e.g.
+  `gpt-4o-audio-preview`) is token-priced `llm` and would be mislabelled.
+- [arona](https://github.com/celestia-island/arona) syncs the URL above at
+  runtime (`system_config.pricing.registry.url` can point it elsewhere) and
+  falls back to a copy compiled into its build when the network or the gateway is
+  unavailable. That copy is not a hand-maintained snapshot: arona's
+  `scripts/gen_registry_catalog.py` imports `scripts/build_catalog_index.py` from
+  this repository and calls `build()`, so the offline copy and the published asset
+  come from the same generator and carry the same `digest`. Offline /
+  inner-network deployments copy either the artifact or the release asset by hand.
+- Never delete or rename the `catalog-latest` release or its asset: the gateway
+  URL resolves through it, and a missing asset silently pushes every deployment
+  back to its bundled snapshot.
 
 ### As a git submodule
 
@@ -284,6 +355,10 @@ just validate-descriptors   # structural validation of descriptors/
 A daily GitHub Actions workflow fetches the latest model lists from [OpenRouter](https://openrouter.ai/) and [models.dev](https://models.dev/) and opens an auto-merge pull request against `master` (squash-only; a validation step gates the PR).
 
 Manual triggers are available via the Actions tab with configurable source and provider filters.
+
+[`Publish Catalog`](.github/workflows/publish-catalog.yml) is the delivery half: on every push to `master` it rebuilds the
+[catalog index](#catalog-index) and replaces the asset of the rolling `catalog-latest` release, which the
+gateway URL above resolves to. It also runs on manual dispatch.
 
 ## License
 

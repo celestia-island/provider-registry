@@ -36,7 +36,29 @@ Checks (stdlib only, `tomllib`):
    booleans — an unknown key would be silently ignored by consumers;
 8. `registry.toml`'s search groups and the `search/` tree agree in both
    directions: every listed id has a `search/<id>/` directory, every directory
-   is listed exactly once, and group spellings are from the known set.
+   is listed exactly once, and group spellings are from the known set;
+9. the published catalog index still builds: `scripts/build_catalog_index.py`
+   flattens the tree into `dist/provider-registry-catalog.json` — the artifact
+   the publish workflow attaches to the rolling `catalog-latest` release, which
+   arona syncs and vendors as its offline fallback. "The tree parses" is not the
+   same claim as "the artifact is publishable": the flattening has its own
+   failure modes (a missing `[model]` table, a duplicate `(provider, id)`, a
+   provider id listed twice), and a tree that silently lost a whole
+   `models/<provider>/` directory would still validate clean while shipping a
+   catalog with several hundred models missing. So the gate also asserts the
+   row counts stay in the documented range — globally *and per provider*, which
+   is the granularity that actually catches a lost directory (a 106-row subtree
+   dropping out still clears a 1000-row global floor) — and that the digest is
+   stable and the numeric values are JSON-legal.
+
+   The gate has a second half aimed at the *endpoint* side, because
+   `providers[].base_hosts` is the consumer's first lookup key (a provider is
+   resolved from the configured endpoint URL before the model id is consulted):
+   every registered provider that ships model cards must keep at least one
+   `entrypoint/<provider>/*.toml`, and the number of entrypoints that declare a
+   fixed `api.base_url` must not drop. Operator-supplied endpoints
+   (`base_url = ""`, the `*_compatible` family) are exempt by design: they ship
+   no host and no model cards.
 
 `descriptors/` gets the full MDD schema check from `scripts/validate_descriptors.py`;
 here it only has to parse, so one missing validator cannot hide a broken file.
@@ -47,16 +69,30 @@ Exit codes: 0 clean / 1 violations (each printed as `path: reason`).
 
 from __future__ import annotations
 
+import math
+import re
 import sys
 import tomllib
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+# The index gate reuses the generator itself rather than shelling out to
+# `build_catalog_index.py --check`: one implementation means this gate cannot
+# drift from the artifact the publish workflow actually ships.
+import build_catalog_index as catalog_index  # noqa: E402
+
+
 REQUIRED_MODEL_KEYS = ("id", "name", "provider_id")
 REQUIRED_MODEL_INTS = ("context_window", "max_output_tokens")
 REQUIRED_PRICING_KEYS = ("input_per_million", "output_per_million")
+# Present-but-wrong-typed values are silently dropped by the builder, so the
+# validator must see EVERY key the artifact can publish.
+PUBLISHED_PRICING_KEYS = (*REQUIRED_PRICING_KEYS, "cached_per_million")
 REQUIRED_ENTRYPOINT_KEYS = ("id", "provider_id", "api", "name")
 
 SEARCH_TOP = "search"
+ENTRYPOINT_TOP = "entrypoint"
 SEARCH_PROTOCOL_SUFFIX = "_search_v1"
 # The closed protocol vocabulary, pinned to arona's `SEARCH_PROTOCOLS`
 # whitelist (scripts/test_validate_search.py keeps this set and the test's
@@ -106,6 +142,55 @@ SEARCH_REGISTRY_GROUPS = (
 )
 SEARCH_REGISTRY_ROW_STRINGS = ("id", "name", "description")
 SEARCH_REGISTRY_ROW_BOOLS = ("is_official", "requires_key", "verified")
+
+# (9) Floor for the published index. The catalog is a data repository: the
+# failure that matters is not a typo but a whole subtree going missing (a bad
+# merge dropping a provider directory), which every other check here would call
+# clean — the artifact would just quietly ship fewer models. The numbers are the
+# documented order of magnitude (1100+ rows, 20+ providers), not a tight bound.
+MIN_INDEX_MODELS = 1000
+MIN_INDEX_PROVIDERS = 20
+DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+
+# (9) Per-provider row floors. This is the granularity that catches real data
+# loss: dropping a whole `models/<provider>/` directory leaves every remaining
+# file valid, so the structural checks stay clean and the global floor above only
+# notices when the lost subtree is large (deleting `models/silicon/` = 106 rows
+# still cleared a 1000-row floor). Rows are only ever ADDED by the sync, so these
+# numbers do not need maintenance for growth; when a provider legitimately
+# shrinks, lower its number in the same PR — that deliberate edit is the point.
+# (9) Endpoint-side floors. `base_hosts` is the consumer's first lookup key, so
+# `entrypoint/` losing a subtree damages resolution exactly like `models/` losing
+# one — and no other check in this file looks at that tree's completeness.
+# Counted over entrypoints that declare a fixed `api.base_url`; operator-supplied
+# endpoints (`base_url = ""`, no host by design) are exempt. Entrypoints may be
+# ADDED freely; a deliberate removal lowers this number in the same PR.
+MIN_ENTRYPOINT_FILES = 59
+
+MIN_ROWS_PER_PROVIDER = {
+    "anthropic": 52,
+    "cohere": 19,
+    "deepseek": 20,
+    "fireworks": 38,
+    "google": 32,
+    "meshy": 1,
+    "meta": 12,
+    "mimo": 1,
+    "minimax": 12,
+    "mistral": 60,
+    "moonshot": 9,
+    "openai": 91,
+    "openrouter": 425,
+    "qwen": 131,
+    "runway": 1,
+    "silicon": 106,
+    "stability": 2,
+    "stepfun": 8,
+    "together": 42,
+    "tripo": 1,
+    "xai": 25,
+    "zhipu_glm": 21,
+}
 
 
 def _load(path: Path, problems: list[str]) -> dict | None:
@@ -374,14 +459,66 @@ def validate(root: Path) -> list[str]:
         for key in REQUIRED_MODEL_INTS:
             if not isinstance(model.get(key), int) or isinstance(model.get(key), bool):
                 problems.append(f"{path}: [model].{key} must be an integer")
+            elif model[key] < 0:
+                problems.append(f"{path}: [model].{key} is {model[key]!r} — a limit cannot be negative")
+            elif model[key] >= catalog_index.MAX_PLAIN_INT:
+                problems.append(
+                    f"{path}: [model].{key} is {model[key]!r} — above 2**53, which JSON consumers "
+                    "cannot represent (JavaScript loses precision, i64 readers reject the document)"
+                )
+        tags = model.get("tags")
+        if tags is not None and (
+            not isinstance(tags, list) or any(not isinstance(t, str) for t in tags)
+        ):
+            problems.append(
+                f"{path}: [model].tags must be an array of strings (the artifact derives `kind` from it)"
+            )
+        category = model.get("category")
+        if category is not None and not isinstance(category, dict):
+            problems.append(f"{path}: [model.category] must be a table")
+        elif isinstance(category, dict) and "generation" in category and not isinstance(
+            category["generation"], str
+        ):
+            problems.append(f"{path}: [model.category].generation must be a string")
+        for key in ("supports_vision", "supports_reasoning"):
+            # The artifact always publishes these as booleans; a string/number would
+            # be silently downgraded to `false`, hiding the capability from consumers.
+            if key in model and not isinstance(model[key], bool):
+                problems.append(
+                    f"{path}: [model].{key} must be a boolean (a non-boolean value would be published "
+                    "as false and silently drop the capability)"
+                )
         pricing = model.get("pricing")
         if pricing is not None:
             if not isinstance(pricing, dict):
                 problems.append(f"{path}: [model.pricing] must be a table")
             else:
-                for key in REQUIRED_PRICING_KEYS:
-                    if pricing.get(key) is not None and not isinstance(pricing[key], (int, float)):
+                for key in PUBLISHED_PRICING_KEYS:
+                    if pricing.get(key) is None:
+                        continue
+                    if isinstance(pricing[key], bool) or not isinstance(pricing[key], (int, float)):
                         problems.append(f"{path}: [model.pricing].{key} must be a number")
+                # TOML accepts `nan` / `inf` (and prices small enough that Python
+                # spells them `1e-05`); the published catalog is strict JSON whose
+                # digest every consumer recomputes, so one such price rejects the
+                # whole document. Check 9 refuses them too — two independent layers.
+                for key, value in pricing.items():
+                    if isinstance(value, bool) or not isinstance(value, (int, float)):
+                        continue
+                    if value < 0:
+                        problems.append(
+                            f"{path}: [model.pricing].{key} is {value!r} — a price cannot be negative "
+                            "(the artifact would publish the sign verbatim)"
+                        )
+                    elif isinstance(value, int) and value >= catalog_index.MAX_PLAIN_INT:
+                        problems.append(
+                            f"{path}: [model.pricing].{key} is {value!r} — above 2**53, which JSON "
+                            "consumers cannot represent"
+                        )
+                    elif isinstance(value, float):
+                        reason = float_json_problem(value)
+                        if reason is not None:
+                            problems.append(f"{path}: [model.pricing].{key} {value!r} {reason}")
         provider = _provider_dir(path, root, "models")
         declared = model.get("provider_id")
         if provider is not None and declared is not None and declared != provider:
@@ -425,6 +562,20 @@ def validate(root: Path) -> list[str]:
                 # Custom/operator endpoints are declared blank on purpose; a
                 # concrete provider with no base_url is a defect.
                 problems.append(f"{path}: [entrypoint.api].base_url is blank for a concrete provider")
+            elif base_url.strip() and not (provider or "").endswith("_compatible"):
+                # A string that is not a URL (e.g. `api.example.com/v1`) parses to
+                # no hostname, so the published providers[].base_hosts would lose
+                # the provider's only lookup key while this validator stayed green.
+                try:
+                    host = catalog_index.base_host(base_url)
+                except catalog_index.CatalogIndexError:
+                    host = None
+                if host is None:
+                    problems.append(
+                        f"{path}: [entrypoint.api].base_url {base_url!r} has no parseable host — "
+                        "write a full URL such as \"https://api.example.com/v1\"; a scheme-less "
+                        "string silently empties providers[].base_hosts in the published catalog"
+                    )
         elif api is not None:
             problems.append(f"{path}: [entrypoint.api] must be a table")
         name = entry.get("name")
@@ -498,6 +649,173 @@ def validate(root: Path) -> list[str]:
     return problems
 
 
+def float_json_problem(value: float) -> str | None:
+    """Why this float cannot be spelled identically by every JSON serializer."""
+    if not math.isfinite(value):
+        return "is not a finite number (TOML accepts nan/inf, the published catalog is strict JSON)"
+    magnitude = abs(value)
+    if 0 < magnitude < catalog_index.MIN_PLAIN_FLOAT or magnitude >= catalog_index.MAX_PLAIN_FLOAT:
+        return (
+            "is outside the range every JSON serializer spells the same way "
+            f"(a non-zero float must be within [{catalog_index.MIN_PLAIN_FLOAT:g}, "
+            f"{catalog_index.MAX_PLAIN_FLOAT:g}]); Python writes it in exponent form, other "
+            "serializers do not, and a consumer recomputing the digest would reject the document"
+        )
+    return None
+
+
+def _entrypoint_census(root: Path) -> dict[str, dict[str, int]]:
+    """`entrypoint/<provider>/*.toml` -> {provider: {files, fixed_host_files}}."""
+    census: dict[str, dict[str, int]] = {}
+    top = root / ENTRYPOINT_TOP
+    if not top.is_dir():
+        return census
+    for path in sorted(top.rglob("*.toml")):
+        parts = path.relative_to(top).parts
+        if len(parts) < 2:
+            continue
+        entry = None
+        try:
+            parsed = tomllib.loads(path.read_text(encoding="utf-8"))
+        except (tomllib.TOMLDecodeError, UnicodeDecodeError, OSError):
+            # The structural pass already reports an unparseable file.
+            continue
+        if isinstance(parsed.get("entrypoint"), dict):
+            entry = parsed["entrypoint"]
+        api = entry.get("api") if entry else None
+        base_url = api.get("base_url") if isinstance(api, dict) else None
+        row = census.setdefault(parts[0], {"files": 0, "fixed_host_files": 0})
+        row["files"] += 1
+        # A base_url that does not parse to a hostname contributes no `base_hosts`
+        # entry to the artifact, so it must not count towards the fixed-host floor
+        # either — that was a hole: rewriting `https://api.x/v1` to `api.x/v1`
+        # emptied the provider's hosts while the floor stayed satisfied.
+        try:
+            if catalog_index.base_host(base_url) is not None:
+                row["fixed_host_files"] += 1
+        except catalog_index.CatalogIndexError:
+            # Reported by the structural pass; counting it here would hide the loss.
+            pass
+    return census
+
+
+def entrypoint_coverage_problems(
+    registered_model_providers: set[str], census: dict[str, dict[str, int]]
+) -> list[str]:
+    """A registered provider with model cards must keep an entrypoint directory.
+
+    Models-only providers (media groups that this registry lists only as model
+    cards) are out of scope: `registry.toml` is what makes a provider selectable
+    in a setup UI, and only then does it need an endpoint to talk to.
+    """
+    problems: list[str] = []
+    for provider in sorted(registered_model_providers):
+        if census.get(provider, {}).get("files", 0) < 1:
+            problems.append(
+                f"catalog index: provider {provider!r} is registered and ships model cards but has no "
+                f"{ENTRYPOINT_TOP}/{provider}/*.toml — its base_hosts would be empty, and the consumer "
+                "resolves a provider by endpoint host before it looks at the model id "
+                "(did the directory go missing?)"
+            )
+    return problems
+
+
+def entrypoint_count_problems(
+    census: dict[str, dict[str, int]], floor: int = MIN_ENTRYPOINT_FILES
+) -> list[str]:
+    """Guard partial loss inside a provider (coverage cannot see one file going)."""
+    total = sum(row["fixed_host_files"] for row in census.values())
+    if total >= floor:
+        return []
+    return [
+        f"catalog index: {total} entrypoint file(s) declaring a fixed api.base_url < {floor} — "
+        "endpoint hosts would silently disappear from the artifact (operator endpoints with "
+        'base_url = "" are exempt); entrypoints may be added freely, a deliberate removal lowers '
+        "the floor in scripts/validate_catalog.py"
+    ]
+
+
+def entrypoint_problems(root: Path, floor: int = MIN_ENTRYPOINT_FILES) -> list[str]:
+    """Both endpoint-side rules over one tree (`floor` is injectable for fixtures)."""
+    census = _entrypoint_census(root)
+    try:
+        registry = tomllib.loads((root / "registry.toml").read_text(encoding="utf-8"))
+        registered = set(catalog_index.registered_providers(registry)[0])
+    except (OSError, tomllib.TOMLDecodeError, catalog_index.CatalogIndexError) as exc:
+        return [f"catalog index: cannot read registry.toml for the endpoint check ({exc})"]
+    models_root = root / "models"
+    model_providers = (
+        {path.name for path in models_root.iterdir() if path.is_dir() and not path.name.startswith(".")}
+        if models_root.is_dir()
+        else set()
+    )
+    return entrypoint_coverage_problems(registered & model_providers, census) + entrypoint_count_problems(
+        census, floor
+    )
+
+
+def provider_floor_problems(row_counts: dict[str, int]) -> list[str]:
+    """(9): per-provider row floors, applied to the rows the artifact carries.
+
+    Extracted from `check_index()` so the floor logic can be pinned with a dict
+    instead of a 1000-file tree (see `scripts/test_build_catalog_index.py`).
+    """
+    problems: list[str] = []
+    for provider, floor in sorted(MIN_ROWS_PER_PROVIDER.items()):
+        rows = row_counts.get(provider, 0)
+        if rows >= floor:
+            continue
+        hint = f"models/{provider}/ is gone" if rows == 0 else "rows went missing"
+        problems.append(
+            f"catalog index: provider {provider!r} carries {rows} model row(s) < {floor} ({hint}); "
+            "rows may be added freely — a deliberate shrink lowers the floor in scripts/validate_catalog.py"
+        )
+    return problems
+
+
+def check_index(root: Path) -> tuple[list[str], dict]:
+    """(9): the publishable catalog index still builds, stays whole, stays stable.
+
+    Kept out of `validate()` on purpose: `validate()` is also called on tiny
+    fixtures (see `scripts/test_validate_search.py`), where a 1000-row floor is
+    meaningless. Only the real tree is held to the artifact contract.
+
+    Returns the violations plus the summary the clean message prints (empty dict
+    when the index cannot be built at all).
+    """
+    try:
+        document, stats = catalog_index.build(root)
+    except catalog_index.CatalogIndexError as exc:
+        return [f"catalog index: cannot be generated ({exc})"], {}
+
+    problems: list[str] = []
+    if stats["models"] < MIN_INDEX_MODELS:
+        problems.append(
+            f"catalog index: {stats['models']} model row(s) < {MIN_INDEX_MODELS} — the published artifact "
+            "would ship a shrunken catalog (did a models/<provider>/ directory go missing?)"
+        )
+    if stats["providers"] < MIN_INDEX_PROVIDERS:
+        problems.append(
+            f"catalog index: {stats['providers']} provider row(s) < {MIN_INDEX_PROVIDERS} — the published "
+            "artifact would drop providers that consumers resolve models and endpoint hosts against"
+        )
+    row_counts: dict[str, int] = {}
+    for row in document["models"]:
+        row_counts[row["provider"]] = row_counts.get(row["provider"], 0) + 1
+    problems.extend(provider_floor_problems(row_counts))
+    if not DIGEST_PATTERN.match(document["digest"]):
+        problems.append(f"catalog index: digest {document['digest']!r} is not sha256:<64 hex>")
+    else:
+        rebuilt, _ = catalog_index.build(root)
+        if rebuilt["digest"] != document["digest"]:
+            # The digest is the consumer's staleness check: it must not depend on
+            # run order, timestamps or dict iteration.
+            problems.append("catalog index: digest is not stable across two builds of the same tree")
+
+    summary = {"models": stats["models"], "providers": stats["providers"], "digest": document["digest"]}
+    return problems, summary
+
+
 def main(argv: list[str]) -> int:
     root = Path(argv[1]).resolve() if len(argv) > 1 else Path(__file__).resolve().parent.parent
     if (
@@ -509,6 +827,13 @@ def main(argv: list[str]) -> int:
         print(f"validate-catalog: {root} does not look like the registry root", file=sys.stderr)
         return 2
     problems = validate(root)
+    index_summary: dict = {}
+    if not problems:
+        # The structural pass owns the data defects; running the index gate on a
+        # tree it already rejects only adds noise (and can abort mid-violation).
+        index_problems, index_summary = check_index(root)
+        problems.extend(index_problems)
+        problems.extend(entrypoint_problems(root))
     if problems:
         for line in problems:
             print(f"validate-catalog: {line}", file=sys.stderr)
@@ -519,7 +844,8 @@ def main(argv: list[str]) -> int:
     searches = len(list((root / SEARCH_TOP).rglob("*.toml")))
     print(
         f"validate-catalog: clean ({models} model file(s), {entrypoints} entrypoint file(s), "
-        f"{searches} search file(s))"
+        f"{searches} search file(s); index {index_summary['models']} row(s) / "
+        f"{index_summary['providers']} provider(s), digest {index_summary['digest']})"
     )
     return 0
 

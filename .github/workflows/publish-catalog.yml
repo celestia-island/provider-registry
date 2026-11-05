@@ -1,0 +1,271 @@
+name: Publish Catalog
+
+# Publishes the machine-readable catalog index that arona syncs at runtime.
+#
+# Producer -> consumer chain (this file is the delivery half of the shared
+# pricing contract; what a consumer may rely on is the asset name, the JSON
+# `schema`, `digest` and the field set the generator emits):
+#
+#   1. `scripts/build_catalog_index.py` flattens `models/` + `entrypoint/` +
+#      `registry.toml` into `dist/provider-registry-catalog.json` (gitignored,
+#      rebuilt from the tree on every run — the TOML files stay the only source);
+#   2. the artifact is uploaded as the asset `provider-registry-catalog.json` of
+#      the rolling release tag `catalog-latest` (same name, `--clobber`, so the
+#      asset is replaced in place and there is exactly one jump URL);
+#   3. `gateway.celestia.world/downloads/provider-registry/latest` 302s to that
+#      asset (registered gateway-side as artifact `provider-registry`, channel
+#      `latest` — an ops action, not a code change in this repository);
+#   4. the arona server GETs that URL (overridable via
+#      `system_config.pricing.registry.url`), validates `schema`/`digest`, stores
+#      it as its pricing snapshot, and falls back to the copy compiled into its
+#      build when the network or the gateway is gone. That copy is produced by
+#      arona's `scripts/gen_registry_catalog.py`, which imports this repository's
+#      `scripts/build_catalog_index.py` and calls `build()` — same generator, same
+#      digest, so the offline fallback cannot drift from the published asset.
+#
+# Two things here are therefore public contract, not implementation detail: the
+# asset name `provider-registry-catalog.json` and the JSON `schema` field. Never
+# rename or delete the `catalog-latest` release (the gateway URL resolves through
+# it), and never publish a second asset name beside it — bump `schema` in the
+# generator instead, when a change is not ignorable by an older consumer.
+#
+# Self-hosted because the org keeps CI compute on the farm (AGENTS [[ci]]). Three
+# runner facts drive the steps below:
+#   * `actions/setup-python` is NOT used: it cannot provision any version on the
+#     org's Debian 12 runners (`no such manifest entry`), which is why every
+#     self-hosted python job in the org runs the system `python3` instead. The
+#     generator is standard-library-only (`tomllib`, 3.11+), and the preflight
+#     step below proves the interpreter is good enough before anything runs.
+#   * there is no `pip install` step on purpose: nothing in this job needs a
+#     third-party wheel (the `toml` package is only used by the writer-side
+#     `scripts/update_models.py` sync, which this job does not run). Keeping the
+#     publish path free of package-index access means a flaky or 403 mirror
+#     cannot make the shipped catalog stale.
+#   * `gh` is preinstalled on the farm and authenticates with the repository's
+#     own `GITHUB_TOKEN`. If it is ever missing the job FAILS instead of
+#     skipping the upload: a green run that published nothing is the worst
+#     failure mode here, because arona would keep serving the previous catalog
+#     and nothing would say so.
+#
+# One in-flight run at a time (ci-ops 8.3.3), but NOT cancel-in-progress: a run
+# cancelled between `gh release create` and `gh release upload` would leave the
+# rolling asset describing an older commit while the run reports cancelled.
+
+concurrency:
+  group: publish-catalog
+  cancel-in-progress: false
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        # The first real run of this workflow happens on master, where a mistake
+        # is already published. This lets an operator build and check the whole
+        # artifact on a branch first, stopping before anything touches the release.
+        description: "Build and verify the artifact, but leave the catalog-latest release untouched"
+        type: boolean
+        default: false
+
+permissions:
+  # `contents: write` is what creating/updating the rolling release and its asset
+  # requires. Nothing else is granted (no checks, packages or pull requests).
+  contents: write
+
+jobs:
+  publish:
+    # The org's canonical fork guard, kept although no trigger here is a
+    # `pull_request`: if one is ever added, it must not run unguarded on the
+    # shared farm (celestia-devtools workflow_audit's fork-guard rule).
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, linux, x64, local]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+        env:
+          # The runner rewrites github.com/celestia-island/* to a local bare
+          # mirror; keep this checkout on the real remote (ci-ops 8.2).
+          GIT_CONFIG_COUNT: "0"
+
+      - name: Preflight the runner
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 --version
+          # The generator reads TOML with the standard library; 3.10 and older
+          # ship no `tomllib`, and failing here names the runner, not the data.
+          python3 -c 'import tomllib'
+          if ! command -v gh >/dev/null 2>&1; then
+            echo "::error::gh is not installed on this runner, so the catalog-latest release cannot be updated. Install the GitHub CLI on the farm — this job must not skip the upload silently, or the published catalog goes stale with a green run."
+            exit 1
+          fi
+          gh --version
+          # `contents: write` failures surface as a 403 on the first release call;
+          # proving the token works here names the problem instead.
+          gh auth status
+
+      # Data gate first: never publish an artifact built from a tree that fails
+      # its own contract. `validate_catalog.py` ends with the index check
+      # (generatable, >=1000 model rows, >=20 providers, stable digest), and the
+      # new suite pins the artifact shape the consumer depends on.
+      - name: Gate the data and build the index
+        run: |
+          set -euo pipefail
+          python3 scripts/validate_catalog.py
+          python3 scripts/test_build_catalog_index.py
+          python3 scripts/build_catalog_index.py
+
+      - name: Collect the artifact facts
+        id: facts
+        run: |
+          set -euo pipefail
+          FILE=dist/provider-registry-catalog.json
+          test -s "$FILE"
+          # One tiny stdlib lookup per fact. The artifact is well under a megabyte,
+          # and short `python3 -c` lines beat a heredoc here: a heredoc terminator
+          # and YAML block indentation do not mix legibly in a workflow.
+          read_schema() { python3 -c 'import json,sys;print(json.load(open(sys.argv[1],encoding="utf-8"))["schema"])' "$1"; }
+          read_digest() { python3 -c 'import json,sys;print(json.load(open(sys.argv[1],encoding="utf-8"))["digest"])' "$1"; }
+          read_time() { python3 -c 'import json,sys;print(json.load(open(sys.argv[1],encoding="utf-8"))["generated_at"])' "$1"; }
+          read_count() { python3 -c 'import json,sys;print(len(json.load(open(sys.argv[1],encoding="utf-8"))[sys.argv[2]]))' "$1" "$2"; }
+
+          SCHEMA="$(read_schema "$FILE")"
+          DIGEST="$(read_digest "$FILE")"
+          GENERATED_AT="$(read_time "$FILE")"
+          MODELS="$(read_count "$FILE" models)"
+          PROVIDERS="$(read_count "$FILE" providers)"
+
+          # A release asset is a published contract: refuse to upload something an
+          # older consumer would reject, and name the offending field.
+          if [ "$SCHEMA" != "1" ]; then
+            echo "::error::the built artifact declares schema ${SCHEMA}, but the release line publishes schema 1 (bump the contract before the generator)"
+            exit 1
+          fi
+          if ! printf '%s' "$DIGEST" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+            echo "::error::the built artifact carries a malformed digest: ${DIGEST}"
+            exit 1
+          fi
+          if [ "$MODELS" -lt 1 ] || [ "$PROVIDERS" -lt 1 ]; then
+            echo "::error::the built artifact is empty (${MODELS} model row(s), ${PROVIDERS} provider(s)) — refusing to publish over a good catalog"
+            exit 1
+          fi
+
+          {
+            echo "schema=${SCHEMA}"
+            echo "digest=${DIGEST}"
+            echo "generated_at=${GENERATED_AT}"
+            echo "models=${MODELS}"
+            echo "providers=${PROVIDERS}"
+            echo "file_size=$(stat -c%s "$FILE")"
+            echo "file_sha256=$(sha256sum "$FILE" | awk '{print $1}')"
+          } >> "$GITHUB_OUTPUT"
+          echo "artifact: schema ${SCHEMA}, ${MODELS} model row(s), ${PROVIDERS} provider(s), digest ${DIGEST}"
+
+      - name: Create or update the rolling catalog-latest release
+        # Two independent gates before anything becomes the published catalog:
+        #   * `github.ref == 'refs/heads/master'` — a `workflow_dispatch` run on a
+        #     feature branch can never publish unmerged data to `catalog-latest`
+        #     (that tag is arona's default sync source). On a branch, a dispatch
+        #     is therefore always an implicit dry run.
+        #   * `inputs.dry_run != true` — the explicit dry run on master.
+        if: github.ref == 'refs/heads/master' && (github.event_name != 'workflow_dispatch' || inputs.dry_run != true)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG=catalog-latest
+          TITLE="Provider Registry Catalog (rolling)"
+          FILE=dist/provider-registry-catalog.json
+          NOTES="$(mktemp)"
+          trap 'rm -f "$NOTES"' EXIT
+          {
+            echo "Machine-readable provider/model catalog, rebuilt from the TOML tree on every push to master."
+            echo
+            echo "| field | value |"
+            echo "| --- | --- |"
+            echo "| generated_at | \`${{ steps.facts.outputs.generated_at }}\` |"
+            echo "| digest | \`${{ steps.facts.outputs.digest }}\` |"
+            echo "| models | ${{ steps.facts.outputs.models }} |"
+            echo "| providers | ${{ steps.facts.outputs.providers }} |"
+            echo "| artifact sha256 | \`${{ steps.facts.outputs.file_sha256 }}\` |"
+            echo "| source commit | \`${{ github.sha }}\` |"
+            echo "| workflow run | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |"
+            echo
+            echo "\`digest\` covers \`providers\` + \`models\` only; the artifact sha256 above also covers the metadata fields."
+            echo
+            echo "Consumers resolve this through \`https://gateway.celestia.world/downloads/provider-registry/latest\`"
+            echo "(gateway 302 -> this asset). Do not delete or rename this release or its asset: the URL is a"
+            echo "published contract, and a missing asset silently forces every deployment back to its bundled snapshot."
+          } > "$NOTES"
+
+          # Rolling release: create it once, then re-point its notes at each build
+          # and overwrite the asset in place. `--target "$GITHUB_SHA"` pins the tag
+          # to the commit whose tree was actually built (master may move during
+          # this run); when the release exists the tag is left where it is — the
+          # asset, not the tag, is what consumers download.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$TITLE" --notes-file "$NOTES"
+          else
+            gh release create "$TAG" --title "$TITLE" --notes-file "$NOTES" --target "$GITHUB_SHA"
+          fi
+          # `--clobber` replaces the asset in place. For the moment between the
+          # delete and the re-upload the asset URL 404s; that window is accepted
+          # (a consumer that syncs inside it falls back to its bundled snapshot,
+          # which is the documented behaviour for any sync failure) and cannot be
+          # closed from this side: GitHub offers no atomic asset replace.
+          gh release upload "$TAG" "$FILE" --clobber
+
+      # An upload that silently replaced nothing leaves the old asset in place and
+      # would look identical to a success. Compare the *content* the release now
+      # serves against what this build produced: the release API exposes a
+      # server-computed sha256 digest for uploaded assets, which is a true
+      # replacement check (a byte count would accept a same-size old asset).
+      - name: Verify the release serves this build
+        # Same gates as the publish step: verifying a release this run did not
+        # (and must not) touch would compare the artifact against someone else's.
+        if: github.ref == 'refs/heads/master' && (github.event_name != 'workflow_dispatch' || inputs.dry_run != true)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          read -r ASSET_SIZE ASSET_DIGEST <<< "$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/catalog-latest" \
+            --jq '.assets[] | select(.name == "provider-registry-catalog.json") | "\(.size) \(.digest // "")"')"
+          if [ -z "${ASSET_SIZE:-}" ]; then
+            echo "::error::catalog-latest has no provider-registry-catalog.json asset after the upload"
+            exit 1
+          fi
+          EXPECTED_SHA="${{ steps.facts.outputs.file_sha256 }}"
+          if [ -n "${ASSET_DIGEST:-}" ]; then
+            if [ "$ASSET_DIGEST" != "sha256:${EXPECTED_SHA}" ]; then
+              echo "::error::catalog-latest serves ${ASSET_DIGEST} but this build produced sha256:${EXPECTED_SHA} — the asset was not replaced"
+              exit 1
+            fi
+            echo "catalog-latest serves this build (sha256:${EXPECTED_SHA})"
+          else
+            # Older assets carry no server-side digest; a size check is weaker but
+            # still catches an untouched asset. Say so instead of implying parity.
+            echo "::warning::the release API exposes no digest for this asset; falling back to a byte-count check"
+            if [ "$ASSET_SIZE" != "${{ steps.facts.outputs.file_size }}" ]; then
+              echo "::error::catalog-latest serves ${ASSET_SIZE} bytes but this build produced ${{ steps.facts.outputs.file_size }} bytes — the asset was not replaced"
+              exit 1
+            fi
+            echo "catalog-latest size matches this build (${ASSET_SIZE} bytes)"
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          MODELS="${{ steps.facts.outputs.models }}"
+          PROVIDERS="${{ steps.facts.outputs.providers }}"
+          {
+            echo "### Catalog index"
+            echo
+            echo "- schema 1, ${MODELS:-?} model row(s), ${PROVIDERS:-?} provider(s)"
+            echo "- digest \`${{ steps.facts.outputs.digest }}\`"
+            echo "- generated_at \`${{ steps.facts.outputs.generated_at }}\`"
+            echo "- release: tag \`catalog-latest\`, asset \`provider-registry-catalog.json\` (untouched on a dispatched dry run)"
+          } >> "$GITHUB_STEP_SUMMARY"
