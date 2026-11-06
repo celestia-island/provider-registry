@@ -19,9 +19,6 @@ on:
   workflow_dispatch:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
-    types: [opened, reopened, ready_for_review, synchronize]
 
 permissions:
   contents: read
