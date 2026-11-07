@@ -1,0 +1,20 @@
+# accounts/fireworks/routers/kimi-k3-spot
+# Provider: fireworks
+
+[model]
+id = "accounts/fireworks/routers/kimi-k3-spot"
+name = "accounts/fireworks/routers/kimi-k3-spot"
+provider_id = "fireworks"
+
+context_window = 1048576
+max_output_tokens = 131072
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship", "vision", "reasoning"]
+
+[model.pricing]
+input_per_million = 2.1
+output_per_million = 10.5
+cached_per_million = 0.21

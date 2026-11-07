@@ -6,10 +6,6 @@ id = "deepseek-v4.1-flash"
 name = "DeepSeek V4.1 Flash"
 provider_id = "deepseek"
 
-# Direct-provider facts: 1M context and 384K (393216 token) output.
-# OpenRouter's aggregate alias advertises a different served completion
-# window; the curated direct-provider card intentionally keeps the vendor limit.
-
 context_window = 1048576
 max_output_tokens = 393216
 supports_vision = true

@@ -1,0 +1,20 @@
+# Ling 3.0 Tiny
+# Provider: openrouter
+
+[model]
+id = "inclusionai/ling-3.0-tiny"
+name = "Ling 3.0 Tiny"
+provider_id = "openrouter"
+
+context_window = 262144
+max_output_tokens = 250000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["reasoning"]
+
+[model.pricing]
+input_per_million = 0.015
+output_per_million = 0.045
+cached_per_million = 0.003
