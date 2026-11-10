@@ -344,7 +344,16 @@ def test_rewrite_roundtrip() -> None:
             + "'a\"b' = 1\n"
             + "'my.note' = \"hello\"\n"
             + "tricky = \"line one\\nline two\\u007f\"\n"
-            + "meta2 = { inner = { 'x\"y' = 1 } }\n",
+            + "meta2 = { inner = { 'x\"y' = 1 } }\n"
+            # A quoted table header and a known field carrying a raw newline
+            # (delta round: the known-field writer and the table header were
+            # separate hand-rolled escape paths from the value writer).
+            + "['prov\"two']\n"
+            + 'source = "official"\n'
+            + 'source_url = "https://example.invalid/provtwo.svg"\n'
+            + 'mode = "mono"\n'
+            + 'license = """MIT\nsee NOTICE"""\n'
+            + '"a\\n" = 1\n',
             encoding="utf-8",
         )
         fl.rewrite_manifest(root / "logos", fl.load_manifest(root / "logos"))
@@ -358,6 +367,10 @@ def test_rewrite_roundtrip() -> None:
         assert "my" not in reparsed["provone"], "dotted key must stay quoted, not reshape"
         assert reparsed["provone"]["tricky"] == "line one\nline two\x7f"
         assert reparsed["provone"]["meta2"] == {"inner": {'x"y': 1}}
+        # The quoted TABLE HEADER survives as one key, and the known field's
+        # embedded newline serializes as an escape, not a broken line.
+        assert reparsed.get('prov"two', {}).get("license") == "MIT\nsee NOTICE"
+        assert reparsed.get('prov"two', {}).get("a\n") == 1
         # Idempotent.
         fl.rewrite_manifest(root / "logos", fl.load_manifest(root / "logos"))
         assert (root / "logos" / "manifest.toml").read_text(encoding="utf-8") == text

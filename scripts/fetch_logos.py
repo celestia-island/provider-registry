@@ -458,6 +458,8 @@ DEFAULT_MANIFEST_HEADER = [
     "# the consumer's letter fallback (see validate_logos.py's allowlist).",
 ]
 
+# bare-safe by full match (`match` + `$` still matches before a trailing
+# newline: the key "a\n" would pass and be written bare, splitting the line).
 _BARE_KEY = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
@@ -479,7 +481,7 @@ def _toml_key(key: str) -> str:
     Quoting is not cosmetic — a bare `my.note` parses as the DOTTED key
     my.note (silently reshaping a `my.note` annotation into a `my` table),
     and an embedded quote produces illegal bytes."""
-    if _BARE_KEY.match(key):
+    if _BARE_KEY.fullmatch(key):
         return key
     return _toml_string(key)
 
@@ -545,7 +547,9 @@ def rewrite_manifest(logos_dir: Path, entries: dict[str, dict]) -> None:
     lines.append("")
     problems: list[str] = []
     for provider, entry in sorted(entries.items()):
-        lines.append(f"[{provider}]")
+        # Table headers are keys too: a quoted provider id (or one carrying
+        # control characters) must come out as ['prov"two'], not [prov"two].
+        lines.append(f"[{_toml_key(provider)}]")
         emitted = set()
         for field in (
             "source", "source_url", "mode", "pre_clean", "license",
@@ -554,8 +558,10 @@ def rewrite_manifest(logos_dir: Path, entries: dict[str, dict]) -> None:
             value = entry.get(field)
             if value is None or value == "":
                 continue
-            escaped = str(value).replace("\\", "\\\\").replace('"', '\\"')
-            lines.append(f'{field} = "{escaped}"')
+            # The shared emitter, not a hand-rolled escape: a license note
+            # carrying a newline (or any control character) must serialize
+            # as a legal single-line basic string, same as unknown fields.
+            lines.append(f"{_toml_key(field)} = {_toml_string(str(value))}")
             emitted.add(field)
         # Fields this tool does not know (a reviewer's `note =`, future
         # metadata) survive the rewrite AFTER the known block — dropping
