@@ -63,6 +63,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import re
 import sys
 import tomllib
@@ -174,7 +175,7 @@ def inline_css_classes(data: bytes) -> bytes:
     style_texts = [
         (el.text or "") + "".join(child.text or "" for child in el)
         for el in root.iter()
-        if _ns_local(el.tag) == ("svg", "style") or _ns_local(el.tag)[1] == "style"
+        if _ns_local(el.tag)[1] == "style"
     ]
     has_class_attrs = any("class" in el.attrib for el in root.iter())
     if not style_texts and not has_class_attrs:
@@ -349,7 +350,8 @@ def load_manifest(logos_dir: Path) -> dict[str, dict]:
     entries: dict[str, dict] = {}
     for key, value in data.items():
         if not isinstance(value, dict):
-            continue  # future non-provider sections
+            continue  # stray scalars are not provider sections; a future
+            # dict-typed SECTION must still satisfy the per-entry checks below
         for field in ("source", "source_url", "mode", "license"):
             if not isinstance(value.get(field), str) or not value[field]:
                 raise LogoError(f"[{key}] is missing {field}")
@@ -389,12 +391,16 @@ def download(url: str, budget: dict[str, int]) -> bytes:
             with urllib.request.urlopen(request, timeout=30) as response:
                 payload = response.read(MAX_SVG_BYTES + 1)
             if len(payload) > MAX_SVG_BYTES:
-                raise LogoError(f"download exceeds {MAX_SVG_BYTES} bytes")
+                # A data-sized refusal is not a transport failure: retrying
+                # an oversized source three times only slows the failure.
+                raise
             budget["total"] -= len(payload)
             if budget["total"] < 0:
                 raise LogoError("total download budget exhausted — refusing to continue")
             return payload
-        except Exception as exc:  # noqa: BLE001 — retry any transport failure
+        except LogoError:
+            raise  # policy refusals are final; only transport errors retry
+        except Exception as exc:  # noqa: BLE001 — retry transport failures
             last_error = exc
             if attempt < MAX_RETRIES:
                 continue
@@ -438,20 +444,61 @@ def cmd_fetch(logos_dir: Path, only: set[str] | None) -> int:
     return 0
 
 
+DEFAULT_MANIFEST_HEADER = [
+    "# Provider logo manifest — the hand-authored SOURCING decision per provider.",
+    "# `source`/`source_url`/`mode`/`pre_clean`/`license`/`brand_color` are hand-",
+    "# maintained; `sha256`/`fetched_at` are owned by scripts/fetch_logos.py (do",
+    "# not hand-edit).",
+    "#",
+    '# mode = "mono"   -> the SVG carries fill=currentColor, follows the theme text.',
+    '# mode = "brand"  -> original vendor fills kept (multi-color marks).',
+    "#",
+    "# A provider WITHOUT an entry here has no usable vector source yet and keeps",
+    "# the consumer's letter fallback (see validate_logos.py's allowlist).",
+]
+
+# Unknown manifest fields survive the rewrite in TOML-valid spelling: scalars
+# natively, lists/tables via JSON (valid TOML array / inline table for
+# str/num/bool members). Anything beyond that is dropped loudly rather than
+# written as Python repr (which would poison the next tomllib parse).
+def _toml_unknown(field: str, value: object, problems: list[str]) -> str | None:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return repr(value)
+    if isinstance(value, str):
+        escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+        return f'"{escaped}"'
+    try:
+        return json.dumps(value, ensure_ascii=False)
+    except (TypeError, ValueError) as exc:
+        problems.append(
+            f"[?] field {field!r} ({type(value).__name__}) is not TOML-expressible"
+            f" ({exc}) and was DROPPED from the rewrite"
+        )
+        return None
+
+
 def rewrite_manifest(logos_dir: Path, entries: dict[str, dict]) -> None:
-    """Rewrite manifest.toml in a stable field order (deterministic bytes)."""
-    lines = [
-        "# Provider logo manifest — the hand-authored SOURCING decision per provider.",
-        "# `source`/`source_url`/`mode`/`license`/`brand_color` are hand-maintained;",
-        "# `sha256`/`fetched_at` are owned by scripts/fetch_logos.py (do not hand-edit).",
-        "#",
-        '# mode = "mono"   -> the SVG carries fill=currentColor, follows the theme text.',
-        '# mode = "brand"  -> original vendor fills kept (multi-color marks).',
-        "#",
-        "# A provider WITHOUT an entry here has no usable vector source yet and keeps",
-        "# the consumer's letter fallback (see validate_logos.py's allowlist).",
-        "",
-    ]
+    """Rewrite manifest.toml in a stable field order (deterministic bytes).
+
+    The leading hand-written comment block is preserved across the rewrite —
+    the seed date, the pinned simple-icons version and the ZIP-reseed notes
+    live there, and a hash refresh must not erase them. (A fresh tree with no
+    comment block gets the tool's default header.)"""
+    existing = logos_dir / MANIFEST_NAME
+    header: list[str] | None = None
+    if existing.is_file():
+        candidate: list[str] = []
+        for line in existing.read_text(encoding="utf-8").splitlines():
+            if line.startswith("["):
+                break
+            candidate.append(line)
+        if any(line.strip().startswith("#") for line in candidate):
+            header = candidate
+    lines = list(header if header is not None else DEFAULT_MANIFEST_HEADER)
+    lines.append("")
+    problems: list[str] = []
     for provider, entry in sorted(entries.items()):
         lines.append(f"[{provider}]")
         emitted = set()
@@ -469,14 +516,13 @@ def rewrite_manifest(logos_dir: Path, entries: dict[str, dict]) -> None:
         # metadata) survive the rewrite AFTER the known block — dropping
         # hand-written annotations on a hash refresh would be silent loss.
         for field in sorted(k for k in entry if k not in emitted):
-            value = entry[field]
-            if isinstance(value, str):
-                escaped = value.replace("\\", "\\\\").replace('"', '\\"')
-                lines.append(f'{field} = "{escaped}"')
-            else:
-                lines.append(f"{field} = {value!r}")
+            rendered = _toml_unknown(field, entry[field], problems)
+            if rendered is not None:
+                lines.append(f"{field} = {rendered}")
         lines.append("")
     (logos_dir / MANIFEST_NAME).write_text("\n".join(lines), encoding="utf-8")
+    for problem in problems:
+        print(f"[WARN] {problem}", file=sys.stderr)
 
 
 # ── checking (no network) ────────────────────────────────────────────────────
