@@ -334,6 +334,34 @@ def test_rewrite_roundtrip() -> None:
     # A table renders as an inline table (= syntax), not JSON colons.
     assert fl._toml_unknown("meta", {"x": 1, "y": "z"}, []) == '{x = 1, y = "z"}'
 
+    # Escaping corner cases (R3 round: legal-but-tricky TOML inputs must
+    # re-serialize to VALID bytes, never silently reshape): quoted keys,
+    # dotted keys, quoted nested keys, control characters in values.
+    with TmpTree(REGISTRY) as root:
+        sha = write_logo(root, "provone", SAMPLE_SVG)
+        (root / "logos" / "manifest.toml").write_text(
+            MANIFEST_ENTRY.format(sha=sha)
+            + "'a\"b' = 1\n"
+            + "'my.note' = \"hello\"\n"
+            + "tricky = \"line one\\nline two\\u007f\"\n"
+            + "meta2 = { inner = { 'x\"y' = 1 } }\n",
+            encoding="utf-8",
+        )
+        fl.rewrite_manifest(root / "logos", fl.load_manifest(root / "logos"))
+        text = (root / "logos" / "manifest.toml").read_text(encoding="utf-8")
+        # Re-parseable, and the KEY SHAPES survive: `a"b` stays one key,
+        # `my.note` stays ONE key (a bare rewrite would parse it as the
+        # dotted key my.note and silently reshape it into a `my` table).
+        reparsed = tomllib.loads(text)
+        assert reparsed["provone"].get('a"b') == 1
+        assert reparsed["provone"].get("my.note") == "hello"
+        assert "my" not in reparsed["provone"], "dotted key must stay quoted, not reshape"
+        assert reparsed["provone"]["tricky"] == "line one\nline two\x7f"
+        assert reparsed["provone"]["meta2"] == {"inner": {'x"y': 1}}
+        # Idempotent.
+        fl.rewrite_manifest(root / "logos", fl.load_manifest(root / "logos"))
+        assert (root / "logos" / "manifest.toml").read_text(encoding="utf-8") == text
+
 
 def test_download_policy_refusal_does_not_retry() -> None:
     # An oversized source is a POLICY refusal, not a transport failure: it

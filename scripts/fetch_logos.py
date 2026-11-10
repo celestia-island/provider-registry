@@ -461,6 +461,29 @@ DEFAULT_MANIFEST_HEADER = [
 _BARE_KEY = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
+def _toml_string(value: str) -> str:
+    """A TOML basic string that is VALID for ANY input: backslash, quote and
+    every control character (including newlines and DEL) escaped — a raw
+    newline inside a quoted single-line string is illegal TOML, and browsers
+    are not the only consumers that fold what XML preserves."""
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    escaped = "".join(
+        ch if ord(ch) >= 0x20 and ord(ch) != 0x7F else f"\\u{ord(ch):04X}"
+        for ch in escaped
+    )
+    return f'"{escaped}"'
+
+
+def _toml_key(key: str) -> str:
+    """A TOML key: bare when the spelling allows it, else a quoted string.
+    Quoting is not cosmetic — a bare `my.note` parses as the DOTTED key
+    my.note (silently reshaping a `my.note` annotation into a `my` table),
+    and an embedded quote produces illegal bytes."""
+    if _BARE_KEY.match(key):
+        return key
+    return _toml_string(key)
+
+
 def _toml_inline(field: str, value: object) -> str:
     """Render one unknown manifest value as a TOML literal.
 
@@ -473,13 +496,12 @@ def _toml_inline(field: str, value: object) -> str:
     if isinstance(value, (int, float)):
         return repr(value)
     if isinstance(value, str):
-        escaped = value.replace("\\", "\\\\").replace('"', '\\"')
-        return f'"{escaped}"'
+        return _toml_string(value)
     if isinstance(value, list):
         return "[" + ", ".join(_toml_inline(field, item) for item in value) + "]"
     if isinstance(value, dict):
         body = ", ".join(
-            (key if _BARE_KEY.match(key) else f'"{key}"') + " = " + _toml_inline(field, item)
+            _toml_key(key) + " = " + _toml_inline(field, item)
             for key, item in value.items()
         )
         return "{" + body + "}"
@@ -541,7 +563,11 @@ def rewrite_manifest(logos_dir: Path, entries: dict[str, dict]) -> None:
         for field in sorted(k for k in entry if k not in emitted):
             rendered = _toml_unknown(field, entry[field], problems)
             if rendered is not None:
-                lines.append(f"{field} = {rendered}")
+                # The KEY needs the same treatment as its value: a bare
+                # `my.note` parses as a dotted key (silently reshaping the
+                # annotation into a `my` table) and an embedded quote is
+                # illegal bytes — quote+escape unless bare-safe.
+                lines.append(f"{_toml_key(field)} = {rendered}")
         lines.append("")
     (logos_dir / MANIFEST_NAME).write_text("\n".join(lines), encoding="utf-8")
     for problem in problems:
