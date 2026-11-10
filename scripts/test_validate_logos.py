@@ -295,6 +295,82 @@ def test_mono_needs_brand_color() -> None:
         expect_fail("mono without brand_color", vl.validate(root), "mono mode should record brand_color")
 
 
+def test_rewrite_roundtrip() -> None:
+    # The rewrite owns the DERIVED manifest fields; the hand-written header
+    # and unknown fields must survive it in TOML-valid spelling, and two
+    # rewrites in a row must be byte-identical (no blank-line inflation).
+    import tomllib
+
+    with TmpTree(REGISTRY) as root:
+        sha = write_logo(root, "provone", SAMPLE_SVG)
+        (root / "logos" / "manifest.toml").write_text(
+            "# hand note 2026-01-01\n"
+            "# pinned simple-icons 16.37.0\n"
+            "\n"
+            + MANIFEST_ENTRY.format(sha=sha)
+            + 'note = "keep me"\nflag = true\ntags = ["a", "b"]\nmeta = { x = 1, y = "z" }\n',
+            encoding="utf-8",
+        )
+        fl.rewrite_manifest(root / "logos", fl.load_manifest(root / "logos"))
+        text = (root / "logos" / "manifest.toml").read_text(encoding="utf-8")
+        # Header preserved verbatim, trailing blanks normalized (no growth).
+        assert text.startswith("# hand note 2026-01-01\n# pinned simple-icons 16.37.0\n"), text[:200]
+        # Re-parseable: unknown fields round-trip with their values intact.
+        reparsed = tomllib.loads(text)
+        assert reparsed["provone"]["note"] == "keep me"
+        assert reparsed["provone"]["flag"] is True
+        assert reparsed["provone"]["tags"] == ["a", "b"]
+        assert reparsed["provone"]["meta"] == {"x": 1, "y": "z"}
+        assert "note = " in text and "'keep me'" not in text, "must be TOML-quoted, not Python repr"
+        # Idempotent: a second rewrite changes nothing.
+        fl.rewrite_manifest(root / "logos", fl.load_manifest(root / "logos"))
+        assert (root / "logos" / "manifest.toml").read_text(encoding="utf-8") == text
+
+    # A None anywhere in an unknown value has no TOML spelling: dropped with
+    # a loud warning, never written as `null` (which would poison tomllib).
+    problems: list[str] = []
+    assert fl._toml_unknown("meta", {"n": None}, problems) is None
+    assert problems and "DROPPED" in problems[0]
+    # A table renders as an inline table (= syntax), not JSON colons.
+    assert fl._toml_unknown("meta", {"x": 1, "y": "z"}, []) == '{x = 1, y = "z"}'
+
+
+def test_download_policy_refusal_does_not_retry() -> None:
+    # An oversized source is a POLICY refusal, not a transport failure: it
+    # must raise immediately (one attempt), not after MAX_RETRIES network
+    # round-trips with a RuntimeError masking the real reason.
+    import urllib.request
+
+    calls: list[int] = []
+
+    class FakeOversized:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self, limit: int) -> bytes:
+            return b"x" * limit
+
+    def fake_urlopen(request, timeout=None):
+        calls.append(1)
+        return FakeOversized()
+
+    original = fl.urllib.request.urlopen
+    fl.urllib.request.urlopen = fake_urlopen
+    try:
+        try:
+            fl.download("https://example.invalid/logo.svg", {"total": fl.MAX_TOTAL_BYTES})
+        except fl.LogoError as exc:
+            assert "exceeds" in str(exc), f"wrong refusal: {exc}"
+        else:
+            raise AssertionError("oversized download must fail with LogoError")
+    finally:
+        fl.urllib.request.urlopen = original
+    assert len(calls) == 1, f"policy refusal must not retry (attempted {len(calls)}x)"
+
+
 def main() -> int:
     test_normalization()
     test_real_tree_validates()
@@ -302,6 +378,8 @@ def main() -> int:
     test_provider_resolution_and_coverage()
     test_brand_prefixes_shape()
     test_mono_needs_brand_color()
+    test_rewrite_roundtrip()
+    test_download_policy_refusal_does_not_retry()
     print("test_validate_logos: all green")
     return 0
 

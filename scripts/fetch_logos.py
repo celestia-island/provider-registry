@@ -63,7 +63,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import json
 import re
 import sys
 import tomllib
@@ -391,9 +390,11 @@ def download(url: str, budget: dict[str, int]) -> bytes:
             with urllib.request.urlopen(request, timeout=30) as response:
                 payload = response.read(MAX_SVG_BYTES + 1)
             if len(payload) > MAX_SVG_BYTES:
-                # A data-sized refusal is not a transport failure: retrying
-                # an oversized source three times only slows the failure.
-                raise
+                # A data-sized refusal is not a transport failure: raise the
+                # policy error so the LogoError handler below re-raises it
+                # without consuming the retry budget (retrying an oversized
+                # source three times only slows the failure).
+                raise LogoError(f"download exceeds {MAX_SVG_BYTES} bytes")
             budget["total"] -= len(payload)
             if budget["total"] < 0:
                 raise LogoError("total download budget exhausted — refusing to continue")
@@ -457,11 +458,16 @@ DEFAULT_MANIFEST_HEADER = [
     "# the consumer's letter fallback (see validate_logos.py's allowlist).",
 ]
 
-# Unknown manifest fields survive the rewrite in TOML-valid spelling: scalars
-# natively, lists/tables via JSON (valid TOML array / inline table for
-# str/num/bool members). Anything beyond that is dropped loudly rather than
-# written as Python repr (which would poison the next tomllib parse).
-def _toml_unknown(field: str, value: object, problems: list[str]) -> str | None:
+_BARE_KEY = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
+def _toml_inline(field: str, value: object) -> str:
+    """Render one unknown manifest value as a TOML literal.
+
+    Scalars natively; arrays as TOML arrays; tables as TOML inline tables
+    (`{ key = value }` — JSON's colon syntax is NOT valid TOML and would
+    poison the next tomllib parse). `None` has no TOML spelling at all, so
+    anything carrying one is refused; the caller drops it loudly."""
     if isinstance(value, bool):
         return "true" if value else "false"
     if isinstance(value, (int, float)):
@@ -469,13 +475,25 @@ def _toml_unknown(field: str, value: object, problems: list[str]) -> str | None:
     if isinstance(value, str):
         escaped = value.replace("\\", "\\\\").replace('"', '\\"')
         return f'"{escaped}"'
-    try:
-        return json.dumps(value, ensure_ascii=False)
-    except (TypeError, ValueError) as exc:
-        problems.append(
-            f"[?] field {field!r} ({type(value).__name__}) is not TOML-expressible"
-            f" ({exc}) and was DROPPED from the rewrite"
+    if isinstance(value, list):
+        return "[" + ", ".join(_toml_inline(field, item) for item in value) + "]"
+    if isinstance(value, dict):
+        body = ", ".join(
+            (key if _BARE_KEY.match(key) else f'"{key}"') + " = " + _toml_inline(field, item)
+            for key, item in value.items()
         )
+        return "{" + body + "}"
+    raise LogoError(f"field {field!r}: {type(value).__name__} has no TOML spelling")
+
+
+def _toml_unknown(field: str, value: object, problems: list[str]) -> str | None:
+    """TOML spelling for an unknown field, or None (dropped, loudly) when the
+    value cannot be expressed — a `None` anywhere in a list/table, or a
+    non-JSON type. Silent loss on a hash refresh would hide the annotation."""
+    try:
+        return _toml_inline(field, value)
+    except LogoError as exc:
+        problems.append(f"[?] {exc} and was DROPPED from the rewrite")
         return None
 
 
@@ -495,6 +513,11 @@ def rewrite_manifest(logos_dir: Path, entries: dict[str, dict]) -> None:
                 break
             candidate.append(line)
         if any(line.strip().startswith("#") for line in candidate):
+            # Trailing blanks are normalized away — re-appending exactly one
+            # separator below keeps repeated rewrites byte-identical instead
+            # of growing a blank line per refresh.
+            while candidate and not candidate[-1].strip():
+                candidate.pop()
             header = candidate
     lines = list(header if header is not None else DEFAULT_MANIFEST_HEADER)
     lines.append("")
