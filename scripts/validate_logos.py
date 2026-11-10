@@ -109,7 +109,6 @@ def dir_providers(root: Path) -> set[str]:
                 if p.is_dir() and not p.name.startswith(".") and not p.name.endswith("_compatible")
             )
     return ids
-    return ids
 
 
 def validate(root: Path) -> list[str]:

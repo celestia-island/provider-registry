@@ -86,7 +86,15 @@ XLINK_NS = "http://www.w3.org/1999/xlink"
 # the LOWERCASED local name: XML is case-sensitive and a `<SCRIPT>` element
 # survives ElementTree verbatim, but the browser's HTML/SVG parser folds case
 # when the SVG is inlined — an uppercase gate check is a silent XSS bypass.
-FORBIDDEN_ELEMENTS = frozenset({"script", "image", "style", "foreignobject"})
+#
+# SMIL animation elements are forbidden wholesale: a logo never needs
+# animation, and `<animate attributeName="href" to="javascript:…"/>` /
+# `<set attributeName="onmouseover" to="…"/>` are documented click-triggered
+# XSS payloads that carry NO href/src attribute for the scheme gate to see.
+FORBIDDEN_ELEMENTS = frozenset({
+    "script", "image", "style", "foreignobject",
+    "animate", "set", "animatetransform", "animatemotion", "discard", "handler",
+})
 # Metadata elements dropped from the committed form (lowercase compare, same
 # case-folding rationale).
 METADATA_ELEMENTS = frozenset({"title", "desc", "metadata"})
@@ -95,10 +103,15 @@ METADATA_ELEMENTS = frozenset({"title", "desc", "metadata"})
 FORBIDDEN_ATTR = re.compile(r"^on[a-z]+$", re.IGNORECASE)
 # href/src (any namespace) must not reference anything external OR carry a
 # script scheme: `//` covers protocol-relative and absolute URLs, the scheme
-# alternation covers `javascript:` / `data:` / `vbscript:` payloads (a chip
-# can sit inside a clickable surface).
+# prefixes cover `javascript:` / `data:` / `vbscript:` payloads (a chip can
+# sit inside a clickable surface). The probe is checked on a copy of the
+# value with ALL ASCII C0 controls and spaces removed — browsers strip
+# TAB/LF/CR anywhere inside a URL, so `jav&#09;ascript:` (an XML entity that
+# decodes to an embedded TAB) would otherwise sail past an anchored,
+# literal `javascript:` match.
 EXTERNAL_REF = re.compile(r"(?:https?:)?//")
-SCRIPT_SCHEME = re.compile(r"^(?:javascript|data|vbscript):", re.IGNORECASE)
+SCRIPT_SCHEMES = ("javascript:", "vbscript:", "data:")
+URL_PROBE_STRIP = re.compile(r"[\x00-\x20]")
 # Any url() reference outside inline-css must target a fragment (`#id`):
 # internal gradients/clipPaths are fine, `url(https://…)` in a paint or
 # clip-path attribute is a rendering-time beacon / remote-content channel.
@@ -249,8 +262,12 @@ def normalize_svg(data: bytes, mode: str, pre_clean: str = "") -> bytes:
             if FORBIDDEN_ATTR.match(check_local):
                 raise LogoError(f"forbidden attribute {attr_name!r}")
             value = el.attrib[attr_name]
-            if check_local in ("href", "src") and (EXTERNAL_REF.search(value) or SCRIPT_SCHEME.match(value.strip())):
-                raise LogoError(f"unsafe reference in {attr_name!r}")
+            if check_local in ("href", "src"):
+                # WHATWG URL parsing strips TAB/LF/CR (and leading C0) inside
+                # the value — probe a control-stripped, lowercased copy.
+                probe = URL_PROBE_STRIP.sub("", value).lower()
+                if EXTERNAL_REF.search(probe) or probe.startswith(SCRIPT_SCHEMES):
+                    raise LogoError(f"unsafe reference in {attr_name!r}")
             if URL_CALL.search(value) and not FRAGMENT_URL.match(value.strip()):
                 raise LogoError(f"non-fragment url() reference in {attr_name!r}")
             if ans is not None and ans not in (SVG_NS, XLINK_NS):

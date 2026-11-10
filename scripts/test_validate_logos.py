@@ -150,6 +150,35 @@ def test_normalization() -> None:
         except fl.LogoError:
             continue
         raise AssertionError(f"unsafe reference {bad[:40]!r} was accepted")
+    # SMIL animation is forbidden wholesale — a logo never animates, and
+    # `<animate attributeName="href" to="javascript:…"/>` /
+    # `<set attributeName="onmouseover" to="…"/>` are documented
+    # click-triggered XSS payloads with NO href/src for the scheme gate.
+    for smil in (b'<animate attributeName="href" to="javascript:alert(1)"/>',
+                 b'<set attributeName="onmouseover" to="alert(1)"/>',
+                 b'<animateTransform attributeName="transform" type="rotate"/>',
+                 b'<discard begin="0s"/>'):
+        payload = SAMPLE_SVG.replace(b'</svg>', smil + b'</svg>')
+        try:
+            fl.normalize_svg(payload, "mono")
+        except fl.LogoError:
+            continue
+        raise AssertionError(f"SMIL element {smil[:44]!r} was accepted")
+    # Scheme detection must survive WHATWG URL control-stripping: the browser
+    # removes TAB/LF/CR anywhere inside a URL, so entity-encoded `jav&#09;ascript:`
+    # is a live javascript: URL even though the literal never anchors the scheme.
+    for sneaky in (b'<path xlink:href="jav&#09;ascript:alert(1)" d="M0 0"/>',
+                   b'<path xlink:href="jav&#x0D;ascript:alert(1)" d="M0 0"/>',
+                   b'<path href=" &#10;javascript:alert(1)" d="M0 0"/>'):
+        payload = SAMPLE_SVG.replace(b'</svg>', sneaky + b'</svg>')
+        try:
+            fl.normalize_svg(payload, "mono")
+        except fl.LogoError:
+            continue
+        raise AssertionError(f"control-stripped scheme {sneaky[:44]!r} was accepted")
+    # …while a plain internal fragment stays legal.
+    ok_frag = SAMPLE_SVG.replace(b'</svg>', b'<path href="#only-a-fragment"/></svg>')
+    fl.normalize_svg(ok_frag, "mono")
     try:
         fl.normalize_svg(b"x" * (fl.MAX_SVG_BYTES + 1), "mono")
     except fl.LogoError:
