@@ -3,12 +3,12 @@
 # maintained; `sha256`/`fetched_at` are owned by scripts/fetch_logos.py (do
 # not hand-edit).
 #
-# SOURCE PRIORITY (user ruling 2026-11-10): the dedicated AI-provider icon
-# library (@lobehub/icons-static-svg, MIT) first — this tree is fully
-# lobehub-sourced at pinned 1.102.0, one uniform 24x24 set (21 mono
-# currentColor + doubao in brand mode, see its entry); official press
-# assets, simple-icons and letter fallback apply only where the library
-# has no mark (see validate_logos.py's LETTER_FALLBACK).
+# SOURCE PRIORITY (user ruling 2026-11-11): a current first-party vendor
+# asset wins over the dedicated AI-provider icon library. The library
+# (@lobehub/icons-static-svg, MIT, pinned 1.102.0) covers providers without
+# a verified official asset; simple-icons and letter fallback follow. Most
+# entries are uniform 24x24 mono marks; Z.ai's official 30x30 brand plate and
+# doubao's color mark are the documented exceptions.
 #
 # mode = "mono"   -> the SVG carries fill=currentColor, follows the theme text.
 # mode = "brand"  -> original vendor fills kept (multi-color marks).
@@ -203,10 +203,11 @@ sha256 = "bf5edb49834e7734536aed3ba8c6696e5316e0199b7a0d9591916661cc56cd25"
 fetched_at = "2026-11-10"
 
 [zhipu_glm]
-source = "lobehub"
-source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/zhipu.svg"
-mode = "mono"
-license = "MIT (icon library path data); the mark is Zhipu / Z.ai (GLM)'s trademark"
+source = "official"
+source_url = "https://z-cdn.chatglm.cn/z-ai/static/logo.svg"
+mode = "brand"
+license = "The mark is Zhipu/Z.ai's trademark; official z.ai asset, pre-cleaned from an Illustrator class bundle (pre_clean=inline-css), dark plate + white Z kept"
 brand_color = "1F63EC"
-sha256 = "356d3aba0540611f287d7e6b7d4cc6b61f6bb9ff8ff4371602a7567383139d20"
-fetched_at = "2026-11-10"
+pre_clean = "inline-css"
+sha256 = "e4b7b0cef66d2be1bcd6eec62a983c068480710c8df2c5e5821dae31c9178f3e"
+fetched_at = "2026-11-11"

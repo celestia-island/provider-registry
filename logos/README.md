@@ -6,23 +6,24 @@ coverage by `scripts/validate_logos.py`. Consumers vendor a snapshot of this
 tree (shittim-chest generates a TS module; the catalog index intentionally
 does NOT embed logos — schema 1 stays closed).
 
-## Sourcing policy (user rulings 2026-11-10)
+## Sourcing policy (user rulings 2026-11-10 / 2026-11-11)
 
-Icon library first, then official, then simple-icons, then letter fallback:
+A verified, current first-party mark wins over third-party renditions;
+otherwise use the icon library, simple-icons, then letter fallback:
 
-1. **icon library** — the dedicated AI-provider library
+1. **official** — the vendor's press kit / brand page / site asset. This
+   priority is deliberate: a familiar third-party approximation must not
+   replace the vendor's own identity. Z.ai therefore uses the official 30×30
+   dark-plate/white-Z asset in `brand` mode. Assets that only ship inside a
+   brand ZIP are seeded by hand (unzip → normalize → commit) and say so in
+   `license`; their recorded `source_url` (the ZIP) will not re-fetch as SVG
+   until `fetch_logos.py` grows ZIP support.
+2. **icon library** — the dedicated AI-provider library
    (`@lobehub/icons-static-svg`, MIT, community-maintained marks derived from
    the official brand assets), pinned to the exact package version in
-   `source_url`. The whole tree is lobehub-sourced (pinned 1.102.0): one
-   uniform 24×24 set, 21 of 22 in mono `currentColor` (the one exception is
-   doubao, whose identity is its color — see Modes), so chips share one
-   visual language and render theme-safely apart from that documented case.
-2. **official** — the vendor's press kit / brand page / site asset, for
-   providers the library does not cover or whose identity is color-centric.
-   Assets that only ship inside a brand ZIP are seeded by hand (unzip →
-   normalize → commit) and say so in `license`; their recorded `source_url`
-   (the ZIP) will not re-fetch as SVG until `fetch_logos.py` grows ZIP
-   support.
+   `source_url`. It covers providers without a verified official SVG. Its
+   entries share one 24×24 mono `currentColor` grammar, apart from doubao's
+   documented color mark, so chips remain visually consistent and theme-safe.
 3. **simple-icons** — the official mark as a single CC0 path; pinned to the
    exact package version in `source_url`.
 4. **letter fallback** — providers with no usable vector source are listed
@@ -38,8 +39,8 @@ Icon library first, then official, then simple-icons, then letter fallback:
 - `mono` — every paint color stripped, root carries `fill=currentColor`: the
   mark follows the theme text. `brand_color` records the vendor hue for the
   consumer chip tint (required for mono entries).
-- `brand` — original vendor fills kept (currently only doubao, whose cloud
-  identity is its color).
+- `brand` — original vendor fills kept (doubao's color cloud and Z.ai's
+  dark-plate/white-Z official mark; 20 mono + 2 brand entries).
 
 `pre_clean = "inline-css"` resolves `<style>` CLASS rules into presentation
 attributes before that walk — official Illustrator exports put every fill
