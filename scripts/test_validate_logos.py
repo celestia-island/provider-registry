@@ -217,6 +217,22 @@ def test_real_tree_validates() -> None:
     assert not problems, f"real tree has problems: {problems}"
 
 
+def test_zai_uses_the_verified_first_party_mark() -> None:
+    """The generic icon library must not displace Z.ai's own identity."""
+    import hashlib
+    import tomllib
+
+    manifest = tomllib.loads((ROOT / "logos" / "manifest.toml").read_text())
+    row = manifest["zhipu_glm"]
+    assert row["source"] == "official"
+    assert row["source_url"] == "https://z-cdn.chatglm.cn/z-ai/static/logo.svg"
+    assert row["mode"] == "brand"
+    assert row["pre_clean"] == "inline-css"
+    raw = (ROOT / "logos" / "zhipu_glm.svg").read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == "e4b7b0cef66d2be1bcd6eec62a983c068480710c8df2c5e5821dae31c9178f3e"
+    assert b'viewBox="0 0 30 30"' in raw
+
+
 def test_manifest_file_drift() -> None:
     with TmpTree(REGISTRY) as root:
         sha = write_logo(root, "provone", SAMPLE_SVG)
@@ -415,6 +431,7 @@ def test_download_policy_refusal_does_not_retry() -> None:
 def main() -> int:
     test_normalization()
     test_real_tree_validates()
+    test_zai_uses_the_verified_first_party_mark()
     test_manifest_file_drift()
     test_provider_resolution_and_coverage()
     test_brand_prefixes_shape()

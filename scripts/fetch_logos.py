@@ -2,11 +2,12 @@
 """Fetch, normalize and verify the provider logo assets in `logos/`.
 
 The logo tree is the upstream CACHE for vendor marks. Source priority
-(user ruling 2026-11-10): the dedicated AI-provider icon library
-(@lobehub/icons-static-svg, MIT — uniform 24x24 set, 21 mono
-currentColor + one brand-mode mark)
-first, official press kits second, simple-icons (CC0) third, and providers
-with no usable vector source keep the consumer's letter fallback.
+(user ruling 2026-11-11): a verified current first-party asset first, the
+dedicated AI-provider icon library (@lobehub/icons-static-svg, MIT) second,
+simple-icons (CC0) third, and providers with no usable vector source keep
+the consumer's letter fallback. Library entries are uniform 24x24 mono
+except doubao's documented color mark; official assets keep their intrinsic
+geometry/mode when the vendor identity requires it (Z.ai's 30x30 brand plate).
 Consumers vendor a snapshot of this tree (e.g. shittim-chest generates a
 TS module from it via its own export script), so the committed bytes must
 be deterministic — no timestamps inside the SVG files, stable
