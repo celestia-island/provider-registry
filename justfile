@@ -42,8 +42,18 @@ validate:
 validate-descriptors:
     python3 scripts/validate_descriptors.py
 
+# Verify the logos tree offline: manifest hashes, normalization invariants,
+# coverage vs registry.toml (letter-fallback allowlist included).
+validate-logos:
+    python3 scripts/validate_logos.py
+
+# Re-fetch official/simple-icons logo sources into logos/ (network).
+fetch-logos provider='':
+    python3 scripts/fetch_logos.py {{ if provider == "" { "" } else { "--only " + provider } }}
+
 # Regression tests for the validator rules and the index contract (stdlib only).
 test:
     python3 scripts/test_update_models.py
     python3 scripts/test_validate_search.py
     python3 scripts/test_build_catalog_index.py
+    python3 scripts/test_validate_logos.py
