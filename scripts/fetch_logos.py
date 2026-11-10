@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Fetch, normalize and verify the provider logo assets in `logos/`.
 
-The logo tree is the upstream CACHE for vendor marks: official SVGs (vendor
-press kits) first, simple-icons (CC0, the official mark as a single path)
-second, and providers with no usable vector source keep the consumer's
-letter fallback. Consumers vendor a snapshot of this tree (e.g. shittim-chest
-generates a TS module from it via its own export script), so the committed
-bytes must be deterministic — no timestamps inside the SVG files, stable
+The logo tree is the upstream CACHE for vendor marks. Source priority
+(user ruling 2026-11-10): the dedicated AI-provider icon library
+(@lobehub/icons-static-svg, MIT — uniform 24x24 mono currentColor set)
+first, official press kits second, simple-icons (CC0) third, and providers
+with no usable vector source keep the consumer's letter fallback.
+Consumers vendor a snapshot of this tree (e.g. shittim-chest generates a
+TS module from it via its own export script), so the committed bytes must
+be deterministic — no timestamps inside the SVG files, stable
 serialization, hashes recorded in the manifest.
 
 The manifest `logos/manifest.toml` is the hand-authored SOURCING decision per
@@ -354,8 +356,8 @@ def load_manifest(logos_dir: Path) -> dict[str, dict]:
         for field in ("source", "source_url", "mode", "license"):
             if not isinstance(value.get(field), str) or not value[field]:
                 raise LogoError(f"[{key}] is missing {field}")
-        if value["source"] not in ("official", "simple-icons"):
-            raise LogoError(f"[{key}] source must be official|simple-icons")
+        if value["source"] not in ("official", "simple-icons", "lobehub"):
+            raise LogoError(f"[{key}] source must be official|simple-icons|lobehub")
         if value["mode"] not in ("mono", "brand"):
             raise LogoError(f"[{key}] mode must be mono|brand")
         pre_clean = value.get("pre_clean", "")

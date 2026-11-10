@@ -44,29 +44,16 @@ REGISTRY_FILE = "registry.toml"
 # with no model rosters to mark. Neither carries a logo.
 COMPATIBLE_PREFIX = "compatible"
 
-# Providers with an entrypoint/ or models/ dir but NO usable vector source yet
-# (verified against the official sites and simple-icons master, 2026-11-10).
-# Each keeps the consumer's letter fallback. When a source appears, move the
-# provider into logos/manifest.toml and drop it here — this list shrinking is
-# the direction of travel.
+# Providers with an entrypoint/ or models/ dir that carry NO logo by policy
+# (2026-11-10 user ruling): relay/reseller providers do not set marks — the
+# models they serve render the ACTUAL DEVELOPER's mark via the consumer's
+# model-family mapping, and relay-exclusive models render bare. Everything
+# else is covered by logos/manifest.toml.
 LETTER_FALLBACK: dict[str, str] = {
-    # fireworks.ai has no press kit (/brand and /press are 404); the site
-    # favicon is a two-tone mark that is not theme-safe in either mode.
-    "fireworks": "no theme-safe vector source; letter fallback",
-    # siliconflow.cn's logo-new.svg is a horizontal lockup with a black
-    # wordmark; no glyph-only variant is published.
-    "silicon": "official asset is a lockup with black wordmark; needs a glyph variant",
-    # stepfun's official favicon is a white circle + black grid dual-tone;
-    # neither mono (one blob) nor brand mode (mark mutates per theme) is safe.
-    "stepfun": "official mark is dual-tone, not theme-safe; needs light/dark variants",
-    # stability.ai publishes a white-only horizontal wordmark; illegible at
-    # the chip size and unusable on light surfaces without hand-recoloring.
-    "stability": "official asset is a white-only wordmark; needs a glyph variant",
-    # x.ai's asset ZIP (data.x.ai) is unreachable from this network and the
-    # site-embedded wordmark is a wide text mark, illegible at chip size.
-    "xai": "official assets unreachable here; wordmark illegible at chip size",
-    # tripo3d.ai was unreachable from this node during the 2026-11-10 sweep.
-    "tripo": "not researched yet (site unreachable from this node)",
+    "fireworks": "relay/reseller - models render developer marks",
+    "openrouter": "relay/reseller - models render developer marks",
+    "silicon": "relay/reseller (SiliconFlow) - models render developer marks",
+    "together": "relay/reseller - models render developer marks",
 }
 
 # Brand-prefix words are matched against label/id STARTS (case-insensitive),
