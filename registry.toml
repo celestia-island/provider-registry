@@ -254,7 +254,6 @@ description = "Search & Fetch tools API from DeepSeek"
 is_official = true
 requires_key = true
 verified = true
-brand_prefixes = ["DeepSeek"]
 
 [[search.international.developers]]
 id = "tavily"
@@ -291,7 +290,6 @@ description = "AI Search API from Baidu Qianfan"
 is_official = true
 requires_key = true
 verified = false
-brand_prefixes = ["ERNIE", "Wenxin"]
 
 [[search.chinese.developers]]
 id = "bocha"

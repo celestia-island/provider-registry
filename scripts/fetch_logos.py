@@ -82,15 +82,30 @@ SVG_NS = "http://www.w3.org/2000/svg"
 XLINK_NS = "http://www.w3.org/1999/xlink"
 
 # Elements that make an SVG active content or dependent on external state —
-# rejected in both modes, whatever namespace they appear in.
-FORBIDDEN_ELEMENTS = frozenset({"script", "image", "style", "foreignObject"})
-# Metadata elements dropped from the committed form.
+# rejected in both modes, whatever namespace they appear in. Compared against
+# the LOWERCASED local name: XML is case-sensitive and a `<SCRIPT>` element
+# survives ElementTree verbatim, but the browser's HTML/SVG parser folds case
+# when the SVG is inlined — an uppercase gate check is a silent XSS bypass.
+FORBIDDEN_ELEMENTS = frozenset({"script", "image", "style", "foreignobject"})
+# Metadata elements dropped from the committed form (lowercase compare, same
+# case-folding rationale).
 METADATA_ELEMENTS = frozenset({"title", "desc", "metadata"})
-# Attributes never allowed: event handlers. Checked by local name.
-FORBIDDEN_ATTR = re.compile(r"^on[a-z]+$")
-# href/src (any namespace) must not reference anything external.
+# Attributes never allowed: event handlers, matched case-insensitively (an
+# `ONLOAD` attribute is as executable as `onload` once the browser folds it).
+FORBIDDEN_ATTR = re.compile(r"^on[a-z]+$", re.IGNORECASE)
+# href/src (any namespace) must not reference anything external OR carry a
+# script scheme: `//` covers protocol-relative and absolute URLs, the scheme
+# alternation covers `javascript:` / `data:` / `vbscript:` payloads (a chip
+# can sit inside a clickable surface).
 EXTERNAL_REF = re.compile(r"(?:https?:)?//")
-NUMERIC = re.compile(r"^[0-9]*\.?[0-9]+$")
+SCRIPT_SCHEME = re.compile(r"^(?:javascript|data|vbscript):", re.IGNORECASE)
+# Any url() reference outside inline-css must target a fragment (`#id`):
+# internal gradients/clipPaths are fine, `url(https://…)` in a paint or
+# clip-path attribute is a rendering-time beacon / remote-content channel.
+FRAGMENT_URL = re.compile(r"^url\(#[^)]*\)$", re.IGNORECASE)
+URL_CALL = re.compile(r"url\(", re.IGNORECASE)
+# Numbers in a viewBox: negative components are legal SVG.
+NUMERIC = re.compile(r"^-?[0-9]*\.?[0-9]+$")
 
 
 class LogoError(Exception):
@@ -135,10 +150,12 @@ def inline_css_classes(data: bytes) -> bytes:
     Illustrator-exported official logos put every fill on `.stN` classes; the
     block cannot simply be stripped (shapes would lose their paint). This
     pass inlines the declarations onto the elements carrying the class —
-    stylesheet order wins (later rules overwrite earlier ones per property) —
-    then removes the block and the class attributes. Anything but plain class
-    selectors (@media, element or descendant selectors, keyframes) fails
-    loudly: a silent half-conversion would ship a broken mark.
+    stylesheet order wins per PROPERTY (later rules overwrite earlier ones
+    property by property, they never erase a sibling rule's other
+    declarations) — then removes the block and the class attributes.
+    Anything but plain class selectors (@media, element or descendant
+    selectors, keyframes) fails loudly: a silent half-conversion would ship
+    a broken mark.
     """
     root = ET.fromstring(data)
     style_texts = [
@@ -159,7 +176,7 @@ def inline_css_classes(data: bytes) -> bytes:
             f"<style> carries non-class CSS ({residue[:60]!r}…) — pre_clean=inline-css refuses it"
         )
     for name, body in CSS_CLASS_RULE.findall(joined):
-        props: dict[str, str] = {}
+        props = rules.setdefault(name, {})
         for declaration in body.split(";"):
             if not declaration.strip():
                 continue
@@ -214,50 +231,28 @@ def normalize_svg(data: bytes, mode: str, pre_clean: str = "") -> bytes:
     root.set("viewBox", _derive_viewbox(root))
     for attr in ("width", "height"):
         root.attrib.pop(attr, None)
-    if mode == "mono":
-        # Mono = ONE color that follows the consumer theme. Child paint colors
-        # would override an inherited root fill, so every non-"none"
-        # fill/stroke color is stripped (fill="none"/stroke="none" are kept —
-        # they are transparency, not a color). The root then carries
-        # fill=currentColor; a mark drawn in strokes gets stroke=currentColor
-        # only when some element actually stroked in a color.
-        stroked = False
-
-        def strip_paint(el: ET.Element) -> None:
-            nonlocal stroked
-            for attr_name in ("fill", "stroke"):
-                value = el.get(attr_name)
-                if value is None:
-                    continue
-                if value.strip().lower() == "none":
-                    continue
-                if attr_name == "stroke":
-                    stroked = True
-                del el.attrib[attr_name]
-
-        strip_paint(root)
-        for el in root.iter():
-            strip_paint(el)
-        root.set("fill", "currentColor")
-        if stroked:
-            root.set("stroke", "currentColor")
-
     # One validating walk: reject active content, collect the nodes the
     # committed form must not carry (metadata, editor namespaces). The root's
     # own attributes go through the same reject/strip pass as every child's.
+    # Element/attribute local names compare LOWERCASED — XML preserves case,
+    # the browser that later inlines this SVG does not (see FORBIDDEN_ELEMENTS).
     def screen_attributes(el: ET.Element) -> None:
         for attr_name in list(el.attrib):
             ans, alocal = _ns_local(attr_name)
-            if alocal == "style":
+            check_local = alocal.lower()
+            if check_local == "style":
                 # CSS-in-attribute is a smuggling vector and never carries
                 # mark information we keep (`enable-background`-style legacy
                 # decorations are dropped with it).
                 del el.attrib[attr_name]
                 continue
-            if FORBIDDEN_ATTR.match(alocal):
+            if FORBIDDEN_ATTR.match(check_local):
                 raise LogoError(f"forbidden attribute {attr_name!r}")
-            if alocal in ("href", "src") and EXTERNAL_REF.search(el.attrib[attr_name]):
-                raise LogoError(f"external reference in {attr_name!r}")
+            value = el.attrib[attr_name]
+            if check_local in ("href", "src") and (EXTERNAL_REF.search(value) or SCRIPT_SCHEME.match(value.strip())):
+                raise LogoError(f"unsafe reference in {attr_name!r}")
+            if URL_CALL.search(value) and not FRAGMENT_URL.match(value.strip()):
+                raise LogoError(f"non-fragment url() reference in {attr_name!r}")
             if ans is not None and ans not in (SVG_NS, XLINK_NS):
                 del el.attrib[attr_name]  # inkscape/sodipodi bookkeeping
 
@@ -268,9 +263,10 @@ def normalize_svg(data: bytes, mode: str, pre_clean: str = "") -> bytes:
         for child in list(parent):
             parents[id(child)] = parent
             cns, clocal = _ns_local(child.tag)
-            if clocal in FORBIDDEN_ELEMENTS:
+            check_local = clocal.lower()
+            if check_local in FORBIDDEN_ELEMENTS:
                 raise LogoError(f"forbidden element <{clocal}>")
-            if clocal in METADATA_ELEMENTS and cns in (None, SVG_NS):
+            if check_local in METADATA_ELEMENTS and cns in (None, SVG_NS):
                 to_remove.append(child)
                 continue
             if cns is not None and cns != SVG_NS:
@@ -279,6 +275,44 @@ def normalize_svg(data: bytes, mode: str, pre_clean: str = "") -> bytes:
 
     for child in to_remove:
         parents.get(id(child), root).remove(child)
+
+    if mode == "mono":
+        # Mono = ONE color that follows the consumer theme. Child paint colors
+        # would override an inherited root fill, so every non-"none"
+        # fill/stroke color is stripped (fill="none"/stroke="none" are kept —
+        # they are transparency, not a color).
+        #
+        # The root then carries fill=currentColor ONLY when a shape actually
+        # depends on inheritance: a mark drawn purely in strokes keeps its
+        # root fill="none" (painting it would turn outlined shapes into
+        # solid blobs), while a mark whose children carried explicit fills
+        # (now stripped) needs the inherited color or it disappears.
+        stroked = False
+        stripped_fills = 0
+
+        def strip_paint(el: ET.Element, is_root: bool) -> None:
+            nonlocal stroked, stripped_fills
+            for attr_name in ("fill", "stroke"):
+                value = el.get(attr_name)
+                if value is None:
+                    continue
+                if value.strip().lower() == "none":
+                    continue
+                if attr_name == "stroke":
+                    stroked = True
+                elif not is_root:
+                    stripped_fills += 1
+                del el.attrib[attr_name]
+
+        strip_paint(root, True)
+        for el in root.iter():
+            if el is root:
+                continue
+            strip_paint(el, False)
+        if root.get("fill") != "none" or stripped_fills:
+            root.set("fill", "currentColor")
+        if stroked:
+            root.set("stroke", "currentColor")
 
     # Deterministic serialization: pin the prefixes so the bytes are stable
     # across Python versions, then write compact UTF-8 without a declaration.
@@ -403,6 +437,7 @@ def rewrite_manifest(logos_dir: Path, entries: dict[str, dict]) -> None:
     ]
     for provider, entry in sorted(entries.items()):
         lines.append(f"[{provider}]")
+        emitted = set()
         for field in (
             "source", "source_url", "mode", "pre_clean", "license",
             "brand_color", "sha256", "fetched_at",
@@ -412,6 +447,17 @@ def rewrite_manifest(logos_dir: Path, entries: dict[str, dict]) -> None:
                 continue
             escaped = str(value).replace("\\", "\\\\").replace('"', '\\"')
             lines.append(f'{field} = "{escaped}"')
+            emitted.add(field)
+        # Fields this tool does not know (a reviewer's `note =`, future
+        # metadata) survive the rewrite AFTER the known block — dropping
+        # hand-written annotations on a hash refresh would be silent loss.
+        for field in sorted(k for k in entry if k not in emitted):
+            value = entry[field]
+            if isinstance(value, str):
+                escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+                lines.append(f'{field} = "{escaped}"')
+            else:
+                lines.append(f"{field} = {value!r}")
         lines.append("")
     (logos_dir / MANIFEST_NAME).write_text("\n".join(lines), encoding="utf-8")
 

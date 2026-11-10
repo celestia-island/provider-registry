@@ -119,27 +119,66 @@ def test_normalization() -> None:
     derived = fl.normalize_svg(bare, "mono").decode("utf-8")
     assert 'viewBox="0 0 24 24"' in derived, "viewBox must be derived from width/height"
 
-    # Active content is rejected outright.
-    for evil in (b"<script/>", b"<image/>", b"<style/>", b"<foreignObject/>"):
+    # Active content is rejected outright — including CASE VARIANTS: XML
+    # keeps `<SCRIPT>` verbatim and the browser that later inlines the SVG
+    # folds case, so an uppercase-sensitive gate is a silent XSS bypass
+    # (R2 S0). Attributes likewise: `ONLOAD` == `onload` to the browser.
+    for evil in (b"<script/>", b"<SCRIPT/>", b"<ScRiPt/>", b"<image/>",
+                 b"<style/>", b"<foreignObject/>", b"<FOREIGNOBJECT/>"):
         payload = SAMPLE_SVG.replace(b"<path", evil + b"<path")
         try:
             fl.normalize_svg(payload, "mono")
         except fl.LogoError:
             continue
         raise AssertionError(f"forbidden element {evil!r} was accepted")
-    handler = SAMPLE_SVG.replace(b"<path d=", b'<path onload="x()" d=')
-    try:
-        fl.normalize_svg(handler, "mono")
-    except fl.LogoError:
-        pass
-    else:
-        raise AssertionError("on* attribute was accepted")
+    for attr in (b'onload="x()"', b'ONLOAD="x()"', b'OnClick="x()"'):
+        payload = SAMPLE_SVG.replace(b"<path d=", b"<path " + attr + b" d=")
+        try:
+            fl.normalize_svg(payload, "mono")
+        except fl.LogoError:
+            continue
+        raise AssertionError(f"event attribute {attr!r} was accepted")
+    # href/src never carry script schemes or external targets, and url()
+    # references anywhere must be fragments (internal defs only).
+    for bad in (b'<path href="javascript:alert(1)" d="M0 0"/>',
+                b'<path xlink:href="data:text/html,x" d="M0 0"/>',
+                b'<path fill="url(https://evil.example/x#p)" d="M0 0"/>',
+                b'<path clip-path="url(http://evil.example/y)" d="M0 0"/>'):
+        payload = SAMPLE_SVG.replace(b'</svg>', bad + b'</svg>')
+        try:
+            fl.normalize_svg(payload, "mono")
+        except fl.LogoError:
+            continue
+        raise AssertionError(f"unsafe reference {bad[:40]!r} was accepted")
     try:
         fl.normalize_svg(b"x" * (fl.MAX_SVG_BYTES + 1), "mono")
     except fl.LogoError:
         pass
     else:
         raise AssertionError("oversized source was accepted")
+
+    # A mark drawn purely in strokes keeps fill="none" (painting it would
+    # turn outlined shapes into solid blobs) but gains the themed stroke.
+    stroke_only = (b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" fill="none">'
+                   b'<path d="M1 1h8v8H1z" stroke="#123456" stroke-width="1"/></svg>')
+    out = fl.normalize_svg(stroke_only, "mono").decode()
+    assert 'fill="none"' in out, "stroke-only mark must keep fill=none"
+    assert 'stroke="currentColor"' in out, "stroke must become currentColor"
+
+    # Negative viewBox components are legal SVG and must be accepted.
+    negative = fl.normalize_svg(
+        SAMPLE_SVG.replace(b'viewBox="0 0 24 24"', b'viewBox="0 -2 24 28"'), "mono"
+    )
+    assert b'viewBox="0 -2 24 28"' in negative
+
+    # inline-css merges same-name rules per PROPERTY: a later rule adds its
+    # declarations without erasing the earlier rule's fill.
+    two_rules = (b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><style>'
+                 b'.st0{fill:#ff0000;}.st0{stroke-width:2;}</style>'
+                 b'<path class="st0" d="M1 1h8v8"/></svg>')
+    merged = fl.normalize_svg(two_rules, "brand", "inline-css").decode()
+    assert 'fill="#ff0000"' in merged, "first rule's fill must survive the merge"
+    assert 'stroke-width="2"' in merged, "second rule's property must land"
 
 
 def test_real_tree_validates() -> None:
@@ -214,12 +253,26 @@ def test_brand_prefixes_shape() -> None:
         expect_fail("path-like prefix", vl.validate(root), "path-like")
 
 
+def test_mono_needs_brand_color() -> None:
+    # Negative pin for the mono-tint rule: a mono record without brand_color
+    # loses the chip tint that keeps the theme-safe mark readable, so the
+    # audit must name it (mutation E proved this check had zero coverage).
+    with TmpTree(REGISTRY) as root:
+        sha = write_logo(root, "provone", SAMPLE_SVG)
+        manifest(
+            MANIFEST_ENTRY.format(sha=sha).replace('brand_color = "4D6BFE"\n', ""),
+            root,
+        )
+        expect_fail("mono without brand_color", vl.validate(root), "mono mode should record brand_color")
+
+
 def main() -> int:
     test_normalization()
     test_real_tree_validates()
     test_manifest_file_drift()
     test_provider_resolution_and_coverage()
     test_brand_prefixes_shape()
+    test_mono_needs_brand_color()
     print("test_validate_logos: all green")
     return 0
 

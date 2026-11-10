@@ -54,3 +54,17 @@ Path data from simple-icons is CC0-1.0; official assets are the vendors'
 trademarks used for vendor identification in our own tooling (nominative
 use), governed by each vendor's brand guidelines. Per-provider provenance and
 notes live in `manifest.toml`.
+
+## Known limitations
+
+- **Document-level ids are not namespaced.** A few official assets carry
+  internal `url(#id)` refs (`hunyuan`, `perplexity`); if two DIFFERENT
+  vendors ever shipped the same id, chips sharing one document would
+  cross-resolve those defs. Today's tree has no cross-vendor collision
+  (grep-checked at sourcing time); id rewriting was deliberately not added —
+  it risks breaking refs for a collision that does not exist. Revisit if a
+  new asset lands with a suspiciously generic id (`Layer_1`, `clip0`).
+- **ZIP-sourced marks** (cohere/runway/together) record the ZIP as
+  `source_url`; a plain refetch cannot reproduce those bytes until
+  `fetch_logos.py` learns ZIP extraction. The committed hashes are the
+  verification for the current bytes.
