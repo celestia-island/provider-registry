@@ -3,7 +3,8 @@
 
 The logo tree is the upstream CACHE for vendor marks. Source priority
 (user ruling 2026-11-10): the dedicated AI-provider icon library
-(@lobehub/icons-static-svg, MIT — uniform 24x24 mono currentColor set)
+(@lobehub/icons-static-svg, MIT — uniform 24x24 set, 21 mono
+currentColor + one brand-mode mark)
 first, official press kits second, simple-icons (CC0) third, and providers
 with no usable vector source keep the consumer's letter fallback.
 Consumers vendor a snapshot of this tree (e.g. shittim-chest generates a

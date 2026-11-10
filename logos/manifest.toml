@@ -5,9 +5,10 @@
 #
 # SOURCE PRIORITY (user ruling 2026-11-10): the dedicated AI-provider icon
 # library (@lobehub/icons-static-svg, MIT) first — this tree is fully
-# lobehub-sourced at pinned 1.102.0, one uniform 24x24 mono set; official
-# press assets, simple-icons and letter fallback apply only where the
-# library has no mark (see validate_logos.py's LETTER_FALLBACK).
+# lobehub-sourced at pinned 1.102.0, one uniform 24x24 set (21 mono
+# currentColor + doubao in brand mode, see its entry); official press
+# assets, simple-icons and letter fallback apply only where the library
+# has no mark (see validate_logos.py's LETTER_FALLBACK).
 #
 # mode = "mono"   -> the SVG carries fill=currentColor, follows the theme text.
 # mode = "brand"  -> original vendor fills kept (multi-color marks).
