@@ -14,8 +14,9 @@ Icon library first, then official, then simple-icons, then letter fallback:
    (`@lobehub/icons-static-svg`, MIT, community-maintained marks derived from
    the official brand assets), pinned to the exact package version in
    `source_url`. The whole tree is lobehub-sourced (pinned 1.102.0): one
-   uniform 24×24 mono `currentColor` set, so every chip renders
-   theme-safely in the same visual language.
+   uniform 24×24 set, 21 of 22 in mono `currentColor` (the one exception is
+   doubao, whose identity is its color — see Modes), so chips share one
+   visual language and render theme-safely apart from that documented case.
 2. **official** — the vendor's press kit / brand page / site asset, for
    providers the library does not cover or whose identity is color-centric.
    Assets that only ship inside a brand ZIP are seeded by hand (unzip →
