@@ -503,7 +503,7 @@ def _toml_inline(field: str, value: object) -> str:
         return "[" + ", ".join(_toml_inline(field, item) for item in value) + "]"
     if isinstance(value, dict):
         body = ", ".join(
-            _toml_key(key) + " = " + _toml_inline(field, item)
+            _toml_key(str(key)) + " = " + _toml_inline(field, item)
             for key, item in value.items()
         )
         return "{" + body + "}"
