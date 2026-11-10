@@ -1,0 +1,198 @@
+# Provider logo manifest — the hand-authored SOURCING decision per provider.
+# `source`/`source_url`/`mode`/`pre_clean`/`license`/`brand_color` are hand-maintained;
+# `sha256`/`fetched_at` are owned by scripts/fetch_logos.py (do not hand-edit).
+#
+# mode = "mono"   -> the SVG carries fill=currentColor, follows the theme text.
+# mode = "brand"  -> original vendor fills kept (multi-color marks).
+#
+# A provider WITHOUT an entry here has no usable vector source yet and keeps
+# the consumer's letter fallback (see validate_logos.py's LETTER_FALLBACK).
+#
+# Seeded 2026-11-10. simple-icons entries are pinned to 16.37.0 (the version
+# the bytes were taken from); official entries point at the vendor's own asset.
+# together/runway ship their marks only inside a brand ZIP with no per-file
+# URL — the committed bytes were seeded from that ZIP by hand; a refetch of
+# the recorded source_url will fail until fetch_logos grows ZIP support, so
+# refresh those two by re-unzipping and re-running this script's normalization
+# (scripts/fetch_logos.py --check still verifies the committed bytes).
+
+[anthropic]
+source = "simple-icons"
+source_url = "https://unpkg.com/simple-icons@16.37.0/icons/anthropic.svg"
+mode = "mono"
+license = "CC0-1.0 (path data); the mark is Anthropic's trademark"
+brand_color = "191919"
+sha256 = "5244d3cbd27b5115c64d8080c4abe34bcdf1484ff7ef54a0078e3872ee3d8104"
+fetched_at = "2026-11-10"
+
+[baidu]
+source = "simple-icons"
+source_url = "https://unpkg.com/simple-icons@16.37.0/icons/baidu.svg"
+mode = "mono"
+license = "CC0-1.0 (path data); the mark is Baidu's trademark (company mark — the ERNIE/Wenxin product line has no vector mark)"
+brand_color = "2932E1"
+sha256 = "40e610c6f6af593149cfe3e2d9ffc8c75ca2fd89806ac54403f186c9d534c1b3"
+fetched_at = "2026-11-10"
+
+[cohere]
+source = "official"
+source_url = "https://cdn.sanity.io/files/rjtqmwfu/web3-prod/32f7d09e898b78e0b96c6de7969586824ce4bb71.zip"
+mode = "mono"
+license = "The mark is Cohere's trademark; seeded by hand from the official press-kit ZIP (Symbol/Digital (RGB)/Monochrome/cohere_symbol_black_rgb.svg) — see the header note on ZIP sources"
+brand_color = "FF7759"
+sha256 = "000c87751e2335976fa8ecc3fa9ed09a187bf5304e3fefcc7f4c4217b6d7fa3c"
+fetched_at = "2026-11-10"
+
+[deepseek]
+source = "official"
+source_url = "https://fe-static.deepseek.com/chat/favicon.svg"
+mode = "mono"
+license = "The mark is DeepSeek's trademark; official chat-site asset, brand color #4D6BFE per the asset itself (simple-icons' #5786FE diverges)"
+brand_color = "4D6BFE"
+sha256 = "c5eda8a5cfcdd8b33dd3f0eb1623056c96cb29870821b4ca0302bda1c8f5885d"
+fetched_at = "2026-11-10"
+
+[doubao]
+source = "simple-icons"
+source_url = "https://unpkg.com/simple-icons@16.37.0/icons/bytedance.svg"
+mode = "mono"
+license = "CC0-1.0 (path data); ByteDance company mark — doubao.com ships PNG favicons only, the chip identifies the VENDOR"
+brand_color = "3C8CFF"
+sha256 = "35e09d3a461f9eb9d59feb658806ae759d449374d3688c5b83429187343d0a93"
+fetched_at = "2026-11-10"
+
+[google]
+source = "simple-icons"
+source_url = "https://unpkg.com/simple-icons@16.37.0/icons/googlegemini.svg"
+mode = "mono"
+license = "CC0-1.0 (path data); the Gemini spark mark is Google's trademark"
+brand_color = "8E75B2"
+sha256 = "466e340b131009e75cc593c9397612a036e283a89d0cb1d3b8f27bc57d39e94e"
+fetched_at = "2026-11-10"
+
+[hunyuan]
+source = "official"
+source_url = "https://hunyuan-blog-web-prod-1258344703.cos.ap-guangzhou.myqcloud.com/logo.svg"
+mode = "brand"
+license = "The mark is Tencent's trademark; official hunyuan.tencent.com icon asset (multi-color)"
+sha256 = "eedfe0e1ae68dec5d9bab01fb8d789412d5c5e4e411f249c9dcb60459f3dd7f6"
+fetched_at = "2026-11-10"
+
+[meshy]
+source = "official"
+source_url = "https://cdn.meshy.ai/landing-assets/media-kit/meshy-logo-light.svg"
+mode = "mono"
+license = "The mark is Meshy's trademark; official media-kit glyph (the light variant's fills are normalized to currentColor)"
+brand_color = "67B800"
+sha256 = "52d03303793b3359150c973738d681d715050128863b255b685fb2b40011d336"
+fetched_at = "2026-11-10"
+
+[openai]
+source = "official"
+source_url = "https://cdn.openai.com/brand/openai-logos.zip"
+mode = "mono"
+license = "The mark is OpenAI's trademark; seeded by hand from the official brand ZIP (OAI_OpenAI-Blossom_Black.svg) — simple-icons removed OpenAI 2025-11-29, so the ZIP is the only vector source. brand_color is the ChatGPT-era accent (the brand asset itself is pure black)"
+brand_color = "10A37F"
+sha256 = "c184b8dda147f887697f9a9c6f2fb244cef6f4a441dc13057f620baccd93fc05"
+fetched_at = "2026-11-10"
+
+[meta]
+source = "simple-icons"
+source_url = "https://unpkg.com/simple-icons@16.37.0/icons/meta.svg"
+mode = "mono"
+license = "CC0-1.0 (path data); the Meta mark is Meta's trademark (no Llama-specific vector mark exists)"
+brand_color = "0467DF"
+sha256 = "9ee3955091658b3fb5bebcc48534b0711178982ca612b6465c56b7fb02fb18fc"
+fetched_at = "2026-11-10"
+
+[mimo]
+source = "simple-icons"
+source_url = "https://unpkg.com/simple-icons@16.37.0/icons/xiaomi.svg"
+mode = "mono"
+license = "CC0-1.0 (path data); Xiaomi company mark — MiMo has no standalone vector mark"
+brand_color = "FF6900"
+sha256 = "a404385c1c35daa4062c4d0bf91a3b082e50ab32bc73828ef66d3dd28f413235"
+fetched_at = "2026-11-10"
+
+[minimax]
+source = "simple-icons"
+source_url = "https://unpkg.com/simple-icons@16.37.0/icons/minimax.svg"
+mode = "mono"
+license = "CC0-1.0 (path data); the mark is MiniMax's trademark"
+brand_color = "E73562"
+sha256 = "53ce9faec8b1c094b377082027b63f2a1dd3035b4a8366756407cbed36e5767a"
+fetched_at = "2026-11-10"
+
+[mistral]
+source = "simple-icons"
+source_url = "https://unpkg.com/simple-icons@16.37.0/icons/mistralai.svg"
+mode = "mono"
+license = "CC0-1.0 (path data); the mark is Mistral AI's trademark"
+brand_color = "FA520F"
+sha256 = "2e71f85d99fbb30315fd13b5f507c28c01f5a2d2834507955154f7a5b2b75f73"
+fetched_at = "2026-11-10"
+
+[moonshot]
+source = "official"
+source_url = "https://moonshotai.github.io/Branding-Guide/scenarios/04-k-only/k-only-light.svg"
+mode = "mono"
+license = "The mark is Moonshot AI's trademark; official branding-guide K logomark, brand color #1783FF per the brand guide"
+brand_color = "1783FF"
+sha256 = "e2d0f9093ff03b00b37147f09bb0908a81263eeb89f4428c218faf6f04e647c6"
+fetched_at = "2026-11-10"
+
+[openrouter]
+source = "official"
+source_url = "https://openrouter.ai/brand/v2/openrouter-glyph-light.svg"
+mode = "mono"
+license = "The mark is OpenRouter's trademark; official brand-page glyph, brand color #7624F4 per the asset"
+brand_color = "7624F4"
+pre_clean = "inline-css"
+sha256 = "db4ec47458838784822741640e5885d8a94bb9d56df8699c794155d4c8465bee"
+fetched_at = "2026-11-10"
+
+[perplexity]
+source = "official"
+source_url = "https://frontend-cdn.perplexity.ai/_agi_assets/marketing/hub/brand/logos/2026-10-08/perplexity-symbol-offblack.svg"
+mode = "mono"
+license = "The mark is Perplexity AI's trademark; official brand-hub symbol (offblack variant; simple-icons' #1FB8CD is the retired brand color). The mark is built with a clipPath — browsers resolve it, naive rasterizers may not"
+brand_color = "121516"
+sha256 = "eed489cd7742db1f0e0e0a6017d1280da159d62765a210dc9c0bd497b62bc356"
+fetched_at = "2026-11-10"
+
+[qwen]
+source = "simple-icons"
+source_url = "https://unpkg.com/simple-icons@16.37.0/icons/qwen.svg"
+mode = "mono"
+license = "CC0-1.0 (path data); the Qwen mark is Alibaba's trademark (qwen.ai ships PNG favicons only)"
+brand_color = "6950EF"
+sha256 = "4ad27145061ffb5ff743c8eebf93ba940ab61ea2f3d3bb85af6f9ea5a724eb82"
+fetched_at = "2026-11-10"
+
+[runway]
+source = "official"
+source_url = "https://runwayml.com/assets/Runway-Brand-Guidelines.zip"
+mode = "mono"
+license = "The mark is Runway AI's trademark; seeded by hand from the official brand ZIP (Runway_Black_Symbol_SVG.svg) — see the header note on ZIP sources"
+brand_color = "181818"
+sha256 = "f399e48a947f3e4316238fc54003f2ba76c4e94484d1fe50f91d8d8ec538ed3f"
+fetched_at = "2026-11-10"
+
+[together]
+source = "official"
+source_url = "https://cdn.prod.website-files.com/69654e88dce9154b5f1206dd/69a6dad66e8b98c718262888_together-ai-logo-suite.zip"
+mode = "brand"
+license = "The mark is Together AI's trademark; seeded by hand from the official brand ZIP (SVG/Color+Black/TogetherAI_Logo_021026_Logo.svg) — see the header note on ZIP sources"
+pre_clean = "inline-css"
+sha256 = "9ebac7257946b01a1ae6f11f2581c8f763ccc423caf636ac3155396689fcfd3f"
+fetched_at = "2026-11-10"
+
+[zhipu_glm]
+source = "official"
+source_url = "https://z-cdn.chatglm.cn/z-ai/static/logo.svg"
+mode = "brand"
+license = "The mark is Zhipu/Z.ai's trademark; official z.ai asset, pre-cleaned from an Illustrator class bundle (pre_clean=inline-css), dark plate + white Z kept"
+brand_color = "1F63EC"
+pre_clean = "inline-css"
+sha256 = "e4b7b0cef66d2be1bcd6eec62a983c068480710c8df2c5e5821dae31c9178f3e"
+fetched_at = "2026-11-10"
