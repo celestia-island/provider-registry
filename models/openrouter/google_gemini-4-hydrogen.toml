@@ -1,0 +1,20 @@
+# google/gemini-4-hydrogen
+# Provider: openrouter
+
+[model]
+id = "google/gemini-4-hydrogen"
+name = "google/gemini-4-hydrogen"
+provider_id = "openrouter"
+
+context_window = 1048576
+max_output_tokens = 943718
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship", "vision", "reasoning"]
+
+[model.pricing]
+input_per_million = 1.5
+output_per_million = 7.5
+cached_per_million = 0.075

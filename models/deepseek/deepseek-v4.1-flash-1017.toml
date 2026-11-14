@@ -6,8 +6,6 @@ id = "deepseek-v4.1-flash-1017"
 name = "DeepSeek V4.1 Flash 1017"
 provider_id = "deepseek"
 
-# Direct-provider facts: 1M context and 384K (393216 token) output.
-
 context_window = 1048576
 max_output_tokens = 393216
 supports_vision = true

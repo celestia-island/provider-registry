@@ -62,6 +62,14 @@ output_per_million = 8.8
 cached_per_million = 0.52
 
 [[entrypoint.models]]
+id = "accounts/fireworks/routers/deepseek-v4p1-flash-1017-ultrafast"
+
+[entrypoint.models.pricing]
+input_per_million = 2.4
+output_per_million = 9.6
+cached_per_million = 0.048
+
+[[entrypoint.models]]
 id = "accounts/fireworks/routers/glm-5p2-fast"
 supports_vision = false
 
@@ -77,6 +85,22 @@ id = "accounts/fireworks/routers/glm-5p3-fast"
 input_per_million = 2.1
 output_per_million = 6.6
 cached_per_million = 0.39
+
+[[entrypoint.models]]
+id = "accounts/fireworks/routers/kimi-k3-spot"
+
+[entrypoint.models.pricing]
+input_per_million = 2.1
+output_per_million = 10.5
+cached_per_million = 0.21
+
+[[entrypoint.models]]
+id = "accounts/fireworks/models/kimi-k3p1-pro"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 10.0
+cached_per_million = 0.2
 
 [[entrypoint.models]]
 id = "accounts/fireworks/models/qwen3p8-2p4t-a95b"
@@ -121,6 +145,14 @@ output_per_million = 4.4
 cached_per_million = 0.26
 
 [[entrypoint.models]]
+id = "accounts/fireworks/routers/glm-5p3-spot"
+
+[entrypoint.models.pricing]
+input_per_million = 0.98
+output_per_million = 3.08
+cached_per_million = 0.182
+
+[[entrypoint.models]]
 id = "accounts/fireworks/models/deepseek-v4p1-flash-1017"
 
 [entrypoint.models.pricing]
@@ -129,12 +161,36 @@ output_per_million = 1.2
 cached_per_million = 0.006
 
 [[entrypoint.models]]
+id = "accounts/fireworks/routers/deepseek-v4p1-flash-1017-spot"
+
+[entrypoint.models.pricing]
+input_per_million = 0.21
+output_per_million = 0.84
+cached_per_million = 0.0042
+
+[[entrypoint.models]]
+id = "accounts/fireworks/routers/deepseek-v4p1-flash-spot"
+
+[entrypoint.models.pricing]
+input_per_million = 0.21
+output_per_million = 0.84
+cached_per_million = 0.0042
+
+[[entrypoint.models]]
 id = "accounts/fireworks/models/glm-5p3-flash"
 
 [entrypoint.models.pricing]
 input_per_million = 0.15
 output_per_million = 0.5
 cached_per_million = 0.03
+
+[[entrypoint.models]]
+id = "accounts/fireworks/models/minimax-m3p1-flash"
+
+[entrypoint.models.pricing]
+input_per_million = 0.15
+output_per_million = 0.6
+cached_per_million = 0.015
 
 [[entrypoint.models]]
 id = "accounts/fireworks/routers/kimi-fast-latest"

@@ -12,11 +12,12 @@ supports_vision = true
 supports_function_calling = true
 supports_streaming = true
 supports_reasoning = false
-tags = []
+tags = ["vision", "reasoning"]
 
 [model.pricing]
 input_per_million = 0.1
 output_per_million = 0.15
+cached_per_million = 0.092
 
 [model.score]
 value = 28.7
