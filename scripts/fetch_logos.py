@@ -570,7 +570,13 @@ def rewrite_manifest(logos_dir: Path, entries: dict[str, dict]) -> None:
         # Fields this tool does not know (a reviewer's `note =`, future
         # metadata) survive the rewrite AFTER the known block — dropping
         # hand-written annotations on a hash refresh would be silent loss.
-        for field in sorted(k for k in entry if k not in emitted):
+        # Dict-typed fields are the sub-table shape ([provider.combine]):
+        # emitting them as inline tables would flatten a structure the
+        # combine tool owns and reformat every hand-authored block on an
+        # unrelated mono-hash refresh. Scalars keep the sorted emission;
+        # tables keep file order (their hand-authored field order).
+        unknown = [k for k in entry if k not in emitted]
+        for field in sorted(k for k in unknown if not isinstance(entry[k], dict)):
             rendered = _toml_unknown(field, entry[field], problems)
             if rendered is not None:
                 # The KEY needs the same treatment as its value: a bare
@@ -578,10 +584,31 @@ def rewrite_manifest(logos_dir: Path, entries: dict[str, dict]) -> None:
                 # annotation into a `my` table) and an embedded quote is
                 # illegal bytes — quote+escape unless bare-safe.
                 lines.append(f"{_toml_key(field)} = {rendered}")
+        for field in (k for k in unknown if isinstance(entry[k], dict)):
+            # A blank line keeps the parent block and its sub-table visually
+            # separate (legal TOML anywhere; purely for the reviewer's eye).
+            lines.append("")
+            _emit_table(lines, f"{_toml_key(provider)}.{_toml_key(field)}", entry[field], problems)
         lines.append("")
     (logos_dir / MANIFEST_NAME).write_text("\n".join(lines), encoding="utf-8")
     for problem in problems:
         print(f"[WARN] {problem}", file=sys.stderr)
+
+
+def _emit_table(lines: list[str], header: str, table: dict, problems: list[str]) -> None:
+    """Emit one dict-typed manifest field as a real TOML sub-table.
+
+    Keys keep file (insertion) order — the hand-authored order IS part of
+    the reviewed artifact. Nested dicts recurse into dotted headers; empty
+    tables emit their bare header so the section survives a rewrite."""
+    lines.append(f"[{header}]")
+    for key, value in table.items():
+        if isinstance(value, dict):
+            _emit_table(lines, f"{header}.{_toml_key(str(key))}", value, problems)
+            continue
+        rendered = _toml_unknown(str(key), value, problems)
+        if rendered is not None:
+            lines.append(f"{_toml_key(str(key))} = {rendered}")
 
 
 # ── checking (no network) ────────────────────────────────────────────────────

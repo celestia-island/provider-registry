@@ -4,3 +4,7 @@
 # The previous list (beautifulsoup4/aiohttp/playwright/rich) had zero
 # imports across all scripts in this directory.
 toml>=0.10.2
+# fetch_logos_combines.py only: measures the wordmark/mark ink boxes by
+# parsing SVG path data into a bounds pen (no rasterization). Install into a
+# project venv (see the script's header for the exact recipe).
+fonttools>=4.43
