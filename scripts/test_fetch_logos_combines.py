@@ -173,7 +173,30 @@ def test_compose() -> None:
     box = text_layer[0].get(fc.BOX_ATTR).split()
     check("text band is 1/1.45 tall and centered", abs(float(box[3]) - 1 / fc.MARK_HEIGHT) < 1e-6
           and abs(float(box[1]) - (1 - 1 / fc.MARK_HEIGHT) / 2) < 1e-6, text_layer[0].get(fc.BOX_ATTR))
+    # Unit contract: the mark box fills the full unit height and NEVER
+    # escapes the pinned `0 0 W 1` canvas (the unit-mixing defect this
+    # composer once shipped — validate_composed's containment pin is what
+    # keeps it dead, exercised directly below).
+    mark_layer = [el for el in root if fc.MARK_MONO_CLASS in el.get("class", "").split()][0]
+    mx, my, mw, mh = (float(v) for v in mark_layer.get(fc.BOX_ATTR).split())
+    vw = float(root.get("viewBox").split()[2])
+    check("mark box fills the unit height", abs(mh - 1.0) < 1e-6 or abs(mw - 1.0) < 1e-6,
+          mark_layer.get(fc.BOX_ATTR))
+    check("mark box inside the canvas", mx >= -1e-6 and my >= -1e-6
+          and mx + mw <= vw + 1e-6 and my + mh <= 1.0 + 1e-6, mark_layer.get(fc.BOX_ATTR))
+    # The mark:wordmark proportion is the skins' 1.45:1 (mark height = 1.45
+    # cap bands), now IN one unit system — pin it, not just the geometry.
+    check("mark stands MARK_HEIGHT cap-bands tall",
+          abs(mh / (float(box[3])) - fc.MARK_HEIGHT) < 1e-6,
+          f"mark {mh} vs band {box[3]}")
     check("validate_composed green on real output", fc.validate_composed(data, expect_word="T") == [])
+    # Negative control for the containment pin: a box pushed past the
+    # canvas must be flagged (else the pin above is decoration).
+    escaped = data.replace(
+        mark_layer.get(fc.BOX_ATTR).encode(), b"0 0 1.45 1.45", 1
+    )
+    flagged = [p for p in fc.validate_composed(escaped) if "escapes" in p]
+    check("escaping layer box flagged", bool(flagged), str(fc.validate_composed(escaped)[:2]))
     check("byte cap respected", len(data) <= fc.MAX_SVG_BYTES)
 
     # Over-width clamp: a 4:1 mark keeps its aspect inside a 1.45-wide box.
@@ -321,6 +344,100 @@ def test_end_to_end() -> None:
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def test_readability_floors() -> None:
+    """S2 floor pins: the two contrast constants must each do their own job,
+    proven through the FULL compose pipeline (compose_provider), not by
+    poking resolve_colorwork directly. The pipeline fixtures run BEFORE the
+    constants-equality pin so a constant mutation dies here on the
+    pipeline-level preserve/flip assertions (the exact gap the review
+    found: the old suite survived MIN_CONTRAST→99 with 48/48 green).
+    The preserve side is the mutation evidence: with the old single 3.0
+    floor (or any floor ≥ 2.39) the teal fixture silently lost its brand
+    color and every pin stayed green."""
+    coral = fc.contrast(fc.parse_paint("#D97757")[1], fc.LIGHT_FABRIC)  # ≈ 3.12
+    teal = fc.contrast(fc.parse_paint("#22B8CD")[1], fc.LIGHT_FABRIC)  # ≈ 2.38
+    check("fixture brackets the art floor", 1.5 < teal < 3.0 <= coral,
+          f"teal {teal:.2f} coral {coral:.2f}")
+
+    def colorwork(main_fill: str) -> bytes:
+        return (
+            b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+            b'<path d="M2 2h9v9H2z" fill="' + main_fill.encode() + b'"/>'
+            b'<path d="M13 2h9v9h-9z" fill="' + main_fill.encode() + b'"/>'
+            b'<path d="M2 13h9v9H2z" fill="#1783FF"/></svg>'
+        )
+
+    tmp = Path(tempfile.mkdtemp(prefix="combine-floors-"))
+    try:
+        logos = tmp / "logos"
+        (logos / "combine-src").mkdir(parents=True)
+        (logos / "combine-src" / "mark.svg").write_bytes(MARK_SVG)
+        (logos / "combine-src" / "text.svg").write_bytes(TEXT_SVG)
+
+        def entry(main_fill: str) -> dict:
+            color_path = f"combine-src/color-{main_fill.lstrip('#').lower()}.svg"
+            (logos / color_path).write_bytes(colorwork(main_fill))
+            return {
+                "source": "lobehub", "source_url": "https://example.invalid/x.svg",
+                "mode": "mono", "license": "test", "brand_color": "1783FF",
+                "combine": {
+                    "word": "T", "license": "test",
+                    "local_mark": "combine-src/mark.svg",
+                    "local_color": color_path,
+                    "local_text": "combine-src/text.svg",
+                },
+            }
+
+        for name, fill, ratio in (("claude coral", "#D97757", coral),
+                                  ("perplexity teal", "#22B8CD", teal)):
+            result, reason = fc.compose_provider(
+                "fixture", entry(fill), logos, {"total": 1 << 20}
+            )
+            check(f"{name} composes", result is not None and reason is None, str(reason))
+            check(f"{name} brand fill PRESERVED ({ratio:.2f} clears the art floor)",
+                  fill.encode() in result.data,
+                  f"{fill} was rewritten — the art floor moved above {ratio:.2f}")
+            note = result.note
+            check(f"{name} note reports a kept fill", "clears contrast" in note, note)
+
+        # The flip side through the same pipeline: the pale fixture (#F6D85A,
+        # 1.41 — BELOW the art floor) must still be rewritten.
+        result, reason = fc.compose_provider(
+            "fixture", entry("#F6D85A"), logos, {"total": 1 << 20}
+        )
+        check("pale fixture composes", result is not None and reason is None, str(reason))
+        check("pale main fill flipped (below the art floor)",
+              b"#F6D85A" not in result.data and b"currentColor" in result.data)
+
+        # Tint floor, APPLIED side: a vendor without colorwork whose brand
+        # hex clears TINT_MIN_CONTRAST ships a real tinted color layer.
+        tint_entry = {
+            "source": "lobehub", "source_url": "https://example.invalid/x.svg",
+            "mode": "mono", "license": "test", "brand_color": "10A37F",
+            "combine": {
+                "word": "T", "license": "test",
+                "local_mark": "combine-src/mark.svg",
+                "local_text": "combine-src/text.svg",
+            },
+        }
+        result, reason = fc.compose_provider("fixture", tint_entry, logos, {"total": 1 << 20})
+        check("tint fixture composes", result is not None and reason is None, str(reason))
+        root = ET.fromstring(result.data)
+        color_layer = [el for el in root if fc.MARK_COLOR_CLASS in el.get("class", "").split()
+                       and fc.MARK_MONO_CLASS not in el.get("class", "").split()]
+        check("tint applied as its own color layer", len(color_layer) == 1
+              and color_layer[0].get("fill") == "#10a37f",
+              str(color_layer[0].get("fill") if color_layer else None))
+
+        # Constants-equality pin LAST: the pipeline assertions above are the
+        # semantic contract; this pin catches a drifted constant even when a
+        # fixture's contrast value happens to sit on the surviving side.
+        check("art floor is 1.5", fc.ART_MIN_CONTRAST == 1.5, str(fc.ART_MIN_CONTRAST))
+        check("tint floor is 3.0", fc.TINT_MIN_CONTRAST == 3.0, str(fc.TINT_MIN_CONTRAST))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def main() -> int:
     test_colors()
     test_ink_bounds()
@@ -328,6 +445,7 @@ def main() -> int:
     test_compose()
     test_validate_negative()
     test_end_to_end()
+    test_readability_floors()
     print(f"test_fetch_logos_combines: all green ({PASS} checks)")
     return 0
 

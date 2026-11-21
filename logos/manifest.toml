@@ -35,7 +35,7 @@ lobehub_mark = "claude"
 lobehub_text = "claude"
 word = "Claude"
 license = "MIT (icon library path data); the mark is Anthropic (Claude product mark)'s trademark; the combine mark is the library's claude rendition (the mono tree keeps the anthropic glyph)"
-sha256 = "db1c52655f7e50e1c9172148eedc291423427ed1a8bab2581d83843cd26dbf6a"
+sha256 = "561c04b237accbbf7ff16d3df5fd1aa68bd6e700c0f9757b481971fee644d680"
 fetched_at = "2026-11-21"
 
 [baidu]
@@ -52,7 +52,7 @@ lobehub_mark = "wenxin"
 lobehub_text = "wenxin"
 word = "Wenxin"
 license = "MIT (icon library path data); the mark is Baidu (Wenxin/ERNIE product mark)'s trademark"
-sha256 = "8cef6756c01ce4cbc5627bd19c12925e40507f3e86350057bbb3dd06c49005c7"
+sha256 = "55b67633dacec327773926e263ef883c5f4739d226b3af12cac6a97e004914d0"
 fetched_at = "2026-11-21"
 
 [cohere]
@@ -69,7 +69,7 @@ lobehub_mark = "cohere"
 lobehub_text = "cohere"
 word = "Cohere"
 license = "MIT (icon library path data); the mark is Cohere's trademark"
-sha256 = "db4eb12db7203545fb408d7a2dce1deb61282a17a11606a48dd214890a20a6fc"
+sha256 = "63f352e8f6f05bcba10cf8fc94f269f976b70970738b1ec732f3536be0a33aae"
 fetched_at = "2026-11-21"
 
 [deepseek]
@@ -86,7 +86,7 @@ lobehub_mark = "deepseek"
 lobehub_text = "deepseek"
 word = "DeepSeek"
 license = "MIT (icon library path data); the mark is DeepSeek's trademark"
-sha256 = "a98239de3e99de72135a2a26b485ff22629dadf5b41a71ded68a002d82f1b19b"
+sha256 = "b3faab6d36aa7c2673f0aa2f629e9ba440b06a2a2e28fdc8b0c9d42fb19ceac9"
 fetched_at = "2026-11-21"
 
 [doubao]
@@ -103,7 +103,7 @@ lobehub_mark = "doubao"
 lobehub_text = "doubao"
 word = "Doubao"
 license = "MIT (icon library path data); the mark is ByteDance (Doubao product mark)'s trademark"
-sha256 = "20442538ce23370992251a126b211c6c699ed1e573e9a8702ce0b9d75a4a6a89"
+sha256 = "99548de47857026c8ae962fd9e7844daa4f8cdfd98fbed185b8c6d079a6c2de8"
 fetched_at = "2026-11-21"
 
 [google]
@@ -120,7 +120,7 @@ lobehub_mark = "gemini"
 lobehub_text = "gemini"
 word = "Gemini"
 license = "MIT (icon library path data); the mark is Google (Gemini spark)'s trademark"
-sha256 = "9564d9248a1745d1ec120911027cd9189be918605b309991f031d522affffe7f"
+sha256 = "aaea79c8b2c1773d6a92afd3acb1d6a22758199c0921d7bdefe391e4ce827809"
 fetched_at = "2026-11-21"
 
 [hunyuan]
@@ -137,7 +137,7 @@ lobehub_mark = "hunyuan"
 lobehub_text = "hunyuan"
 word = "Hunyuan"
 license = "MIT (icon library path data); the mark is Tencent (Hunyuan)'s trademark"
-sha256 = "a57d2410378925f127c218af935ab3675109e97d698fd7746bd110632bf1d019"
+sha256 = "a2e7b52d0bfad35ec024d7348edf21b624389c8f1b0768a5cb877ad2ce16320d"
 fetched_at = "2026-11-21"
 
 [meshy]
@@ -154,7 +154,7 @@ lobehub_mark = "meshy"
 lobehub_text = "meshy"
 word = "Meshy"
 license = "MIT (icon library path data); the mark is Meshy's trademark"
-sha256 = "c9c94475ed782b50076cd914aad2069afcb1ed2ef626b69141d5e68f1ba1990b"
+sha256 = "e10cffedba3e094839ec23cc54d6498b08bb34fd55037b18d325798905ac3d06"
 fetched_at = "2026-11-21"
 
 [meta]
@@ -171,7 +171,7 @@ lobehub_mark = "meta"
 lobehub_text = "meta"
 word = "Llama"
 license = "MIT (icon library path data); the mark is Meta's trademark"
-sha256 = "27436715f8851d35c372b28fb4a931189fd9081c6d830584b242891fcee60f9c"
+sha256 = "92b0e33b34df3211e84019ca71ef11fdadf4b057092847106cc75188b134949b"
 fetched_at = "2026-11-21"
 
 [mimo]
@@ -188,7 +188,7 @@ lobehub_mark = "xiaomimimo"
 lobehub_text = "xiaomimimo"
 word = "Xiaomi MiMo"
 license = "MIT (icon library path data); the mark is Xiaomi (MiMo product mark)'s trademark"
-sha256 = "61f19b36ad88cf25b708a7cf54ed8245974e0543b13693b34b0496085d224e66"
+sha256 = "fd61c53f3aed9574c0e4d49222935a6b8f6cfd8969a1233e2ca653bbb3354fe4"
 fetched_at = "2026-11-21"
 
 [minimax]
@@ -205,7 +205,7 @@ lobehub_mark = "minimax"
 lobehub_text = "minimax"
 word = "MiniMax"
 license = "MIT (icon library path data); the mark is MiniMax's trademark"
-sha256 = "364e53af4f02264a4a6de70b77a8a5b9089abeeaa6197710562794899abbc710"
+sha256 = "06cdf5842da5896d55063c85f6953b7a7b599a7fbd4025b87975027c2907ec9f"
 fetched_at = "2026-11-21"
 
 [mistral]
@@ -222,7 +222,7 @@ lobehub_mark = "mistral"
 lobehub_text = "mistral"
 word = "Mistral AI"
 license = "MIT (icon library path data); the mark is Mistral AI's trademark"
-sha256 = "81ad8c2175c089b8fef8645c9fef5c75931dd5600f57ce1bb67812901ae849a9"
+sha256 = "ed7392a9bcdd7a7d158825368a405b1a65023c1a8a275754a7275dc1d5c10e26"
 fetched_at = "2026-11-21"
 
 [moonshot]
@@ -239,7 +239,7 @@ lobehub_mark = "kimi"
 lobehub_text = "kimi"
 word = "Kimi"
 license = "MIT (icon library path data); the mark is Moonshot AI (Kimi product mark)'s trademark"
-sha256 = "a66dfccfcb9a2e728eb08f3cf2bbae16619829aece08c302a9a9d47e3e571926"
+sha256 = "da8593222981c347feb1bc589d4835901b3b838f9d0aeafa6d83bbb31b45f809"
 fetched_at = "2026-11-21"
 
 [openai]
@@ -256,7 +256,7 @@ lobehub_mark = "openai"
 lobehub_text = "openai"
 word = "OpenAI"
 license = "MIT (icon library path data); the mark is OpenAI's trademark; the library ships no openai -color artwork"
-sha256 = "6a7303208d868e9d33774b86dc47b9f1096a1f73759c341e7288f31d443aeb3f"
+sha256 = "57a7952c4e3435a9c68079b8ab1ccda869410f325333b72326c31c4b5900dc71"
 fetched_at = "2026-11-21"
 
 [perplexity]
@@ -273,7 +273,7 @@ lobehub_mark = "perplexity"
 lobehub_text = "perplexity"
 word = "Perplexity"
 license = "MIT (icon library path data); the mark is Perplexity AI's trademark"
-sha256 = "1dc19c3ad3332543db82b56a43150404b038c3cba5b78edb65a1ce6429e3f4fa"
+sha256 = "7b2d5f1a55758dc145f52964e71bbae70d4398e57c2ac15481207abfecd1aa75"
 fetched_at = "2026-11-21"
 
 [qwen]
@@ -290,7 +290,7 @@ lobehub_mark = "qwen"
 lobehub_text = "qwen"
 word = "Qwen"
 license = "MIT (icon library path data); the mark is Alibaba (Qwen)'s trademark"
-sha256 = "3b39726276128a5a548b273a83cdbcd74461cda3da158d6c5dcd1b2f28e10f55"
+sha256 = "183cc4df668c61cc8fe96f386aecee4cf8f983e8ff32e66c565cf0c14aa03b91"
 fetched_at = "2026-11-21"
 
 [runway]
@@ -307,7 +307,7 @@ lobehub_mark = "runway"
 lobehub_text = "runway"
 word = "Runway"
 license = "MIT (icon library path data); the mark is Runway AI's trademark; the library ships no runway -color artwork"
-sha256 = "f1621e6e2c787d4b0662d758c6d94104a96e9602fa91980b61a5cde7facd8d59"
+sha256 = "cabf8531497e11dac4cda3a0f95e5c0d8364a7b644aad02cbc7162ed699b157c"
 fetched_at = "2026-11-21"
 
 [stability]
@@ -324,7 +324,7 @@ lobehub_mark = "stability"
 lobehub_text = "stability"
 word = "Stable Diffusion"
 license = "MIT (icon library path data); the mark is Stability AI's trademark"
-sha256 = "73f74160cbf98f97bdbabf68da0b135b7b4e84d50e2d044fbe8652e42d8c9e31"
+sha256 = "837a890801917b17f18c75f30a9acc1923e70fa7eeb982707b1b74d706969227"
 fetched_at = "2026-11-21"
 
 [stepfun]
@@ -341,7 +341,7 @@ lobehub_mark = "stepfun"
 lobehub_text = "stepfun"
 word = "StepFun"
 license = "MIT (icon library path data); the mark is StepFun's trademark"
-sha256 = "7232ec813e01726b15b678ac3d75d723427733657151506b18610fd9f579cb99"
+sha256 = "7c1e4c2bff490503ce2615b06ba10e66a152094d751378658d6d55ac5a050156"
 fetched_at = "2026-11-21"
 
 [tripo]
@@ -358,7 +358,7 @@ lobehub_mark = "tripo"
 lobehub_text = "tripo"
 word = "Tripo"
 license = "MIT (icon library path data); the mark is Tripo AI's trademark"
-sha256 = "c01f229f9741aaa850d225088a12d6a38e515dafb55bf844c85ba3631630b125"
+sha256 = "a02a1b032eb4da1ca4f144aad8369db0caaa5b2f8bb5796a058f680a7f92e95f"
 fetched_at = "2026-11-21"
 
 [xai]
@@ -375,7 +375,7 @@ lobehub_mark = "grok"
 lobehub_text = "grok"
 word = "Grok"
 license = "MIT (icon library path data); the mark is xAI (Grok)'s trademark; the library ships no grok -color artwork"
-sha256 = "1328527f9ccf823d27e153a7cf590ed4034864a665611dd27ecf89fadf2e9f8f"
+sha256 = "9aed231e833cf1e8cbef40aaf1999cb6da8ae48fa6076679401d0204eef13469"
 fetched_at = "2026-11-21"
 
 [zhipu_glm]
@@ -393,5 +393,5 @@ lobehub_mark = "zai"
 lobehub_text = "zai"
 word = "Z.ai"
 license = "MIT (icon library path data); the mark is Zhipu/Z.ai's trademark; the combine mark is the library's zai rendition (the mono tree keeps the official plate)"
-sha256 = "1fcbe601065171cdb18e349aab0ec6f60df7c50305edeb62d58b3e15204cd61c"
+sha256 = "ceaab72005234561135df832210165d548bf04b67a658f10c876a69ccb1e19b5"
 fetched_at = "2026-11-21"

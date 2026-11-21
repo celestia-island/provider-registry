@@ -26,11 +26,13 @@ Pipeline per provider (threaded, deterministic bytes):
   3. measure each piece's ink box (fontTools parses the SVG path data into a
      bounds pen — no rasterization, no font files involved);
   4. compose: one lockup unit = the mark ink height (the box is exactly
-     `0 0 W 1`); the wordmark's measured ink band maps to 1/MARK_HEIGHT of
-     the box, vertically centered (the mark stands MARK_HEIGHT cap-bands
-     tall — the consumer skins' proportion); the mark↔word gap is MARK_GAP
-     cap units; an over-wide mark keeps its aspect and shrinks below the
-     full height (MAX_MARK_WIDTH clamp — never distorted);
+     `0 0 W 1` and the mark box fills the full unit height — every layer
+     box stays inside the canvas, validate_composed enforces it); the
+     wordmark's measured ink band maps to 1/MARK_HEIGHT of the box,
+     vertically centered (the mark stands MARK_HEIGHT cap-bands tall —
+     the consumer skins' proportion); the mark↔word gap is MARK_GAP cap
+     units; an over-wide mark keeps its aspect and shrinks below the full
+     height (MAX_MARK_WIDTH clamp — never distorted);
   5. emit the layers (`pr-combine-mark-color`, `pr-combine-mark-mono`,
      `pr-combine-text`), each stamped with its placed box in
      `data-pr-box="x y w h"` so consumers can re-crop a single layer without
@@ -42,14 +44,16 @@ Pipeline per provider (threaded, deterministic bytes):
 Layer policy (the readability contract, aligned with the consumer skins):
   * with color artwork: the SINGLE most-carried flat fill (the "main" fill)
     is contrast-checked against the LIGHT FABRIC (#ffffff); below
-    MIN_CONTRAST it is replaced with currentColor. Gradient paints are kept
+    ART_MIN_CONTRAST (1.5 — effectively invisible) it is replaced with
+    currentColor. Gradient paints are kept
     verbatim — a gradient's own light-to-dark span carries the shape's
     readability, and rewriting one would erase multi-color identities (the
     Gemini spark). Knockout accents inside color artwork stay untouched:
     only the main flat fill is ever rewritten.
   * without color artwork: the color layer is the mono mark tinted with the
     brand hex (manifest `tint` override, else the provider `brand_color`) —
-    but only when the tint itself clears MIN_CONTRAST on the light fabric
+    but only when the tint itself clears TINT_MIN_CONTRAST (3.0) on the
+    light fabric
     (a tint that fails would ship an invisible mark); otherwise the color
     layer is dropped and the mono layer doubles as the color layer (it then
     carries BOTH classes, mirroring the consumer skins' contract).
@@ -118,20 +122,28 @@ LOBEHUB_PIN = "1.102.0"
 LOBEHUB_URL = "https://unpkg.com/{package}@{pin}/icons/{name}.svg"
 
 # ── the composition constants (cap-band units) ──────────────────────────────
-# The lockup box is 1 unit TALL and the mark ink fills the FULL height, so
-# one lockup unit equals one mark height. The wordmark's measured ink band
-# is 1/MARK_HEIGHT tall and vertically centered; the mark↔word gap is
-# MARK_GAP cap-bands. MAX_MARK_WIDTH is the over-width constraint: an
-# unusually wide mark keeps its aspect but shrinks below the full height
-# instead of pushing the wordmark off the chip.
+# The lockup box is 1 unit TALL and the MARK BOX fills the full height, so
+# one lockup unit equals one mark height (the viewBox is pinned to
+# `0 0 W 1` and every layer box stays inside it). The wordmark's measured
+# ink band is 1/MARK_HEIGHT tall and vertically centered; the mark↔word gap
+# is MARK_GAP cap-bands. MAX_MARK_WIDTH is the over-width constraint: a mark
+# wider than the box is tall (aspect > 1 in lockup units) keeps its aspect
+# and shrinks below the full height — never distorted.
 MARK_HEIGHT = 1.45
 MARK_GAP = 0.3
-MAX_MARK_WIDTH = 1.45
+MAX_MARK_WIDTH = 1.0  # lockup units — the over-wide clamp (aspect > 1)
 MAX_LOCKUP_WIDTH = 12.0  # sanity cap — a lockup wider than this is refused
 
-# The readability fabric: the color layer is validated against the LIGHT
+# The readability fabrics: the color layer is validated against the LIGHT
 # surface it will be displayed on (the dark theme displays the mono layer).
-MIN_CONTRAST = 3.0
+# Two floors with different jobs (claude-style skins' intent): the color
+# artwork's MAIN fill only flips to currentColor when it is effectively
+# invisible (ART_MIN_CONTRAST — brand hues like perplexity's teal at 2.4
+# survive), while a mono-mark TINT must clear the stricter bar because the
+# tint IS the whole layer (TINT_MIN_CONTRAST — a failing tint would ship an
+# invisible mark).
+ART_MIN_CONTRAST = 1.5
+TINT_MIN_CONTRAST = 3.0
 LIGHT_FABRIC = (255, 255, 255)
 
 MAX_WORKERS = 6
@@ -486,7 +498,7 @@ def resolve_colorwork(group: ET.Element) -> str:
 
     Main fill = the most-carried flat fill (ties break to the lexicographically
     smallest spelling — deterministic without artwork knowledge). Below
-    MIN_CONTRAST on the light fabric it becomes currentColor; everything else
+    ART_MIN_CONTRAST on the light fabric it becomes currentColor; everything else
     (gradients, knockout accents, other brand fills) is untouched."""
     counts = flat_fill_counts(group)
     if not counts:
@@ -494,13 +506,13 @@ def resolve_colorwork(group: ET.Element) -> str:
     main = min(counts, key=lambda f: (-counts[f], f))
     kind, rgb = parse_paint(main)
     rgb_or_fabric = rgb if rgb is not None else LIGHT_FABRIC
-    if contrast(rgb_or_fabric, LIGHT_FABRIC) >= MIN_CONTRAST:
-        return f"color artwork (main fill {main} clears contrast {MIN_CONTRAST})"
+    if contrast(rgb_or_fabric, LIGHT_FABRIC) >= ART_MIN_CONTRAST:
+        return f"color artwork (main fill {main} clears contrast {ART_MIN_CONTRAST})"
     flipped = rewrite_fill(group, main, "currentColor")
     if flipped == 0:  # pragma: no cover — counts came from this very tree
         raise LogoError("main fill rewrite touched nothing")
     return (
-        f"color artwork (main fill {main} below contrast {MIN_CONTRAST}"
+        f"color artwork (main fill {main} below contrast {ART_MIN_CONTRAST}"
         f" on light fabric — {flipped} path(s) -> currentColor)"
     )
 
@@ -566,11 +578,13 @@ def compose_lockup(word: str,
                    mark_mono_group: ET.Element, mark_mono_ink: Bounds,
                    mark_color_group: ET.Element | None, mark_color_ink: Bounds | None,
                    text_group: ET.Element, text_ink: Bounds) -> bytes:
-    """Build the lockup document. Geometry: the mark box fills the full unit
-    height [0, 1] (its shape derives from the UNION of the mark layers' ink
-    boxes — the two mark drawings may differ slightly); the text ink band
-    maps to 1/MARK_HEIGHT, vertically centered; the gap is MARK_GAP cap
-    units (= MARK_GAP / MARK_HEIGHT here)."""
+    """Build the lockup document. Geometry: one lockup unit = one mark
+    height — the mark box fills the full unit height [0, 1] (its shape
+    derives from the UNION of the mark layers' ink boxes; the two mark
+    drawings may differ slightly), the text ink band maps to
+    1/MARK_HEIGHT, vertically centered, and the gap is MARK_GAP cap units
+    (= MARK_GAP / MARK_HEIGHT here). Every layer box therefore stays inside
+    the pinned `0 0 W 1` viewBox — validate_composed enforces it."""
     inks = [mark_mono_ink] if mark_color_ink is None else [mark_mono_ink, mark_color_ink]
     ux0 = min(b[0] for b in inks)
     uy0 = min(b[1] for b in inks)
@@ -578,7 +592,7 @@ def compose_lockup(word: str,
     uy1 = max(b[3] for b in inks)
     aspect = (ux1 - ux0) / (uy1 - uy0)
     if aspect <= 1.0:
-        mark_w, mark_h = MARK_HEIGHT * aspect, MARK_HEIGHT
+        mark_w, mark_h = aspect, 1.0
     else:
         mark_w, mark_h = MAX_MARK_WIDTH, MAX_MARK_WIDTH / aspect
     gap = MARK_GAP / MARK_HEIGHT
@@ -637,13 +651,31 @@ def validate_composed(data: bytes, expect_word: str | None = None) -> list[str]:
     viewBox = root.get("viewBox")
     if not viewBox or not re.fullmatch(r"0 0 [0-9.]+ 1", viewBox):
         problems.append(f"viewBox {viewBox!r} is not pinned to '0 0 W 1'")
+        return problems
+    total_w = float(viewBox.split()[2])
 
     layers: list[str] = []
     for el in root:
         cls = el.get("class", "")
         layers.extend(c for c in cls.split() if c.startswith("pr-combine-"))
-        if el.get(BOX_ATTR) is None:
+        box = el.get(BOX_ATTR)
+        if box is None:
             problems.append(f"layer {cls!r} carries no {BOX_ATTR}")
+        else:
+            # Containment pin: the composer's unit is the mark height, so a
+            # box that escapes the pinned `0 0 W 1` canvas is a geometry
+            # bug that would CLIP the mark at render time (the unit-mixing
+            # defect this file shipped once — the pin keeps it dead).
+            try:
+                bx, by, bw, bh = (float(part) for part in box.split())
+            except ValueError:
+                problems.append(f"malformed {BOX_ATTR} {box!r}")
+            else:
+                eps = 1e-6
+                if bx < -eps or by < -eps or bx + bw > total_w + eps or by + bh > 1.0 + eps:
+                    problems.append(
+                        f"layer {cls!r} box {box!r} escapes the {viewBox!r} canvas"
+                    )
         for attr_name in el.attrib:
             if FORBIDDEN_ATTR.match(attr_name.rsplit("}", 1)[-1].lower()):
                 problems.append(f"forbidden attribute {attr_name!r}")
@@ -813,7 +845,7 @@ def compose_provider(provider: str, entry: dict, logos_dir: Path,
             tint_rgb: tuple[int, int, int] | None = None
             if tint_value:
                 _, tint_rgb = parse_paint(f"#{tint_value}")
-            if tint_rgb is not None and contrast(tint_rgb, LIGHT_FABRIC) >= MIN_CONTRAST:
+            if tint_rgb is not None and contrast(tint_rgb, LIGHT_FABRIC) >= TINT_MIN_CONTRAST:
                 # Tint the mono mark for the light layer; the dark layer stays
                 # currentColor. Both layers carry their own geometry copies so
                 # the consumer's theme switch is a pure layer toggle.
@@ -824,7 +856,7 @@ def compose_provider(provider: str, entry: dict, logos_dir: Path,
             else:
                 note = (
                     f"no -color artwork; tint {tint_value or '—'} below contrast"
-                    f" {MIN_CONTRAST} on light fabric — color layer folded into mono"
+                    f" {TINT_MIN_CONTRAST} on light fabric — color layer folded into mono"
                 )
 
         data = compose_lockup(

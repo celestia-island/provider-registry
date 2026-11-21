@@ -76,11 +76,12 @@ byte-identical, so a hash only moves when the library moves.
 
 Each committed file carries three layers (`pr-combine-mark-color`,
 `pr-combine-mark-mono`, `pr-combine-text`), each stamped with its placed box
-(`data-pr-box="x y w h"`, the text layer additionally `data-combine-word`)
+(`data-pr-box="x y w h"` — always inside the canvas, the validator pins it)
 so a consumer can split a layer without re-measuring. Geometry: one lockup
-unit = the mark ink height (the viewBox is pinned to `0 0 W 1`); the
-wordmark's measured ink band maps to 1/1.45 of the box, vertically centered;
-the mark↔word gap is 0.3 cap units; an over-wide mark keeps its aspect and
+unit = the mark ink height — the mark box fills the full unit height (the
+viewBox is pinned to `0 0 W 1` and nothing escapes it); the wordmark's
+measured ink band maps to 1/1.45 of the box, vertically centered; the
+mark↔word gap is 0.3 cap units; an over-wide mark keeps its aspect and
 shrinks (uniform scale, never distorted). Ink boxes are measured with
 fontTools by parsing the SVG path data into a bounds pen — no rasterization,
 no font files.
@@ -89,17 +90,21 @@ Layer policy (the readability contract, shared with the consumer skins):
 
 - **Color layer** — the vendor's `-color` artwork when the library ships
   one. The single most-carried flat fill (the "main" fill) is
-  contrast-checked against the light fabric `#ffffff`: below the 3.0 floor
-  it is rewritten to `currentColor` (perplexity's teal and tripo's pale
-  yellow flip; claude's coral clears at 3.12). Gradients are kept verbatim —
-  their own light-to-dark span carries the shape's readability, and
-  rewriting one would erase multi-color identities (the Gemini spark).
+  contrast-checked against the light fabric `#ffffff`: below the 1.5 art
+  floor (effectively invisible) it is rewritten to `currentColor` — tripo's
+  pale yellow (1.41) flips, while perplexity's teal (2.38) and claude's
+  coral (3.12) are brand hues and survive. Gradient paints are kept
+  verbatim — their own light-to-dark span carries the shape's readability,
+  and rewriting one would erase multi-color identities (the Gemini spark).
   Knockout accents are never rewritten: only the main flat fill is touched.
 - **Without `-color` artwork** — the color layer is the mono mark tinted
   with the brand hex (`tint` override, else `brand_color`), but only when
-  the tint itself clears 3.0 on white (openai/runway/xai/zai tint; mimo's
-  `#FF6900` misses at 2.89, so its color layer folds into the mono layer —
-  which then carries both classes, mirroring the consumer skins' contract).
+  the tint itself clears the stricter 3.0 tint floor on white (openai/
+  runway/xai/zai tint; mimo's `#FF6900` misses at 2.89, so its color layer
+  folds into the mono layer — which then carries both classes, mirroring
+  the consumer skins' contract). The two floors are different jobs: the art
+  floor keeps a brand hue that still reads; the tint floor refuses a tint
+  that would BE the whole layer and not read.
 - **Mono layer / text layer** — always `currentColor`, following the
   consumer's theme text. A vendor whose `-text` variant is missing is
   SKIPPED (no lockup synthesized, the gap named in the run report) — a
