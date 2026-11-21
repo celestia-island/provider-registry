@@ -953,10 +953,21 @@ class PublishWorkflowGuardTest(unittest.TestCase):
         # comment describing the same thing cannot satisfy it.
         self.assertIn("\n    branches: [master]", text)
         self.assertIn("\n  contents: write", text)
-        self.assertIn('gh release upload "$TAG" "$FILE" --clobber', text)
+        # The release half talks REST through curl (issue #34 dropped the gh CLI
+        # dependency): pin the upload of the built file under the published asset
+        # name, the delete that makes the upload a replacement, and the lookup
+        # that decides create-vs-edit.
+        self.assertIn('api GET "$API/releases/tags/$TAG"', text)
+        self.assertIn('api DELETE "$API/releases/assets/$ASSET_ID"', text)
+        self.assertIn('--data-binary "@$FILE"', text)
+        self.assertIn('"${UPLOAD_URL}?name=${ASSET_NAME}"', text)
         self.assertIn("\n      dry_run:", text)
-        # `gh` must fail the job rather than skip the upload silently.
-        self.assertIn("gh is not installed on this runner", text)
+        # A missing tool must fail the job rather than skip the upload silently.
+        self.assertIn("curl is not installed on this runner", text)
+        # And the dropped dependency stays dropped: no step may gate on the gh
+        # binary again (that gate is what took the catalog stale, issue #34).
+        self.assertNotIn("command -v gh", text)
+        self.assertNotIn("gh release", text)
 
 
 class CatalogValidateWorkflowTest(unittest.TestCase):

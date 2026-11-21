@@ -10,8 +10,8 @@ name: Publish Catalog
 #      `registry.toml` into `dist/provider-registry-catalog.json` (gitignored,
 #      rebuilt from the tree on every run — the TOML files stay the only source);
 #   2. the artifact is uploaded as the asset `provider-registry-catalog.json` of
-#      the rolling release tag `catalog-latest` (same name, `--clobber`, so the
-#      asset is replaced in place and there is exactly one jump URL);
+#      the rolling release tag `catalog-latest` (same name, replaced in place,
+#      so there is exactly one jump URL);
 #   3. `gateway.celestia.world/downloads/provider-registry/latest` 302s to that
 #      asset (registered gateway-side as artifact `provider-registry`, channel
 #      `latest` — an ops action, not a code change in this repository);
@@ -41,15 +41,21 @@ name: Publish Catalog
 #     `scripts/update_models.py` sync, which this job does not run). Keeping the
 #     publish path free of package-index access means a flaky or 403 mirror
 #     cannot make the shipped catalog stale.
-#   * `gh` is preinstalled on the farm and authenticates with the repository's
-#     own `GITHUB_TOKEN`. If it is ever missing the job FAILS instead of
-#     skipping the upload: a green run that published nothing is the worst
-#     failure mode here, because arona would keep serving the previous catalog
-#     and nothing would say so.
+#   * there is no `gh` dependency either: the farm runners do not ship the
+#     GitHub CLI, and gating on it failed every master push while the catalog
+#     went stale (issue #34). The release half talks to the GitHub REST API
+#     through `curl` — part of every Debian runner — with the repository's own
+#     `GITHUB_TOKEN`, and parses the JSON responses with the same system
+#     `python3` that builds the artifact (the farm ships no `jq`). As with the
+#     whole publish path, a missing tool or a rejected token FAILS the job
+#     instead of skipping the upload: a green run that published nothing is the
+#     worst failure mode here, because arona would keep serving the previous
+#     catalog and nothing would say so.
 #
 # One in-flight run at a time (ci-ops 8.3.3), but NOT cancel-in-progress: a run
-# cancelled between `gh release create` and `gh release upload` would leave the
-# rolling asset describing an older commit while the run reports cancelled.
+# cancelled between the release create/edit call and the asset upload would
+# leave the rolling asset describing an older commit while the run reports
+# cancelled.
 
 concurrency:
   group: publish-catalog
@@ -91,21 +97,35 @@ jobs:
 
       - name: Preflight the runner
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           python3 --version
           # The generator reads TOML with the standard library; 3.10 and older
           # ship no `tomllib`, and failing here names the runner, not the data.
           python3 -c 'import tomllib'
-          if ! command -v gh >/dev/null 2>&1; then
-            echo "::error::gh is not installed on this runner, so the catalog-latest release cannot be updated. Install the GitHub CLI on the farm — this job must not skip the upload silently, or the published catalog goes stale with a green run."
+          # The release half talks to the REST API through curl (the header
+          # explains why there is no gh here). curl ships with every Debian
+          # runner, but if it is ever missing the job FAILS instead of skipping
+          # the upload — a green run that published nothing is the worst
+          # failure mode this job can have.
+          if ! command -v curl >/dev/null 2>&1; then
+            echo "::error::curl is not installed on this runner, so the catalog-latest release cannot be updated over the REST API. Install curl on the farm — this job must not skip the upload silently, or the published catalog goes stale with a green run."
             exit 1
           fi
-          gh --version
-          # `contents: write` failures surface as a 403 on the first release call;
-          # proving the token works here names the problem instead.
-          gh auth status
+          curl --version | head -n 1
+          # `contents: write` failures surface as a 403 on the first release
+          # call; proving the token can read the repository here names the
+          # problem instead (the REST equivalent of the old `gh auth status`).
+          STATUS="$(curl -sS -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}")"
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::the workflow token cannot read ${GITHUB_REPOSITORY} over the REST API (HTTP ${STATUS}) — the catalog-latest release cannot be updated with this credential"
+            exit 1
+          fi
 
       # Data gate first: never publish an artifact built from a tree that fails
       # its own contract. `validate_catalog.py` ends with the index check
@@ -173,14 +193,18 @@ jobs:
         #   * `inputs.dry_run != true` — the explicit dry run on master.
         if: github.ref == 'refs/heads/master' && (github.event_name != 'workflow_dispatch' || inputs.dry_run != true)
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          API="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}"
           TAG=catalog-latest
           TITLE="Provider Registry Catalog (rolling)"
           FILE=dist/provider-registry-catalog.json
+          ASSET_NAME=provider-registry-catalog.json
           NOTES="$(mktemp)"
-          trap 'rm -f "$NOTES"' EXIT
+          PAYLOAD="$(mktemp)"
+          BODY="$(mktemp)"
+          trap 'rm -f "$NOTES" "$PAYLOAD" "$BODY"' EXIT
           {
             echo "Machine-readable provider/model catalog, rebuilt from the TOML tree on every push to master."
             echo
@@ -201,22 +225,74 @@ jobs:
             echo "published contract, and a missing asset silently forces every deployment back to its bundled snapshot."
           } > "$NOTES"
 
+          # One curl wrapper for every release call: prints the HTTP status on
+          # stdout and keeps the response body in "$BODY", sending the optional
+          # payload file as JSON. GitHub reports API errors as a 4xx with a JSON
+          # body, so the status code decides and the body names the problem —
+          # the token itself is never printed.
+          api() { # api METHOD URL [PAYLOAD_FILE]
+            local args=(
+              -sS -o "$BODY" -w '%{http_code}'
+              -H "Authorization: Bearer ${GITHUB_TOKEN}"
+              -H "Accept: application/vnd.github+json"
+              -H "X-GitHub-Api-Version: 2022-11-28"
+            )
+            if [ "$#" -gt 2 ]; then
+              args+=(-H "Content-Type: application/json" --data-binary "@$3")
+            fi
+            curl "${args[@]}" -X "$1" "$2"
+          }
+          bail() { # bail MESSAGE — name the API failure and stop
+            echo "::error::$1 (HTTP ${CODE:-?}, body: $(head -c 400 "$BODY" | tr '\n' ' '))"
+            exit 1
+          }
+
           # Rolling release: create it once, then re-point its notes at each build
-          # and overwrite the asset in place. `--target "$GITHUB_SHA"` pins the tag
-          # to the commit whose tree was actually built (master may move during
-          # this run); when the release exists the tag is left where it is — the
-          # asset, not the tag, is what consumers download.
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --title "$TITLE" --notes-file "$NOTES"
+          # and overwrite the asset in place. `target_commitish` pinned to
+          # "$GITHUB_SHA" tags the commit whose tree was actually built (master
+          # may move during this run); when the release exists the tag is left
+          # where it is — the asset, not the tag, is what consumers download.
+          CODE="$(api GET "$API/releases/tags/$TAG")"
+          if [ "$CODE" = "200" ]; then
+            RELEASE_ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1],encoding="utf-8"))["id"])' "$BODY")"
+            python3 -c 'import json,sys;json.dump({"tag_name":sys.argv[1],"name":sys.argv[2],"body":open(sys.argv[3],encoding="utf-8").read()},open(sys.argv[4],"w",encoding="utf-8"))' "$TAG" "$TITLE" "$NOTES" "$PAYLOAD"
+            CODE="$(api PATCH "$API/releases/$RELEASE_ID" "$PAYLOAD")"
+            [ "$CODE" = "200" ] || bail "editing the catalog-latest release failed"
+          elif [ "$CODE" = "404" ]; then
+            python3 -c 'import json,os,sys;json.dump({"tag_name":sys.argv[1],"target_commitish":os.environ["GITHUB_SHA"],"name":sys.argv[2],"body":open(sys.argv[3],encoding="utf-8").read()},open(sys.argv[4],"w",encoding="utf-8"))' "$TAG" "$TITLE" "$NOTES" "$PAYLOAD"
+            CODE="$(api POST "$API/releases" "$PAYLOAD")"
+            [ "$CODE" = "201" ] || bail "creating the catalog-latest release failed"
           else
-            gh release create "$TAG" --title "$TITLE" --notes-file "$NOTES" --target "$GITHUB_SHA"
+            bail "looking up the catalog-latest release failed"
           fi
-          # `--clobber` replaces the asset in place. For the moment between the
-          # delete and the re-upload the asset URL 404s; that window is accepted
-          # (a consumer that syncs inside it falls back to its bundled snapshot,
-          # which is the documented behaviour for any sync failure) and cannot be
-          # closed from this side: GitHub offers no atomic asset replace.
-          gh release upload "$TAG" "$FILE" --clobber
+
+          # Replace the asset in place (the old upload's clobber semantics):
+          # drop the same-named asset, then upload this build under that name.
+          # For the moment between the delete and the re-upload the asset URL
+          # 404s; that window is accepted (a consumer that syncs inside it falls
+          # back to its bundled snapshot, which is the documented behaviour for
+          # any sync failure) and cannot be closed from this side: GitHub offers
+          # no atomic asset replace.
+          ASSET_ID="$(python3 -c 'import json,sys;print(next((str(a["id"]) for a in json.load(open(sys.argv[1],encoding="utf-8"))["assets"] if a["name"]==sys.argv[2]), ""))' "$BODY" "$ASSET_NAME")"
+          UPLOAD_URL="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1],encoding="utf-8"))["upload_url"].split("{")[0])' "$BODY")"
+          if [ -n "$ASSET_ID" ]; then
+            CODE="$(api DELETE "$API/releases/assets/$ASSET_ID")"
+            # 204 = replaced; 404 = already gone between the two calls — either
+            # way the asset name is free for this upload.
+            { [ "$CODE" = "204" ] || [ "$CODE" = "404" ]; } \
+              || bail "deleting the previous catalog asset failed"
+          fi
+          # The upload host differs from the API host, so the URL comes from the
+          # release's own `upload_url` (its `{?name,label}` template suffix
+          # stripped above) with the asset name as the query — not spliced onto
+          # "$API".
+          CODE="$(curl -sS -o "$BODY" -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@$FILE" \
+            "${UPLOAD_URL}?name=${ASSET_NAME}")"
+          [ "$CODE" = "201" ] || bail "uploading ${ASSET_NAME} failed"
 
       # An upload that silently replaced nothing leaves the old asset in place and
       # would look identical to a success. Compare the *content* the release now
@@ -228,11 +304,24 @@ jobs:
         # (and must not) touch would compare the artifact against someone else's.
         if: github.ref == 'refs/heads/master' && (github.event_name != 'workflow_dispatch' || inputs.dry_run != true)
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          read -r ASSET_SIZE ASSET_DIGEST <<< "$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/catalog-latest" \
-            --jq '.assets[] | select(.name == "provider-registry-catalog.json") | "\(.size) \(.digest // "")"')"
+          BODY="$(mktemp)"
+          trap 'rm -f "$BODY"' EXIT
+          CODE="$(curl -sS -o "$BODY" -w '%{http_code}' \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases/tags/catalog-latest")"
+          if [ "$CODE" != "200" ]; then
+            echo "::error::reading catalog-latest over the REST API failed (HTTP ${CODE}, body: $(head -c 400 "$BODY" | tr '\n' ' '))"
+            exit 1
+          fi
+          # The same server-side facts the previous read-back step pulled via
+          # `gh api --jq`: the asset's byte size and — when the API exposes it —
+          # its server-computed sha256 digest.
+          read -r ASSET_SIZE ASSET_DIGEST <<< "$(python3 -c 'import json,sys;a=next((x for x in json.load(open(sys.argv[1],encoding="utf-8")).get("assets",[]) if x["name"]==sys.argv[2]),None);print((str(a["size"])+" "+(a.get("digest") or "")) if a else "")' "$BODY" "provider-registry-catalog.json")"
           if [ -z "${ASSET_SIZE:-}" ]; then
             echo "::error::catalog-latest has no provider-registry-catalog.json asset after the upload"
             exit 1
