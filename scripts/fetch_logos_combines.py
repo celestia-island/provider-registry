@@ -26,13 +26,14 @@ Pipeline per provider (threaded, deterministic bytes):
   3. measure each piece's ink box (fontTools parses the SVG path data into a
      bounds pen — no rasterization, no font files involved);
   4. compose: one lockup unit = the mark ink height (the box is exactly
-     `0 0 W 1` and the mark box fills the full unit height — every layer
-     box stays inside the canvas, validate_composed enforces it); the
-     wordmark's measured ink band maps to 1/MARK_HEIGHT of the box,
-     vertically centered (the mark stands MARK_HEIGHT cap-bands tall —
-     the consumer skins' proportion); the mark↔word gap is MARK_GAP cap
-     units; an over-wide mark keeps its aspect and shrinks below the full
-     height (MAX_MARK_WIDTH clamp — never distorted);
+     `0 0 W 1`; a tall mark (aspect ≤ 1) fills the unit height and an
+     over-wide mark clamps at the unit width keeping its aspect — every
+     layer box stays inside the canvas, validate_composed enforces it);
+     the wordmark's measured ink band maps to 1/MARK_HEIGHT of the unit,
+     vertically centered (only a tall mark stands MARK_HEIGHT cap-bands
+     tall — the consumer skins' proportion; a clamped wide mark rides
+     lower); the mark↔word gap is MARK_GAP cap units; the clamp is
+     uniform scale, never distorted;
   5. emit the layers (`pr-combine-mark-color`, `pr-combine-mark-mono`,
      `pr-combine-text`), each stamped with its placed box in
      `data-pr-box="x y w h"` so consumers can re-crop a single layer without
