@@ -13,6 +13,14 @@
 # mode = "mono"   -> the SVG carries fill=currentColor, follows the theme text.
 # mode = "brand"  -> original vendor fills kept (multi-color marks).
 
+# [<id>.combine] — the lockup face (mark + wordmark), composed by
+# scripts/fetch_logos_combines.py from the pinned library. Hand fields:
+# lobehub_mark / lobehub_text (icon stems in the pinned package; -color is
+# probed on the mark stem), word (the wordmark text), optional tint
+# (defaults to the provider brand_color), optional local_* file overrides;
+# sha256 / fetched_at are owned by the combine script (do not hand-edit).
+# The mono tree above is untouched: it remains the fallback asset.
+
 [anthropic]
 source = "lobehub"
 source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/anthropic.svg"
@@ -21,6 +29,14 @@ license = "MIT (icon library path data); the mark is Anthropic's trademark"
 brand_color = "191919"
 sha256 = "bf219c127caf8915012755301e532cd800d1255b6add4149e0fe97e335af3438"
 fetched_at = "2026-11-10"
+
+[anthropic.combine]
+lobehub_mark = "claude"
+lobehub_text = "claude"
+word = "Claude"
+license = "MIT (icon library path data); the mark is Anthropic (Claude product mark)'s trademark; the combine mark is the library's claude rendition (the mono tree keeps the anthropic glyph)"
+sha256 = "561c04b237accbbf7ff16d3df5fd1aa68bd6e700c0f9757b481971fee644d680"
+fetched_at = "2026-11-21"
 
 [baidu]
 source = "lobehub"
@@ -31,6 +47,14 @@ brand_color = "012F8D"
 sha256 = "08591fab76999a7782c9fb4a7c83243d4c20b886ca753076752e9ba4fe75b39d"
 fetched_at = "2026-11-10"
 
+[baidu.combine]
+lobehub_mark = "wenxin"
+lobehub_text = "wenxin"
+word = "Wenxin"
+license = "MIT (icon library path data); the mark is Baidu (Wenxin/ERNIE product mark)'s trademark"
+sha256 = "55b67633dacec327773926e263ef883c5f4739d226b3af12cac6a97e004914d0"
+fetched_at = "2026-11-21"
+
 [cohere]
 source = "lobehub"
 source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/cohere.svg"
@@ -39,6 +63,14 @@ license = "MIT (icon library path data); the mark is Cohere's trademark"
 brand_color = "FF7759"
 sha256 = "387cdd4719a86b708da845ee7875c06c2de19f31acd2fabece7fbd5a7c984c0d"
 fetched_at = "2026-11-10"
+
+[cohere.combine]
+lobehub_mark = "cohere"
+lobehub_text = "cohere"
+word = "Cohere"
+license = "MIT (icon library path data); the mark is Cohere's trademark"
+sha256 = "63f352e8f6f05bcba10cf8fc94f269f976b70970738b1ec732f3536be0a33aae"
+fetched_at = "2026-11-21"
 
 [deepseek]
 source = "lobehub"
@@ -49,6 +81,14 @@ brand_color = "4D6BFE"
 sha256 = "9d841e7265ac04871612bb37a1d74e6fbb41e052d1b5bd6d599b642bb5176d08"
 fetched_at = "2026-11-10"
 
+[deepseek.combine]
+lobehub_mark = "deepseek"
+lobehub_text = "deepseek"
+word = "DeepSeek"
+license = "MIT (icon library path data); the mark is DeepSeek's trademark"
+sha256 = "b3faab6d36aa7c2673f0aa2f629e9ba440b06a2a2e28fdc8b0c9d42fb19ceac9"
+fetched_at = "2026-11-21"
+
 [doubao]
 source = "lobehub"
 source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/doubao-color.svg"
@@ -57,6 +97,14 @@ license = "MIT (icon library path data); the mark is ByteDance (Doubao product m
 brand_color = "1E37FC"
 sha256 = "3fc3de5bfc87aef76461762cb4f0708565d6e8843a7b738b22b283e1036c0fdf"
 fetched_at = "2026-11-10"
+
+[doubao.combine]
+lobehub_mark = "doubao"
+lobehub_text = "doubao"
+word = "Doubao"
+license = "MIT (icon library path data); the mark is ByteDance (Doubao product mark)'s trademark"
+sha256 = "99548de47857026c8ae962fd9e7844daa4f8cdfd98fbed185b8c6d079a6c2de8"
+fetched_at = "2026-11-21"
 
 [google]
 source = "lobehub"
@@ -67,6 +115,14 @@ brand_color = "8E75B2"
 sha256 = "9f6f33e47dd60088361357b6d05270f053c90b091f6e741ab90a314bc527499d"
 fetched_at = "2026-11-10"
 
+[google.combine]
+lobehub_mark = "gemini"
+lobehub_text = "gemini"
+word = "Gemini"
+license = "MIT (icon library path data); the mark is Google (Gemini spark)'s trademark"
+sha256 = "aaea79c8b2c1773d6a92afd3acb1d6a22758199c0921d7bdefe391e4ce827809"
+fetched_at = "2026-11-21"
+
 [hunyuan]
 source = "lobehub"
 source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/hunyuan.svg"
@@ -75,6 +131,14 @@ license = "MIT (icon library path data); the mark is Tencent (Hunyuan)'s tradema
 brand_color = "0052D9"
 sha256 = "291a25e849cc983a741946b35ab9b4be776992ccdba8285d87da5a850313dccf"
 fetched_at = "2026-11-10"
+
+[hunyuan.combine]
+lobehub_mark = "hunyuan"
+lobehub_text = "hunyuan"
+word = "Hunyuan"
+license = "MIT (icon library path data); the mark is Tencent (Hunyuan)'s trademark"
+sha256 = "a2e7b52d0bfad35ec024d7348edf21b624389c8f1b0768a5cb877ad2ce16320d"
+fetched_at = "2026-11-21"
 
 [meshy]
 source = "lobehub"
@@ -85,6 +149,14 @@ brand_color = "67B800"
 sha256 = "b8da2a627430939f3a0b8af098fb87e0fbbf89cdf3505619d8cc9a06b57d6e5f"
 fetched_at = "2026-11-10"
 
+[meshy.combine]
+lobehub_mark = "meshy"
+lobehub_text = "meshy"
+word = "Meshy"
+license = "MIT (icon library path data); the mark is Meshy's trademark"
+sha256 = "e10cffedba3e094839ec23cc54d6498b08bb34fd55037b18d325798905ac3d06"
+fetched_at = "2026-11-21"
+
 [meta]
 source = "lobehub"
 source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/meta.svg"
@@ -93,6 +165,14 @@ license = "MIT (icon library path data); the mark is Meta's trademark"
 brand_color = "0467DF"
 sha256 = "17c6c83fd70b08918784946ee27caf5d065faf74ce61adf9d86b47f49b93abc4"
 fetched_at = "2026-11-10"
+
+[meta.combine]
+lobehub_mark = "meta"
+lobehub_text = "meta"
+word = "Llama"
+license = "MIT (icon library path data); the mark is Meta's trademark"
+sha256 = "92b0e33b34df3211e84019ca71ef11fdadf4b057092847106cc75188b134949b"
+fetched_at = "2026-11-21"
 
 [mimo]
 source = "lobehub"
@@ -103,6 +183,14 @@ brand_color = "FF6900"
 sha256 = "22909de6783897d040ef6b0ce8ab6dcde3025652280f24a745ed1071607d42f4"
 fetched_at = "2026-11-10"
 
+[mimo.combine]
+lobehub_mark = "xiaomimimo"
+lobehub_text = "xiaomimimo"
+word = "Xiaomi MiMo"
+license = "MIT (icon library path data); the mark is Xiaomi (MiMo product mark)'s trademark"
+sha256 = "fd61c53f3aed9574c0e4d49222935a6b8f6cfd8969a1233e2ca653bbb3354fe4"
+fetched_at = "2026-11-21"
+
 [minimax]
 source = "lobehub"
 source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/minimax.svg"
@@ -112,14 +200,13 @@ brand_color = "E73562"
 sha256 = "79873a951d4a2cb8683890afe8a63a7eee6dafa622a46a62e338bc79a1c4e57d"
 fetched_at = "2026-11-10"
 
-[moonshot]
-source = "lobehub"
-source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/kimi.svg"
-mode = "mono"
-license = "MIT (icon library path data); the mark is Moonshot AI (Kimi product mark)'s trademark"
-brand_color = "1783FF"
-sha256 = "1424608a873ac93d91635e3c61643ae29e2b5617383b827d41f85643dbfed955"
-fetched_at = "2026-11-10"
+[minimax.combine]
+lobehub_mark = "minimax"
+lobehub_text = "minimax"
+word = "MiniMax"
+license = "MIT (icon library path data); the mark is MiniMax's trademark"
+sha256 = "06cdf5842da5896d55063c85f6953b7a7b599a7fbd4025b87975027c2907ec9f"
+fetched_at = "2026-11-21"
 
 [mistral]
 source = "lobehub"
@@ -130,6 +217,31 @@ brand_color = "FA520F"
 sha256 = "53311c41e999dbb23282891a0b41d1282fa1e7d9e05b6262956861c0cb6757ad"
 fetched_at = "2026-11-10"
 
+[mistral.combine]
+lobehub_mark = "mistral"
+lobehub_text = "mistral"
+word = "Mistral AI"
+license = "MIT (icon library path data); the mark is Mistral AI's trademark"
+sha256 = "ed7392a9bcdd7a7d158825368a405b1a65023c1a8a275754a7275dc1d5c10e26"
+fetched_at = "2026-11-21"
+
+[moonshot]
+source = "lobehub"
+source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/kimi.svg"
+mode = "mono"
+license = "MIT (icon library path data); the mark is Moonshot AI (Kimi product mark)'s trademark"
+brand_color = "1783FF"
+sha256 = "1424608a873ac93d91635e3c61643ae29e2b5617383b827d41f85643dbfed955"
+fetched_at = "2026-11-10"
+
+[moonshot.combine]
+lobehub_mark = "kimi"
+lobehub_text = "kimi"
+word = "Kimi"
+license = "MIT (icon library path data); the mark is Moonshot AI (Kimi product mark)'s trademark"
+sha256 = "da8593222981c347feb1bc589d4835901b3b838f9d0aeafa6d83bbb31b45f809"
+fetched_at = "2026-11-21"
+
 [openai]
 source = "lobehub"
 source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/openai.svg"
@@ -138,6 +250,14 @@ license = "MIT (icon library path data); the mark is OpenAI's trademark"
 brand_color = "10A37F"
 sha256 = "00a196efd66c4875d4a8f8753be81b3656d179cee766912c869a445727ac673e"
 fetched_at = "2026-11-10"
+
+[openai.combine]
+lobehub_mark = "openai"
+lobehub_text = "openai"
+word = "OpenAI"
+license = "MIT (icon library path data); the mark is OpenAI's trademark; the library ships no openai -color artwork"
+sha256 = "57a7952c4e3435a9c68079b8ab1ccda869410f325333b72326c31c4b5900dc71"
+fetched_at = "2026-11-21"
 
 [perplexity]
 source = "lobehub"
@@ -148,6 +268,14 @@ brand_color = "121516"
 sha256 = "5a58bed1a718782b65c0d941a3357d12de6767dc043995aff36dee8a162c1dad"
 fetched_at = "2026-11-10"
 
+[perplexity.combine]
+lobehub_mark = "perplexity"
+lobehub_text = "perplexity"
+word = "Perplexity"
+license = "MIT (icon library path data); the mark is Perplexity AI's trademark"
+sha256 = "7b2d5f1a55758dc145f52964e71bbae70d4398e57c2ac15481207abfecd1aa75"
+fetched_at = "2026-11-21"
+
 [qwen]
 source = "lobehub"
 source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/qwen.svg"
@@ -156,6 +284,14 @@ license = "MIT (icon library path data); the mark is Alibaba (Qwen)'s trademark"
 brand_color = "6950EF"
 sha256 = "bead2d1fd88c87f4d911bd4ee1c672ca4ec105522a0aca0d3d285c66622d91b9"
 fetched_at = "2026-11-10"
+
+[qwen.combine]
+lobehub_mark = "qwen"
+lobehub_text = "qwen"
+word = "Qwen"
+license = "MIT (icon library path data); the mark is Alibaba (Qwen)'s trademark"
+sha256 = "183cc4df668c61cc8fe96f386aecee4cf8f983e8ff32e66c565cf0c14aa03b91"
+fetched_at = "2026-11-21"
 
 [runway]
 source = "lobehub"
@@ -166,6 +302,14 @@ brand_color = "181818"
 sha256 = "8e2f9010b416b320ea8c44c8c0c3c7672afd3df3359ed54d1dd61a99c3eaf19a"
 fetched_at = "2026-11-10"
 
+[runway.combine]
+lobehub_mark = "runway"
+lobehub_text = "runway"
+word = "Runway"
+license = "MIT (icon library path data); the mark is Runway AI's trademark; the library ships no runway -color artwork"
+sha256 = "cabf8531497e11dac4cda3a0f95e5c0d8364a7b644aad02cbc7162ed699b157c"
+fetched_at = "2026-11-21"
+
 [stability]
 source = "lobehub"
 source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/stability.svg"
@@ -174,6 +318,14 @@ license = "MIT (icon library path data); the mark is Stability AI's trademark"
 brand_color = "E80000"
 sha256 = "ceb4639d2b9eb6f02fbfaf0b0406013782ee57c0cdd87aa2c9a1c64ea9954db5"
 fetched_at = "2026-11-10"
+
+[stability.combine]
+lobehub_mark = "stability"
+lobehub_text = "stability"
+word = "Stable Diffusion"
+license = "MIT (icon library path data); the mark is Stability AI's trademark"
+sha256 = "837a890801917b17f18c75f30a9acc1923e70fa7eeb982707b1b74d706969227"
+fetched_at = "2026-11-21"
 
 [stepfun]
 source = "lobehub"
@@ -184,6 +336,14 @@ brand_color = "0160FF"
 sha256 = "df81ec332b9a83b8dbceca203121392ed911572cd36470663a6ca0148cd53ed5"
 fetched_at = "2026-11-10"
 
+[stepfun.combine]
+lobehub_mark = "stepfun"
+lobehub_text = "stepfun"
+word = "StepFun"
+license = "MIT (icon library path data); the mark is StepFun's trademark"
+sha256 = "7c1e4c2bff490503ce2615b06ba10e66a152094d751378658d6d55ac5a050156"
+fetched_at = "2026-11-21"
+
 [tripo]
 source = "lobehub"
 source_url = "https://unpkg.com/@lobehub/icons-static-svg@1.102.0/icons/tripo.svg"
@@ -192,6 +352,14 @@ license = "MIT (icon library path data); the mark is Tripo AI's trademark"
 brand_color = "F6D85A"
 sha256 = "912750bd7e935d4c65ff875243563f545b2d5f5513c2bcc387b6d217fa7cb4f8"
 fetched_at = "2026-11-10"
+
+[tripo.combine]
+lobehub_mark = "tripo"
+lobehub_text = "tripo"
+word = "Tripo"
+license = "MIT (icon library path data); the mark is Tripo AI's trademark"
+sha256 = "a02a1b032eb4da1ca4f144aad8369db0caaa5b2f8bb5796a058f680a7f92e95f"
+fetched_at = "2026-11-21"
 
 [xai]
 source = "lobehub"
@@ -202,12 +370,28 @@ brand_color = "000000"
 sha256 = "bf5edb49834e7734536aed3ba8c6696e5316e0199b7a0d9591916661cc56cd25"
 fetched_at = "2026-11-10"
 
+[xai.combine]
+lobehub_mark = "grok"
+lobehub_text = "grok"
+word = "Grok"
+license = "MIT (icon library path data); the mark is xAI (Grok)'s trademark; the library ships no grok -color artwork"
+sha256 = "9aed231e833cf1e8cbef40aaf1999cb6da8ae48fa6076679401d0204eef13469"
+fetched_at = "2026-11-21"
+
 [zhipu_glm]
 source = "official"
 source_url = "https://z-cdn.chatglm.cn/z-ai/static/logo.svg"
 mode = "brand"
+pre_clean = "inline-css"
 license = "The mark is Zhipu/Z.ai's trademark; official z.ai asset, pre-cleaned from an Illustrator class bundle (pre_clean=inline-css), dark plate + white Z kept"
 brand_color = "1F63EC"
-pre_clean = "inline-css"
 sha256 = "e4b7b0cef66d2be1bcd6eec62a983c068480710c8df2c5e5821dae31c9178f3e"
 fetched_at = "2026-11-11"
+
+[zhipu_glm.combine]
+lobehub_mark = "zai"
+lobehub_text = "zai"
+word = "Z.ai"
+license = "MIT (icon library path data); the mark is Zhipu/Z.ai's trademark; the combine mark is the library's zai rendition (the mono tree keeps the official plate)"
+sha256 = "ceaab72005234561135df832210165d548bf04b67a658f10c876a69ccb1e19b5"
+fetched_at = "2026-11-21"

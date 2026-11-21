@@ -33,7 +33,7 @@ import sys
 import tomllib
 from pathlib import Path
 
-from fetch_logos import LOGOS_TOP, MANIFEST_NAME, file_check_problems, load_manifest
+from fetch_logos import LOGOS_TOP, MANIFEST_NAME, file_check_problems, load_manifest, sha256_file
 
 ENTRYPOINT_TOP = "entrypoint"
 MODELS_TOP = "models"
@@ -108,6 +108,28 @@ def validate(root: Path) -> list[str]:
     # 1: file-level audit (presence, manifest hashes, normalization
     # idempotency — a hand-edited SVG fails HERE, not in a consumer build).
     problems.extend(file_check_problems(logos_dir, entries))
+
+    # 1b: the combine tree (`logos/combine/<id>.svg`, the lockup face) is
+    # hash-pinned by its own manifest table the same way — a drifted or
+    # hand-edited lockup must fail the audit, not only the consumer's
+    # vendoring step (which re-checks the pin, but the upstream tree should
+    # catch its own drift first).
+    for provider, entry in sorted(entries.items()):
+        combine = entry.get("combine")
+        if not isinstance(combine, dict):
+            continue
+        target = logos_dir / "combine" / f"{provider}.svg"
+        if not target.is_file():
+            problems.append(
+                f"manifest [{provider}.combine]: {target.relative_to(logos_dir)}"
+                " is missing — rerun scripts/fetch_logos_combines.py"
+            )
+            continue
+        if combine.get("sha256") != sha256_file(target):
+            problems.append(
+                f"manifest [{provider}.combine]: {target.name} sha256 drift —"
+                " rerun scripts/fetch_logos_combines.py"
+            )
 
     providers = registry_providers(root)
     if not providers:

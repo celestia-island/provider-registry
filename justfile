@@ -51,9 +51,16 @@ validate-logos:
 fetch-logos provider='':
     python3 scripts/fetch_logos.py {{ if provider == "" { "" } else { "--only " + provider } }}
 
-# Regression tests for the validator rules and the index contract (stdlib only).
+# Re-compose the combine lockups (network; needs fonttools — see
+# scripts/fetch_logos_combines.py's header for the venv recipe).
+fetch-combines provider='':
+    python3 scripts/fetch_logos_combines.py {{ if provider == "" { "" } else { "--only " + provider } }}
+
+# Regression tests for the validator rules and the index contract (stdlib
+# only; test_fetch_logos_combines needs fonttools, see requirements.txt).
 test:
     python3 scripts/test_update_models.py
     python3 scripts/test_validate_search.py
     python3 scripts/test_build_catalog_index.py
     python3 scripts/test_validate_logos.py
+    python3 scripts/test_fetch_logos_combines.py
