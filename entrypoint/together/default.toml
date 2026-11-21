@@ -45,6 +45,14 @@ output_per_million = 15.0
 cached_per_million = 0.3
 
 [[entrypoint.models]]
+id = "moonshotai/Kimi-K3.1-Pro"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 10.0
+cached_per_million = 0.2
+
+[[entrypoint.models]]
 id = "zai-org/GLM-5.1"
 supports_vision = false
 

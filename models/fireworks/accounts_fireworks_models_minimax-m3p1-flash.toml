@@ -1,0 +1,20 @@
+# accounts/fireworks/models/minimax-m3p1-flash
+# Provider: fireworks
+
+[model]
+id = "accounts/fireworks/models/minimax-m3p1-flash"
+name = "accounts/fireworks/models/minimax-m3p1-flash"
+provider_id = "fireworks"
+
+context_window = 1000000
+max_output_tokens = 512000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship", "vision", "reasoning"]
+
+[model.pricing]
+input_per_million = 0.15
+output_per_million = 0.6
+cached_per_million = 0.015

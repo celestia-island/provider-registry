@@ -27,7 +27,7 @@ es = "OpenAI (Oficial)"
 ru = "OpenAI (Официальный)"
 
 [entrypoint.defaults]
-deep = "gpt-6.1-sol"
+deep = "gpt-6.2-astra"
 normal = "gpt-5"
 basic = "gpt-5-mini"
 
@@ -88,6 +88,22 @@ output_per_million = 15.0
 cached_per_million = 2.0
 
 [[entrypoint.models]]
+id = "gpt-6.2-astra"
+
+[entrypoint.models.pricing]
+input_per_million = 8.0
+output_per_million = 40.0
+cached_per_million = 0.4
+
+[[entrypoint.models]]
+id = "gpt-6.2-astra-pro"
+
+[entrypoint.models.pricing]
+input_per_million = 8.0
+output_per_million = 40.0
+cached_per_million = 0.4
+
+[[entrypoint.models]]
 id = "gpt-5.4"
 supports_vision = true
 
@@ -131,6 +147,38 @@ supports_vision = true
 input_per_million = 2.0
 output_per_million = 10.0
 cached_per_million = 0.1
+
+[[entrypoint.models]]
+id = "gpt-6.2-sol"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 10.0
+cached_per_million = 0.1
+
+[[entrypoint.models]]
+id = "gpt-6.2-sol-pro"
+
+[entrypoint.models.pricing]
+input_per_million = 2.0
+output_per_million = 10.0
+cached_per_million = 0.1
+
+[[entrypoint.models]]
+id = "gpt-6.1-terra"
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 5.0
+cached_per_million = 0.05
+
+[[entrypoint.models]]
+id = "gpt-6.1-terra-pro"
+
+[entrypoint.models.pricing]
+input_per_million = 1.0
+output_per_million = 5.0
+cached_per_million = 0.05
 
 [[entrypoint.models]]
 id = "gpt-5.4-mini"
@@ -243,6 +291,14 @@ output_per_million = 40.0
 cached_per_million = 2.5
 
 [[entrypoint.models]]
+id = "chatgpt-image-latest"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 10.0
+cached_per_million = 1.25
+
+[[entrypoint.models]]
 id = "gpt-chat-latest"
 supports_vision = true
 
@@ -267,6 +323,14 @@ supports_vision = true
 input_per_million = 5.0
 output_per_million = 30.0
 cached_per_million = 0.5
+
+[[entrypoint.models]]
+id = "gpt-image-1.5"
+
+[entrypoint.models.pricing]
+input_per_million = 5.0
+output_per_million = 10.0
+cached_per_million = 1.25
 
 [[entrypoint.models]]
 id = "gpt-image-2"
@@ -402,6 +466,23 @@ output_per_million = 8.0
 cached_per_million = 0.5
 
 [[entrypoint.models]]
+id = "gpt-5"
+supports_vision = true
+
+[entrypoint.models.pricing]
+input_per_million = 1.25
+output_per_million = 10.0
+cached_per_million = 0.125
+
+[[entrypoint.models]]
+id = "gpt-5-mini"
+
+[entrypoint.models.pricing]
+input_per_million = 0.25
+output_per_million = 2.0
+cached_per_million = 0.025
+
+[[entrypoint.models]]
 id = "o4-mini-deep-research"
 supports_vision = true
 
@@ -472,23 +553,6 @@ supports_vision = true
 input_per_million = 1.75
 output_per_million = 14.0
 cached_per_million = 0.175
-
-[[entrypoint.models]]
-id = "gpt-5"
-supports_vision = true
-
-[entrypoint.models.pricing]
-input_per_million = 1.25
-output_per_million = 10.0
-cached_per_million = 0.125
-
-[[entrypoint.models]]
-id = "gpt-5-mini"
-
-[entrypoint.models.pricing]
-input_per_million = 0.25
-output_per_million = 2.0
-cached_per_million = 0.025
 
 [[entrypoint.models]]
 id = "gpt-5.3-codex-spark"
