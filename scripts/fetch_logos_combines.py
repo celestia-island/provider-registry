@@ -579,12 +579,14 @@ def compose_lockup(word: str,
                    mark_color_group: ET.Element | None, mark_color_ink: Bounds | None,
                    text_group: ET.Element, text_ink: Bounds) -> bytes:
     """Build the lockup document. Geometry: one lockup unit = one mark
-    height — the mark box fills the full unit height [0, 1] (its shape
-    derives from the UNION of the mark layers' ink boxes; the two mark
-    drawings may differ slightly), the text ink band maps to
+    height — a tall mark (aspect ≤ 1) fills the full unit height [0, 1]
+    and an over-wide mark clamps at the unit width keeping its aspect
+    (the mark box derives from the UNION of the mark layers' ink boxes;
+    the two mark drawings may differ slightly), the text ink band maps to
     1/MARK_HEIGHT, vertically centered, and the gap is MARK_GAP cap units
-    (= MARK_GAP / MARK_HEIGHT here). Every layer box therefore stays inside
-    the pinned `0 0 W 1` viewBox — validate_composed enforces it."""
+    (= MARK_GAP / MARK_HEIGHT lockup units here). Every layer box therefore
+    stays inside the pinned `0 0 W 1` viewBox — validate_composed enforces
+    it."""
     inks = [mark_mono_ink] if mark_color_ink is None else [mark_mono_ink, mark_color_ink]
     ux0 = min(b[0] for b in inks)
     uy0 = min(b[1] for b in inks)

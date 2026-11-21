@@ -78,11 +78,13 @@ Each committed file carries three layers (`pr-combine-mark-color`,
 `pr-combine-mark-mono`, `pr-combine-text`), each stamped with its placed box
 (`data-pr-box="x y w h"` — always inside the canvas, the validator pins it)
 so a consumer can split a layer without re-measuring. Geometry: one lockup
-unit = the mark ink height — the mark box fills the full unit height (the
-viewBox is pinned to `0 0 W 1` and nothing escapes it); the wordmark's
-measured ink band maps to 1/1.45 of the box, vertically centered; the
-mark↔word gap is 0.3 cap units; an over-wide mark keeps its aspect and
-shrinks (uniform scale, never distorted). Ink boxes are measured with
+unit = the mark ink height — a tall mark (ink aspect ≤ 1) fills the unit
+height and an over-wide mark keeps its aspect at the unit width (the viewBox
+is pinned to `0 0 W 1` and nothing escapes it); the wordmark's measured ink
+band maps to 1/1.45 of the unit height, vertically centered — so only a
+tall mark stands the skins' 1.45:1 proportion, a clamped wide mark rides
+lower; the mark↔word gap is 0.3 cap units (0.3/1.45 in lockup units); the
+clamp is uniform scale, never distortion. Ink boxes are measured with
 fontTools by parsing the SVG path data into a bounds pen — no rasterization,
 no font files.
 

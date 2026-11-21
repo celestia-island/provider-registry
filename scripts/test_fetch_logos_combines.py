@@ -184,8 +184,11 @@ def test_compose() -> None:
           mark_layer.get(fc.BOX_ATTR))
     check("mark box inside the canvas", mx >= -1e-6 and my >= -1e-6
           and mx + mw <= vw + 1e-6 and my + mh <= 1.0 + 1e-6, mark_layer.get(fc.BOX_ATTR))
-    # The mark:wordmark proportion is the skins' 1.45:1 (mark height = 1.45
-    # cap bands), now IN one unit system — pin it, not just the geometry.
+    # This fixture's mark is tall (aspect ≤ 1), so it fills the unit height
+    # and stands the skins' 1.45:1 proportion (mark = MARK_HEIGHT word
+    # bands) — pin it, not just the geometry. A wide mark clamps at the
+    # unit width instead and rides proportionally lower (see the clamp
+    # block below).
     check("mark stands MARK_HEIGHT cap-bands tall",
           abs(mh / (float(box[3])) - fc.MARK_HEIGHT) < 1e-6,
           f"mark {mh} vs band {box[3]}")
@@ -199,7 +202,7 @@ def test_compose() -> None:
     check("escaping layer box flagged", bool(flagged), str(fc.validate_composed(escaped)[:2]))
     check("byte cap respected", len(data) <= fc.MAX_SVG_BYTES)
 
-    # Over-width clamp: a 4:1 mark keeps its aspect inside a 1.45-wide box.
+    # Over-width clamp: a 4:1 mark keeps its aspect inside a unit-wide box.
     wide = svg(f'<path d="{WIDE_MARK}"/>')
     data_wide = _compose(mark=wide, color=None)
     root = ET.fromstring(data_wide)
