@@ -30,7 +30,6 @@ jobs:
     # defense in depth, not an absolute boundary: GitHub's fork-PR approval gate
     # is the outer control, and a fork can propose edits to this file. Keeping the
     # canonical guard here still stops every fork run that reaches the job.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, linux, x64, local]
     timeout-minutes: 10
     steps:
