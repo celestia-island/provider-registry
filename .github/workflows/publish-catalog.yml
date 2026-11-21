@@ -78,7 +78,6 @@ jobs:
     # The org's canonical fork guard, kept although no trigger here is a
     # `pull_request`: if one is ever added, it must not run unguarded on the
     # shared farm (celestia-devtools workflow_audit's fork-guard rule).
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, linux, x64, local]
     timeout-minutes: 10
     steps:
