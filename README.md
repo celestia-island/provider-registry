@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.webp" alt="Provider Registry" width="120">
+  <img src="https://raw.githubusercontent.com/celestia-island/celestia-island.github.io/main/res/logos/entelecheia.webp" alt="Provider Registry" width="120">
 </p>
 
 <h1 align="center">Provider Registry</h1>
