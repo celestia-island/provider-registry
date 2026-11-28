@@ -1,0 +1,20 @@
+# thinkingmachines/Inkling-2-Small
+# Provider: together
+
+[model]
+id = "thinkingmachines/Inkling-2-Small"
+name = "thinkingmachines/Inkling-2-Small"
+provider_id = "together"
+
+context_window = 1048576
+max_output_tokens = 131072
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["vision", "reasoning"]
+
+[model.pricing]
+input_per_million = 0.3
+output_per_million = 1.0
+cached_per_million = 0.03

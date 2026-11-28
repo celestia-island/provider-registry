@@ -1,0 +1,20 @@
+# Solar Mini 4.5 (Preview)
+# Provider: openrouter
+
+[model]
+id = "upstage/solar-mini-4-5"
+name = "Solar Mini 4.5 (Preview)"
+provider_id = "openrouter"
+
+context_window = 524288
+max_output_tokens = 131072
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = true
+tags = ["cost_effective", "reasoning"]
+
+[model.pricing]
+input_per_million = 0.01
+output_per_million = 0.04
+cached_per_million = 0.001

@@ -1,0 +1,20 @@
+# gpt-6.2-astra-healthcare
+# Provider: openai
+
+[model]
+id = "gpt-6.2-astra-healthcare"
+name = "gpt-6.2-astra-healthcare"
+provider_id = "openai"
+
+context_window = 1050000
+max_output_tokens = 128000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship", "vision", "reasoning"]
+
+[model.pricing]
+input_per_million = 8.0
+output_per_million = 40.0
+cached_per_million = 0.4

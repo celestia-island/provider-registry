@@ -1,0 +1,20 @@
+# ricursive-ai/Ripple-65B-Preview
+# Provider: together
+
+[model]
+id = "ricursive-ai/Ripple-65B-Preview"
+name = "ricursive-ai/Ripple-65B-Preview"
+provider_id = "together"
+
+context_window = 131072
+max_output_tokens = 131072
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["reasoning"]
+
+[model.pricing]
+input_per_million = 0.2
+output_per_million = 0.6
+cached_per_million = 0.02

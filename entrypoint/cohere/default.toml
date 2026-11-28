@@ -132,6 +132,9 @@ supports_vision = false
 id = "north-small-translate-09-2026"
 
 [[entrypoint.models]]
+id = "north-small-translate-1.0"
+
+[[entrypoint.models]]
 id = "tiny-aya-earth"
 
 [[entrypoint.models]]

@@ -1,0 +1,19 @@
+# glm-5.3-prime
+# Provider: qwen
+
+[model]
+id = "glm-5.3-prime"
+name = "glm-5.3-prime"
+provider_id = "qwen"
+
+context_window = 1000000
+max_output_tokens = 131072
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship", "reasoning"]
+
+[model.pricing]
+input_per_million = 2.3955
+output_per_million = 8.3841

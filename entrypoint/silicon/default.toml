@@ -109,6 +109,9 @@ output_per_million = 0.5
 cached_per_million = 0.03
 
 [[entrypoint.models]]
+id = "deepseek-ai/DeepSeek-V4.1-Flash"
+
+[[entrypoint.models]]
 id = "Qwen/Qwen3.8-2.4T-A95B"
 
 [entrypoint.models.pricing]
@@ -288,6 +291,13 @@ input_per_million = 0.45
 output_per_million = 3.5
 
 [[entrypoint.models]]
+id = "Qwen/Qwen3.8-27B"
+
+[entrypoint.models.pricing]
+input_per_million = 0.4498
+output_per_million = 1.7992
+
+[[entrypoint.models]]
 id = "deepseek-ai/DeepSeek-V4-Flash-Vision-Exp"
 
 [entrypoint.models.pricing]
@@ -424,6 +434,13 @@ input_per_million = 0.28
 output_per_million = 1.1
 
 [[entrypoint.models]]
+id = "stepfun-ai/Step-3.5-Flash"
+
+[entrypoint.models.pricing]
+input_per_million = 0.1
+output_per_million = 0.3
+
+[[entrypoint.models]]
 id = "deepseek-ai/DeepSeek-V3.1"
 supports_vision = false
 
@@ -438,13 +455,6 @@ supports_vision = false
 [entrypoint.models.pricing]
 input_per_million = 0.27
 output_per_million = 1.0
-
-[[entrypoint.models]]
-id = "stepfun-ai/Step-3.5-Flash"
-
-[entrypoint.models.pricing]
-input_per_million = 0.1
-output_per_million = 0.3
 
 [[entrypoint.models]]
 id = "deepseek-ai/DeepSeek-V3.2"

@@ -1,0 +1,20 @@
+# DeepSeek R1T2 Chimera
+# Provider: openrouter
+
+[model]
+id = "tngtech/deepseek-r1t2-chimera"
+name = "DeepSeek R1T2 Chimera"
+provider_id = "openrouter"
+
+context_window = 131072
+max_output_tokens = 32768
+supports_vision = false
+supports_function_calling = false
+supports_streaming = true
+supports_reasoning = true
+tags = ["reasoning"]
+
+[model.pricing]
+input_per_million = 1.0
+output_per_million = 2.625
+cached_per_million = 0.02

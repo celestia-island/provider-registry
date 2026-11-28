@@ -106,6 +106,14 @@ output_per_million = 1.08
 cached_per_million = 0.088
 
 [[entrypoint.models]]
+id = "glm-5.3-flashx-legal"
+
+[entrypoint.models.pricing]
+input_per_million = 0.2994
+output_per_million = 1.048
+cached_per_million = 0.08534
+
+[[entrypoint.models]]
 id = "glm-5.3-flash"
 
 [entrypoint.models.pricing]
@@ -115,6 +123,9 @@ cached_per_million = 0.035
 
 [[entrypoint.models]]
 id = "glm-5.3-highspeed"
+
+[[entrypoint.models]]
+id = "glm-5.4"
 
 [[entrypoint.models]]
 id = "glm-4.5"

@@ -1,0 +1,20 @@
+# openai/gpt-6.1-terra-pro
+# Provider: openrouter
+
+[model]
+id = "openai/gpt-6.1-terra-pro"
+name = "openai/gpt-6.1-terra-pro"
+provider_id = "openrouter"
+
+context_window = 1050000
+max_output_tokens = 128000
+supports_vision = false
+supports_function_calling = true
+supports_streaming = true
+supports_reasoning = false
+tags = ["flagship", "vision", "reasoning"]
+
+[model.pricing]
+input_per_million = 1.0
+output_per_million = 5.0
+cached_per_million = 0.05
